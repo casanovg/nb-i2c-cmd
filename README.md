@@ -1,6 +1,6 @@
 ESP8266 ATtiny85 I2C Communications
 ===================================
-This test implements a basic four I2C commands set to control an ATtiny85 MCU from an ESP8266 through the serial console.
+This test implements a basic four I2C commands set to control an ATtiny85 MCU from an ESP8266 through the serial console. In those commands where there are data replies, there is a plain CRC-8 check implemented.
 
 Command path to Attiny85:
 -------------------------------

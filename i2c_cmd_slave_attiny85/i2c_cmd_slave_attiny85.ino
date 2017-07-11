@@ -109,7 +109,7 @@ void heartbit() {
 // *  ==================                                  *
 // *  I2C Slave Stress Test                               *
 // *  ..................................................  *
-// *  (c)2017 Nicebots.com                                *
+// *  Author: Gustavo Casanova                            *
 // *  ..................................................  *
 // *  Firmware Version: 0.1 | MCU: ATtiny85               *
 // *  2017-06-15 gustavo.casanova@nicebots.com            *

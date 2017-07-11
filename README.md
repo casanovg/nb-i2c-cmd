@@ -9,6 +9,10 @@ User (serial console) --> ESP8266 --> Attiny85
 Available commands:
 -------------------
 a - (STDPB1_1) Set ATtiny85 PB1 = 1
+
 s - (STDPB1_0) Set ATtiny85 PB1 = 0
+
 d - (STANAPB3) Set ATtiny85 PB3 = PWMx (the command asks for a PWM value input)
+
 f - (READADC2) Read ATtiny85 ADC2 (the reply has 2 data bytes + 1 CRC byte)
+

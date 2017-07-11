@@ -27,34 +27,6 @@
 
 #define SLAVE_RESET_PIN 2
 
-byte slaveAddress = 0;
-
-//
-//***************************
-//* Setup Block (Runs once) *
-//***************************
-//
-void setup() {
-	pinMode(SLAVE_RESET_PIN, OUTPUT); // Set pin modes
-	Serial.begin(9600); // Init the serial port
-						// Init the Wire object for I2C
-	Wire.begin(); // Standard pins SDA on D2 and SCL on D1 (NodeMCU)
-				  //Wire.begin(D3, D4); // Set SDA on D3 and SCL on D4 (NodeMCU)
-	digitalWrite(SLAVE_RESET_PIN, LOW); // Reset the slave
-	delay(10);
-	digitalWrite(SLAVE_RESET_PIN, HIGH);
-	delay(1000); // Wait 2 seconds for slave init sequence
-				 // Search continuouly for slave addresses
-	while (slaveAddress == 0) {
-		slaveAddress = scanI2C();
-		delay(1000);
-	}
-	clrscr();
-	Serial.println("Nicebots I2C Commands Test");
-	Serial.println("==========================");
-	Serial.println("Please type a command ('a', 's', 'd' or 'f'):");
-}
-
 #define STDPB1_1 0xE9 // Command to Set ATtiny85 PB1 = 1
 #define AKDPB1_1 0x16 // Acknowledge Command PB1 = 1
 
@@ -72,6 +44,11 @@ void setup() {
 
 // Global Variables
 word analogVal = 0;
+byte slaveAddress = 0;
+int blockRXSize = 0;
+bool newKey = false, newByte = false;
+char key = '\0';
+
 // CRC Table: Polynomial=0x9C, CRC size=8-bit, HD=5, Word Length=9 bytes
 byte crcTable[256] = {
 	0x00, 0x9c, 0xa4, 0x38, 0xd4, 0x48, 0x70, 0xec, 0x34, 0xa8,
@@ -102,9 +79,32 @@ byte crcTable[256] = {
 	0x6c, 0xf0, 0x1c, 0x80, 0xb8, 0x24
 };
 
-int blockRXSize = 0;
-bool newKey = false, newByte = false;
-char key = '\0';
+//
+//***************************
+//* Setup Block (Runs once) *
+//***************************
+//
+void setup() {
+	pinMode(SLAVE_RESET_PIN, OUTPUT); // Set pin modes
+	Serial.begin(9600); // Init the serial port
+						// Init the Wire object for I2C
+	Wire.begin(); // Standard pins SDA on D2 and SCL on D1 (NodeMCU)
+				  //Wire.begin(D3, D4); // Set SDA on D3 and SCL on D4 (NodeMCU)
+	digitalWrite(SLAVE_RESET_PIN, LOW); // Reset the slave
+	delay(10);
+	digitalWrite(SLAVE_RESET_PIN, HIGH);
+	delay(1000); // Wait 2 seconds for slave init sequence
+				 // Search continuouly for slave addresses
+	while (slaveAddress == 0) {
+		slaveAddress = scanI2C();
+		delay(1000);
+	}
+	clrscr();
+	Serial.println("Nicebots I2C Commands Test");
+	Serial.println("==========================");
+	Serial.println("Please type a command ('a', 's', 'd' or 'f'):");
+}
+
 
 //
 //**********************************
@@ -248,22 +248,21 @@ void loop() {
 			byte ackRX[blockRXSize];   // Data received from slave
 			for (int i = 0; i < blockRXSize; i++) {
 				ackRX[i] = Wire.read();
-				Serial.print("ESP8266 - ##### ");
-				Serial.print(">> ");
-				Serial.print(i);
-				Serial.print(" << ");
-				Serial.print(ackRX[i]);
-				Serial.println("");
+				//Serial.print("ESP8266 - ##### ");
+				//Serial.print(">> ");
+				//Serial.print(i);
+				//Serial.print(" << ");
+				//Serial.print(ackRX[i]);
+				//Serial.println("");
 			}
 			if (ackRX[0] == ACKNAPB3) {
 				Serial.print("ESP8266 - Command ");
 				Serial.print(cmdTX[0]);
 				Serial.print(" parsed OK <<< ");
 				Serial.println(ackRX[0]);
-				Serial.print("ESP8266 - Operand &&&&&& ");
-				Serial.println(~cmdTX[1]);
-				if (ackRX[1] == ~cmdTX[1]) {
-					//if (ackRX[1] == 200) {
+				//Serial.print("ESP8266 - Operand &&&&&& ");
+				//Serial.println((byte)~cmdTX[1]);
+				if (ackRX[1] == (byte)~cmdTX[1]) {
 					Serial.print("ESP8266 - Operand ");
 					Serial.print(cmdTX[1]);
 					Serial.print(" parsed OK <<< ");

@@ -45,7 +45,7 @@
 // Global Variables
 word analogVal = 0;
 byte slaveAddress = 0;
-int blockRXSize = 0;
+byte blockRXSize = 0;
 bool newKey = false, newByte = false;
 char key = '\0';
 
@@ -135,11 +135,11 @@ void loop() {
 				Wire.endTransmission();
 			}
 			// Receive acknowledgement
-			blockRXSize = Wire.requestFrom(slaveAddress, (int)txSize);
+			blockRXSize = Wire.requestFrom(slaveAddress, (byte)1);
 			Serial.print("ESP8266 - ?¿?¿?¿ RX BLOCKSIZE: ");
 			Serial.print(blockRXSize);
 			Serial.println("");
-			byte ackRX[blockRXSize];   // Data received from slave
+			byte ackRX[1] = { 0 };   // Data received from slave
 			for (int i = 0; i < blockRXSize; i++) {
 				ackRX[i] = Wire.read();
 			}
@@ -175,11 +175,11 @@ void loop() {
 				Wire.endTransmission();
 			}
 			// Receive acknowledgement
-			blockRXSize = Wire.requestFrom(slaveAddress, (int)txSize);
+			blockRXSize = Wire.requestFrom(slaveAddress, (byte)1);
 			Serial.print("ESP8266 - ?¿?¿?¿ RX BLOCKSIZE: ");
 			Serial.print(blockRXSize);
 			Serial.println("");
-			byte ackRX[blockRXSize];   // Data received from slave
+			byte ackRX[1] = { 0 };   // Data received from slave
 			for (int i = 0; i < blockRXSize; i++) {
 				ackRX[i] = Wire.read();
 			}
@@ -241,11 +241,11 @@ void loop() {
 				newByte = false;
 			}
 			// Receive acknowledgement
-			blockRXSize = Wire.requestFrom(slaveAddress, (int)txSize);
+			blockRXSize = Wire.requestFrom(slaveAddress, (byte)2);
 			Serial.print("ESP8266 - ?¿?¿?¿ RX BLOCKSIZE: ");
 			Serial.print(blockRXSize);
 			Serial.println("");
-			byte ackRX[blockRXSize];   // Data received from slave
+			byte ackRX[2] = { 0 };   // Data received from slave
 			for (int i = 0; i < blockRXSize; i++) {
 				ackRX[i] = Wire.read();
 				//Serial.print("ESP8266 - ##### ");
@@ -297,8 +297,8 @@ void loop() {
 				Wire.endTransmission();
 			}
 			// Receive acknowledgement
-			blockRXSize = Wire.requestFrom(slaveAddress, 4);
-			byte ackRX[blockRXSize];   // Data received from slave
+			blockRXSize = Wire.requestFrom(slaveAddress, (byte)4);
+			byte ackRX[4] = { 0 };   // Data received from slave
 			for (int i = 0; i < blockRXSize; i++) {
 				ackRX[i] = Wire.read();
 			}
@@ -418,7 +418,7 @@ void ReadChar() {
 
 // Function ReadByte
 byte ReadByte() {
-	byte dataLength = 16;
+	const byte dataLength = 16;
 	char serialData[dataLength]; // an array to store the received data  
 	static byte ix = 0;
 	char rc, endMarker = 0xD; //standard is: char endMarker = '\n'

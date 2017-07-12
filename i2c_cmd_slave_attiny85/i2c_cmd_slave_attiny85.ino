@@ -78,7 +78,7 @@ byte crcTable[256] = {
 };
 
 // Activates test mode
-bool testReplies = false;
+bool testReplies = true;
 
 // Command received from master
 byte command[4] = { 0 };

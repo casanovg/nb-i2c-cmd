@@ -1,16 +1,35 @@
-C:\Users\gcasanova\AppData\Local\Temp\VMBuilds\i2c_cmd_master_esp8266\digistump_digispark-tiny\ATtiny85\i2c_cmd_master_esp8266.cpp.o: \
- C:\Users\gcasanova\AppData\Local\Temp\VMBuilds\i2c_cmd_master_esp8266\digistump_digispark-tiny\ATtiny85\i2c_cmd_master_esp8266.cpp \
- C:\Users\gcasanova\AppData\Local\arduino15\packages\digistump\hardware\avr\1.6.7\cores\tiny/Arduino.h \
- C:\Users\gcasanova\AppData\Local\arduino15\packages\digistump\hardware\avr\1.6.7\cores\tiny/WProgram.h \
- C:\Users\gcasanova\AppData\Local\arduino15\packages\digistump\hardware\avr\1.6.7\cores\tiny/core_build_options.h \
- C:\Users\gcasanova\AppData\Local\arduino15\packages\digistump\hardware\avr\1.6.7\cores\tiny/core_pins.h \
- C:\Users\gcasanova\AppData\Local\arduino15\packages\digistump\hardware\avr\1.6.7\cores\tiny/wiring.h \
- C:\Users\gcasanova\AppData\Local\arduino15\packages\digistump\hardware\avr\1.6.7\cores\tiny/binary.h \
- C:\Users\gcasanova\AppData\Local\arduino15\packages\digistump\hardware\avr\1.6.7\cores\tiny/pins_arduino.h \
- C:\Users\gcasanova\AppData\Local\arduino15\packages\digistump\hardware\avr\1.6.7\cores\tiny/WCharacter.h \
- C:\Users\gcasanova\AppData\Local\arduino15\packages\digistump\hardware\avr\1.6.7\cores\tiny/WString.h \
- C:\Users\gcasanova\AppData\Local\arduino15\packages\digistump\hardware\avr\1.6.7\cores\tiny/TinyDebugSerial.h \
- C:\Users\gcasanova\AppData\Local\arduino15\packages\digistump\hardware\avr\1.6.7\cores\tiny/Stream.h \
- C:\Users\gcasanova\AppData\Local\arduino15\packages\digistump\hardware\avr\1.6.7\cores\tiny/Print.h \
- C:\Users\gcasanova\AppData\Local\arduino15\packages\digistump\hardware\avr\1.6.7\cores\tiny/HardwareSerial.h \
- C:\Users\gcasanova\AppData\Local\arduino15\packages\digistump\hardware\avr\1.6.7\libraries\Wire/Wire.h
+C:\Users\casanovg\AppData\Local\Temp\VMBuilds\i2c_cmd_master_esp8266\esp8266_nodemcuv2\ESP8266\i2c_cmd_master_esp8266.cpp.o: \
+ C:\Users\casanovg\AppData\Local\Temp\VMBuilds\i2c_cmd_master_esp8266\esp8266_nodemcuv2\ESP8266\i2c_cmd_master_esp8266.cpp \
+ C:\Users\casanovg\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\cores\esp8266/Arduino.h \
+ C:\Users\casanovg\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\cores\esp8266/stdlib_noniso.h \
+ C:\Users\casanovg\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\cores\esp8266/binary.h \
+ C:\Users\casanovg\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\cores\esp8266/esp8266_peri.h \
+ C:\Users\casanovg\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0/tools/sdk/include/c_types.h \
+ C:\Users\casanovg\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\cores\esp8266/twi.h \
+ C:\Users\casanovg\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\cores\esp8266/Arduino.h \
+ C:\Users\casanovg\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\cores\esp8266/core_esp8266_features.h \
+ C:\Users\casanovg\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\cores\esp8266/pgmspace.h \
+ C:\Users\casanovg\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0/tools/sdk/include/ets_sys.h \
+ C:\Users\casanovg\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0/tools/sdk/include/c_types.h \
+ C:\Users\casanovg\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0/tools/sdk/include/eagle_soc.h \
+ C:\Users\casanovg\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0/tools/sdk/include/osapi.h \
+ C:\Users\casanovg\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\cores\esp8266/user_config.h \
+ C:\Users\casanovg\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\cores\esp8266/WCharacter.h \
+ C:\Users\casanovg\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\cores\esp8266/WString.h \
+ C:\Users\casanovg\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\cores\esp8266/pgmspace.h \
+ C:\Users\casanovg\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\cores\esp8266/HardwareSerial.h \
+ C:\Users\casanovg\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\cores\esp8266/Stream.h \
+ C:\Users\casanovg\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\cores\esp8266/Print.h \
+ C:\Users\casanovg\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\cores\esp8266/Printable.h \
+ C:\Users\casanovg\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\cores\esp8266/uart.h \
+ C:\Users\casanovg\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\cores\esp8266/Esp.h \
+ C:\Users\casanovg\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\cores\esp8266/Updater.h \
+ C:\Users\casanovg\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\cores\esp8266/flash_utils.h \
+ C:\Users\casanovg\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\cores\esp8266/MD5Builder.h \
+ C:\Users\casanovg\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\cores\esp8266/WString.h \
+ C:\Users\casanovg\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\cores\esp8266/Stream.h \
+ C:\Users\casanovg\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\cores\esp8266/md5.h \
+ C:\Users\casanovg\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\cores\esp8266/debug.h \
+ C:\Users\casanovg\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\variants\nodemcu/pins_arduino.h \
+ C:\Users\casanovg\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\variants\nodemcu/../generic/common.h \
+ C:\Users\casanovg\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.3.0\libraries\Wire/Wire.h

@@ -78,7 +78,7 @@ byte crcTable[256] = {
 };
 
 // Activates test mode
-bool testReplies = true;
+bool testReplies = false;
 
 // Command received from master
 byte command[4] = { 0 };
@@ -133,9 +133,9 @@ void requestEvent() {
 
 		byte opCodeAck = ~command[0]; // Command Operation Code acknowledge => Command Bitwise "Not".
 		switch (command[0]) {
-				// ******************
-				// * STDPB1_1 Reply *
-				//*******************
+							// ******************
+							// * STDPB1_1 Reply *
+							//*******************
 			case STDPB1_1: {
 				byte ackLng = 1;
 				byte acknowledge[1] = { 0 };
@@ -146,9 +146,9 @@ void requestEvent() {
 				}
 				break;
 			}
-						   // ******************
-						   // * STDPB1_0 Reply *
-						   //*******************
+							// ******************
+							// * STDPB1_0 Reply *
+							//*******************
 			case STDPB1_0: {
 				byte ackLng = 1;
 				byte acknowledge[1] = { 0 };
@@ -159,36 +159,41 @@ void requestEvent() {
 				}
 				break;
 			}
-						   // ******************
-						   // * STANAPB3 Reply *
-						   //*******************
+							// ******************
+							// * STANAPB3 Reply *
+							//*******************
 			case STANAPB3: {
-				/*
 				byte ackLng = 1;
 				byte acknowledge[1] = { 0 };
 				acknowledge[0] = opCodeAck;
-				//acknowledge[1] = ~command[1];
-				//acknowledge[1] = 0x33;
+				digitalWrite(LED_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
 				for (int i = 0; i < ackLng; i++) {
 					TinyWireS.send(acknowledge[i]);
 				}
-				*/
-				TinyWireS.send(0x04);
-				//TinyWireS.send((byte)0xC8);
 				break;
 			}
-						   // ******************
-						   // * READADC2 Reply *
-						   //*******************
+							// ******************
+							// * READADC2 Reply *
+							//*******************
 			case READADC2: {
+				byte ackLng = 1;
+				byte acknowledge[1] = { 0 };
+				acknowledge[0] = opCodeAck;
+				digitalWrite(LED_PIN, LOW);    // turn the LED off by making the voltage LOW
+				for (int i = 0; i < ackLng; i++) {
+					TinyWireS.send(acknowledge[i]);
+				}
+				break;
+				/*
+				int analogVal = 0;
 				byte ackLng = 4, analogMSB = 0, analogLSB = 0;
-				//word analogRead = 0;
+				word analogRead = 0;
 				word analogRead = rand() % (1023 + 1 - 0) + 0;
-				//if (analogVal < 1024) {
-				//    analogRead = ++analogVal;
-				//} else {
-				//    analogVal = 0;
-				//}
+				if (analogVal < 1024) {
+				    analogRead = ++analogVal;
+				} else {
+				    analogVal = 0;
+				}
 				analogMSB = ((analogRead >> 8) & 0x03);
 				analogLSB = (analogRead & 0x0FF);
 				word analogValue = ((analogMSB << 8) + analogLSB);
@@ -201,13 +206,14 @@ void requestEvent() {
 					TinyWireS.send(acknowledge[i]);
 				}
 				break;
+				*/
 			}
-						   // *************************
-						   // * Unknown Command Reply *
-						   //**************************
+							// *************************
+							// * Unknown Command Reply *
+							//**************************
 			default: {
 				byte acknowledge[1] = { 0 };
-				acknowledge[0] = opCodeAck;
+				acknowledge[0] = 0xFA;
 				break;
 			}
 		}

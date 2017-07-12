@@ -215,7 +215,7 @@ void loop() {
 					Wire.endTransmission();
 				}
 				// Receive acknowledgement
-				blockRXSize = Wire.requestFrom(slaveAddress, (byte)1);
+				blockRXSize = Wire.requestFrom(slaveAddress, (byte)2);
 				Serial.print("ESP8266 - ?¿?¿?¿ RX BLOCKSIZE: ");
 				Serial.print(blockRXSize);
 				Serial.println("");
@@ -223,18 +223,23 @@ void loop() {
 				for (int i = 0; i < blockRXSize; i++) {
 					ackRX[i] = Wire.read();
 				}
-				if (ackRX[0] == ACKNAPB3) {
+				//if (ackRX[0] == ACKNAPB3) {
 					Serial.print("ESP8266 - Command ");
 					Serial.print(cmdTX[0]);
 					Serial.print(" parsed OK <<< ");
 					Serial.println(ackRX[0]);
-				}
-				else {
-					Serial.print("ESP8266 - Error parsing ");
-					Serial.print(cmdTX[0]);
-					Serial.print(" command! <<< ");
+
+					Serial.print("ESP8266 - OPERAND ");
+					Serial.print(cmdTX[1]);
+					Serial.print(" parsed OK <<< ");
 					Serial.println(ackRX[0]);
-				}
+				//}
+				//else {
+				//	Serial.print("ESP8266 - Error parsing ");
+				//	Serial.print(cmdTX[0]);
+				//	Serial.print(" command! <<< ");
+				//	Serial.println(ackRX[0]);
+				//}
 				break;
 			}
 						  // ********************

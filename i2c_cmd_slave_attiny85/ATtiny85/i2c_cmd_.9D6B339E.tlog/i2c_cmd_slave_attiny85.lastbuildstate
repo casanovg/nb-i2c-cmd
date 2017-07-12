@@ -1,0 +1,2 @@
+#TargetFrameworkVersion=v4.0:PlatformToolSet=v141:EnableManagedIncrementalBuild=false:VCToolArchitecture=Native32Bit:WindowsTargetPlatformVersion=8.1
+ATtiny85|Win32|C:\Users\gcasanova\Google Drive\Arduino Sketchbook\i2c\nb-i2c-cmd\|

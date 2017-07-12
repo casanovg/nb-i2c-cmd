@@ -128,7 +128,8 @@ void receiveEvent(byte commandbytes) {
 void requestEvent() {
 
 	if (testReplies == false) {
-		// operating mode ...
+		
+		// operating mode ... ##########
 
 		byte opCodeAck = ~command[0]; // Command Operation Code acknowledge => Command Bitwise "Not".
 		switch (command[0]) {
@@ -212,7 +213,9 @@ void requestEvent() {
 		}
 	}
 	else {
-		// Test mode ...
+
+		// Test mode ... ##########
+
 		// Just reply the command inverted (Not-command)
 		for (int i = 0; i < commandLength; i++) {
 			TinyWireS.send(~command[i]);

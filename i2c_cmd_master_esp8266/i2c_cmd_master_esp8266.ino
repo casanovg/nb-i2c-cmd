@@ -351,6 +351,9 @@ void loop() {
 			//free(ackRX);
 			break;
 		}
+				  // *******************
+				  // * Unknown Command *
+				  //********************      
 		default: {
 			Serial.print("ESP8266 - Command '");
 			Serial.print(key);

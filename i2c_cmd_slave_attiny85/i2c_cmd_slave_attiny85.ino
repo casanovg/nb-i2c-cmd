@@ -133,12 +133,9 @@ void requestEvent() {
 
     byte opCodeAck = ~command[0]; // Command Operation Code acknowledge => Command Bitwise "Not".
 		switch (command[0]) {
-							// ******************
-							// * STDPB1_1 Reply *
-							//*******************
-
-
-
+			// ******************
+			// * STDPB1_1 Reply *
+			//*******************     
 			case STDPB1_1: {
 				byte ackLng = 1;
 				byte acknowledge[1] = { 0 };
@@ -149,9 +146,9 @@ void requestEvent() {
 				}
 				break;
 			}
-							// ******************
-							// * STDPB1_0 Reply *
-							//*******************
+			// ******************
+			// * STDPB1_0 Reply *
+			//*******************
 			case STDPB1_0: {
 				byte ackLng = 1;
 				byte acknowledge[1] = { 0 };
@@ -162,9 +159,9 @@ void requestEvent() {
 				}
 				break;
 			}
-							// ******************
-							// * STANAPB3 Reply *
-							//*******************
+			// ******************
+			// * STANAPB3 Reply *
+			//*******************
 			case STANAPB3: {
         byte ackLng = 2;
 				byte acknowledge[2] = { 0 };
@@ -179,9 +176,9 @@ void requestEvent() {
 				}
 				break;
 			}
-							// ******************
-							// * READADC2 Reply *
-							//*******************
+			// ******************
+			// * READADC2 Reply *
+			//*******************
 			case READADC2: {
         byte ackLng = 4;
         byte acknowledge[4] = { 0 };

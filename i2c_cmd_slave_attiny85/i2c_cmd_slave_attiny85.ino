@@ -110,7 +110,7 @@ void loop() {
 		heartbit();
 	}
 	// This needs to be here
-	TinyWireS_stop_check();
+	// TinyWireS_stop_check();  //// WHAT IS THIS?????
 	// otherwise empty loop
 }
 
@@ -131,11 +131,14 @@ void requestEvent() {
 		
 		// operating mode ... ##########
 
-		byte opCodeAck = ~command[0]; // Command Operation Code acknowledge => Command Bitwise "Not".
+    byte opCodeAck = ~command[0]; // Command Operation Code acknowledge => Command Bitwise "Not".
 		switch (command[0]) {
 							// ******************
 							// * STDPB1_1 Reply *
 							//*******************
+
+
+
 			case STDPB1_1: {
 				byte ackLng = 1;
 				byte acknowledge[1] = { 0 };
@@ -163,9 +166,10 @@ void requestEvent() {
 							// * STANAPB3 Reply *
 							//*******************
 			case STANAPB3: {
-				byte ackLng = 1;
-				byte acknowledge[1] = { 0 };
+        byte ackLng = 2;
+				byte acknowledge[2] = { 0 };
 				acknowledge[0] = opCodeAck;
+        acknowledge[1] = command[1] + command[2];
 				digitalWrite(LED_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
 				for (int i = 0; i < ackLng; i++) {
 					TinyWireS.send(acknowledge[i]);
@@ -176,9 +180,12 @@ void requestEvent() {
 							// * READADC2 Reply *
 							//*******************
 			case READADC2: {
-				byte ackLng = 1;
-				byte acknowledge[1] = { 0 };
-				acknowledge[0] = opCodeAck;
+        byte ackLng = 4;
+        byte acknowledge[4] = { 0 };
+        acknowledge[0] = opCodeAck;
+        acknowledge[1] = 0x07;
+        acknowledge[2] = 0x2E;
+        acknowledge[3] = 0x05;
 				digitalWrite(LED_PIN, LOW);    // turn the LED off by making the voltage LOW
 				for (int i = 0; i < ackLng; i++) {
 					TinyWireS.send(acknowledge[i]);
@@ -212,8 +219,11 @@ void requestEvent() {
 							// * Unknown Command Reply *
 							//**************************
 			default: {
-				byte acknowledge[1] = { 0 };
-				acknowledge[0] = 0xFA;
+				//byte acknowledge[1] = { 0 };
+				//acknowledge[0] = 0xFA;
+        for (int i = 0; i < commandLength; i++) {
+          TinyWireS.send(~command[i]);
+        }
 				break;
 			}
 		}

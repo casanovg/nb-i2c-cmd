@@ -169,7 +169,10 @@ void requestEvent() {
         byte ackLng = 2;
 				byte acknowledge[2] = { 0 };
 				acknowledge[0] = opCodeAck;
-        acknowledge[1] = command[1] + command[2];
+
+        command[1] = command[1] & 0xEF; // ERROR INJECTED IN SOME OPERANDS RECEIVED TO TEST CRC - REMOVE FOR PRODUCTION !!! 
+
+        acknowledge[1] = CalculateCRC(command, 3);
 				digitalWrite(LED_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
 				for (int i = 0; i < ackLng; i++) {
 					TinyWireS.send(acknowledge[i]);

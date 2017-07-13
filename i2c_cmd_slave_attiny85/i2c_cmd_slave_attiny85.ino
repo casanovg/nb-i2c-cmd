@@ -110,7 +110,7 @@ void loop() {
 		heartbit();
 	}
 	// This needs to be here
-	// TinyWireS_stop_check();  //// WHAT IS THIS?????
+	// TinyWireS_stop_check();
 	// otherwise empty loop
 }
 

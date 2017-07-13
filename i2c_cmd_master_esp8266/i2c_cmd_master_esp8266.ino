@@ -198,22 +198,38 @@ void loop() {
       byte cmdTX[3] = { STANAPB3, 0, 0 };
       //byte txSize = sizeof(cmdTX);
       byte txSize = 3;
+      byte operandValue = 0;
       Serial.print("ESP8266 - Sending Opcode >>> ");
       Serial.print(cmdTX[0]);
       Serial.println("(STANAPB3)");
-      cmdTX[1] = random(0, 127);
-      cmdTX[2] = random(1, 128);
-      // Transmit command
-      byte transmitData[1] = { 0 };
-      for (int i = 0; i < txSize; i++) {
-        if (i > 0) {
-          Serial.print("ESP8266 - Sending Operand >>> ");
-          Serial.println(cmdTX[i]);
+      Serial.print("Please enter a value from 0 to 255 for this command: ");
+      while (newByte == false) {
+        //operandValue = random(1, 255);
+        operandValue = ReadByte();
+      }
+      if (newByte == true) {
+        Serial.println("");
+        Serial.print("Command STANAPB3 Operand Value (decimal): ");
+        Serial.println(operandValue);
+        Serial.println("");
+        cmdTX[1] = operandValue;
+        Serial.print("ESP8266 - Sending Opcode >>> ");
+        Serial.print(cmdTX[0]);
+        Serial.println("(STANAPB3)");
+        cmdTX[2] = CalculateCRC(cmdTX, 2);
+        // Transmit command
+        byte transmitData[1] = { 0 };
+        for (int i = 0; i < txSize; i++) {
+          if (i > 0) {
+            Serial.print("ESP8266 - Sending Operand >>> ");
+            Serial.println(cmdTX[i]);
+          }
+          transmitData[i] = cmdTX[i];
+          Wire.beginTransmission(slaveAddress);
+          Wire.write(transmitData[i]);
+          Wire.endTransmission();
         }
-        transmitData[i] = cmdTX[i];
-        Wire.beginTransmission(slaveAddress);
-        Wire.write(transmitData[i]);
-        Wire.endTransmission();
+      newByte = false;
       }
       // Receive acknowledgement
       blockRXSize = Wire.requestFrom(slaveAddress, (byte)2);

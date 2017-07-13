@@ -202,7 +202,7 @@ void loop() {
         Serial.print("ESP8266 - Sending Opcode >>> ");
         Serial.print(cmdTX[0]);
         Serial.println("(STANAPB3)");
-        Serial.print("Please enter a value from 0 to 255 for this command: ");
+        Serial.print("Please enter a value between 0 and 255 for this command: ");
         while (newByte == false) {
           //operandValue = random(1, 255);
           operandValue = ReadByte();

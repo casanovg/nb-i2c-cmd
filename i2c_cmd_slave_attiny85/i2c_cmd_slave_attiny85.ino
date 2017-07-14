@@ -47,6 +47,13 @@
 #define READADC2 0xDA // Command to Read ATtiny85 ADC2
 #define ACKNADC2 0x25 // Acknowledge Command Read ADC2
 
+// Global Variables
+bool testReplies = false;   // Activates test mode
+byte command[4] = { 0 };    // Command received from master
+int commandLength = 0;      // Command number of bytes
+int analogVal = 0;          // Pseudo ADC value
+
+
 // CRC Table: Polynomial=0x9C, CRC size=8-bit, HD=5, Word Length=9 bytes
 byte crcTable[256] = {
 	0x00, 0x9c, 0xa4, 0x38, 0xd4, 0x48, 0x70, 0xec, 0x34, 0xa8,
@@ -76,15 +83,6 @@ byte crcTable[256] = {
 	0xfc, 0x60, 0x58, 0xc4, 0x28, 0xb4, 0x8c, 0x10, 0xc8, 0x54,
 	0x6c, 0xf0, 0x1c, 0x80, 0xb8, 0x24
 };
-
-// Activates test mode
-bool testReplies = false;
-
-// Command received from master
-byte command[4] = { 0 };
-
-// Command number of bytes
-int commandLength = 0;
 
 //
 //***************************
@@ -180,22 +178,9 @@ void requestEvent() {
 			// * READADC2 Reply *
 			//*******************
 			case READADC2: {
-        byte ackLng = 4;
-        byte acknowledge[4] = { 0 };
-        acknowledge[0] = opCodeAck;
-        acknowledge[1] = 0x07;
-        acknowledge[2] = 0x2E;
-        acknowledge[3] = 0x05;
-				digitalWrite(LED_PIN, LOW);    // turn the LED off by making the voltage LOW
-				for (int i = 0; i < ackLng; i++) {
-					TinyWireS.send(acknowledge[i]);
-				}
-				break;
-				/*
-				int analogVal = 0;
 				byte ackLng = 4, analogMSB = 0, analogLSB = 0;
 				word analogRead = 0;
-				word analogRead = rand() % (1023 + 1 - 0) + 0;
+				//word analogRead = rand() % (1023 + 1 - 0) + 0;
 				if (analogVal < 1024) {
 				    analogRead = ++analogVal;
 				} else {
@@ -213,7 +198,6 @@ void requestEvent() {
 					TinyWireS.send(acknowledge[i]);
 				}
 				break;
-				*/
 			}
 							// *************************
 							// * Unknown Command Reply *

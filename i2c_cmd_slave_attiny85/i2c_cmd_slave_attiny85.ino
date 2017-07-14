@@ -212,7 +212,7 @@ void requestEvent() {
 			}
 		}
 
-    TinyWireS_stop_check();
+    // TinyWireS_stop_check();
 
 	}
 	else {

@@ -48,6 +48,7 @@ byte slaveAddress = 0;
 byte blockRXSize = 0;
 bool newKey = false, newByte = false;
 char key = '\0';
+long opcodeErrors = 0;    // This is for stress testing READADC2 only - REMOVE FOR PRODUCTION 
 
 // CRC Table: Polynomial=0x9C, CRC size=8-bit, HD=5, Word Length=9 bytes
 byte crcTable[256] = {
@@ -335,8 +336,10 @@ void loop() {
           Serial.print(cmdTX[0]);
           Serial.print(" command! <<< ");
           Serial.println(ackRX[0]);
+          opcodeErrors++;
         }
-        //free(ackRX);
+        Serial.print("/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\ OPCODE ERRORS: "); // DEBUG - REMOVE FOR PRODUCTION
+        Serial.println(opcodeErrors);
         break;
       }
       // *******************

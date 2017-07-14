@@ -43,12 +43,12 @@
 //typedef uint16_t word; // 16 bit data type
 
 // Global Variables
-word analogVal = 0;
 byte slaveAddress = 0;
 byte blockRXSize = 0;
 bool newKey = false, newByte = false;
 char key = '\0';
-long opcodeErrors = 0;    // This is for stress testing READADC2 only - REMOVE FOR PRODUCTION 
+long opcodeErrors = 0;    // This is for stress testing READADC2 only - REMOVE FOR PRODUCTION
+long loopsREADADC2 = 0;   // This is for stress testing READADC2 only - REMOVE FOR PRODUCTION
 
 // CRC Table: Polynomial=0x9C, CRC size=8-bit, HD=5, Word Length=9 bytes
 byte crcTable[256] = {
@@ -105,7 +105,6 @@ void setup() {
   Serial.println("==========================");
   Serial.println("Please type a command ('a', 's', 'd' or 'f'):");
 }
-
 
 //
 //**********************************
@@ -202,15 +201,11 @@ void loop() {
         byte operandValue = 0;
         Serial.print("Please enter a value between 0 and 255 for this command: ");
         while (newByte == false) {
-          //operandValue = random(1, 255);
           operandValue = ReadByte();
         }
         if (newByte == true) {
           Serial.println("");
           Serial.println("");
-          //Serial.print("Command STANAPB3 Operand Value (decimal): ");
-          //Serial.println(operandValue);
-          //Serial.println("");
           cmdTX[1] = operandValue;
           Serial.print("ESP8266 - Sending Opcode >>> ");
           Serial.print(cmdTX[0]);
@@ -315,7 +310,7 @@ void loop() {
           Serial.print(" | CRC=");
           Serial.println(ackRX[3]);
 
-          ackRX[2] = ackRX[2] & 0xDF; // Generate a CRC Error for testing
+          ackRX[2] = ackRX[2] & 0xDF; // Generate a CRC Error for testing - REMOVE FOR PRODUCTION
 
           byte checkCRC = CalculateCRC(ackRX, sizeof(ackRX));
           if (checkCRC == 0) {
@@ -338,8 +333,10 @@ void loop() {
           Serial.println(ackRX[0]);
           opcodeErrors++;
         }
-        Serial.print("/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\ OPCODE ERRORS: "); // DEBUG - REMOVE FOR PRODUCTION
-        Serial.println(opcodeErrors);
+        Serial.print("/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\ LOOPS: ");  // DEBUG - REMOVE FOR PRODUCTION
+        Serial.print(++loopsREADADC2);                                    // DEBUG - REMOVE FOR PRODUCTION
+        Serial.print(" /\\/\\/\\/\\/\\ OPCODE ERRORS: ");                 // DEBUG - REMOVE FOR PRODUCTION
+        Serial.println(opcodeErrors);                                     // DEBUG - REMOVE FOR PRODUCTION
         break;
       }
       // *******************
@@ -354,14 +351,12 @@ void loop() {
     }
     Serial.println("");
     Serial.println("Please type a command ('a', 's', 'd' or 'f'):");
-    //Serial.println("DLY*");
-    //delay(2000);
   }
-  //ReadChar();
+  //ReadChar();       // DEBUG - RESTORE FOR PRODUCTION
 
-  delay(150);
-  key = 'f';
-  newKey = true;
+  delay(150);         // DEBUG - REMOVE FOR PRODUCTION
+  key = 'f';          // DEBUG - REMOVE FOR PRODUCTION
+  newKey = true;      // DEBUG - REMOVE FOR PRODUCTION
 
 }
 

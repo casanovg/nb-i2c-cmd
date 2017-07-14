@@ -122,7 +122,7 @@ void loop() {
       //*********************
       case 'a': case 'A': {
         byte cmdTX[1] = { STDPB1_1 };
-        byte txSize = sizeof(cmdTX), rxSize = 0;
+        byte txSize = sizeof(cmdTX);
         Serial.print("ESP8266 - Sending Opcode >>> ");
         Serial.print(cmdTX[0]);
         Serial.println("(STDPB1_1)");
@@ -159,7 +159,7 @@ void loop() {
       //*********************      
       case 's': case 'S': {
         byte cmdTX[1] = { STDPB1_0 };
-        byte txSize = sizeof(cmdTX), rxSize = 0;
+        byte txSize = sizeof(cmdTX);
         Serial.print("ESP8266 - Sending Opcode >>> ");
         Serial.print(cmdTX[0]);
         Serial.println("(STDPB1_0)");
@@ -356,7 +356,7 @@ void loop() {
   }
   //ReadChar();
 
-  delay(1000);
+  delay(150);
   key = 'f';
   newKey = true;
 

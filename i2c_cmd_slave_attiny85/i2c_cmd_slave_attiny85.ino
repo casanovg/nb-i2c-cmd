@@ -211,6 +211,9 @@ void requestEvent() {
 				break;
 			}
 		}
+
+    TinyWireS_stop_check();
+
 	}
 	else {
 

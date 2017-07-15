@@ -33,7 +33,10 @@
 #include "TinyWireS.h"                  // wrapper class for I2C slave routines
 
 #define I2C_SLAVE_ADDR 0x2E             // I2C slave address (46, can be changed)
-#define LED_PIN 1
+
+#define PB1 1
+#define PB3 3
+#define ADC2 2
 
 #define STDPB1_1 0xE9 // Command to Set ATtiny85 PB1 = 1
 #define AKDPB1_1 0x16 // Acknowledge Command PB1 = 1
@@ -51,7 +54,7 @@
 bool testReplies = false;   // Activates test mode
 byte command[4] = { 0 };    // Command received from master
 int commandLength = 0;      // Command number of bytes
-int analogVal = 0;          // Pseudo ADC value
+int analogValue = 0;          // Pseudo ADC value
 
 
 // CRC Table: Polynomial=0x9C, CRC size=8-bit, HD=5, Word Length=9 bytes
@@ -96,6 +99,11 @@ void setup() {
 	TinyWireS.onReceive(receiveEvent);
 	// register the onRequest() callback function
 	TinyWireS.onRequest(requestEvent);
+
+  pinMode(PB1, OUTPUT);
+  pinMode(PB3, OUTPUT);
+  pinMode(4, INPUT);          // PB4 = ADC2
+
 }
 
 //
@@ -131,35 +139,35 @@ void requestEvent() {
 
     byte opCodeAck = ~command[0]; // Command Operation Code acknowledge => Command Bitwise "Not".
 		switch (command[0]) {
-			// ******************
-			// * STDPB1_1 Reply *
-			//*******************     
+			//******************
+			//* STDPB1_1 Reply *
+			//******************     
 			case STDPB1_1: {
 				byte ackLng = 1;
 				byte acknowledge[1] = { 0 };
 				acknowledge[0] = opCodeAck;
-				digitalWrite(LED_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
+				digitalWrite(PB1, HIGH);   // turn the LED on (HIGH is the voltage level)
 				for (int i = 0; i < ackLng; i++) {
 					TinyWireS.send(acknowledge[i]);
 				}
 				break;
 			}
-			// ******************
-			// * STDPB1_0 Reply *
-			//*******************
+			//******************
+			//* STDPB1_0 Reply *
+			//******************
 			case STDPB1_0: {
 				byte ackLng = 1;
 				byte acknowledge[1] = { 0 };
 				acknowledge[0] = opCodeAck;
-				digitalWrite(LED_PIN, LOW);    // turn the LED off by making the voltage LOW
+				digitalWrite(PB1, LOW);    // turn the LED off by making the voltage LOW
 				for (int i = 0; i < ackLng; i++) {
 					TinyWireS.send(acknowledge[i]);
 				}
 				break;
 			}
-			// ******************
-			// * STANAPB3 Reply *
-			//*******************
+			//******************
+			//* STANAPB3 Reply *
+			//******************
 			case STANAPB3: {
         byte ackLng = 2;
 				byte acknowledge[2] = { 0 };
@@ -168,40 +176,49 @@ void requestEvent() {
         command[1] = command[1] & 0xEF; // ERROR INJECTED IN SOME OPERANDS RECEIVED TO TEST CRC - REMOVE THIS LINE FOR PRODUCTION !!! 
 
         acknowledge[1] = CalculateCRC(command, 3);
-				digitalWrite(LED_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
+				digitalWrite(PB1, HIGH);   // turn the LED on (HIGH is the voltage level)
 				for (int i = 0; i < ackLng; i++) {
 					TinyWireS.send(acknowledge[i]);
 				}
 				break;
 			}
-			// ******************
-			// * READADC2 Reply *
-			//*******************
+			//******************
+			//* READADC2 Reply *
+			//******************
 			case READADC2: {
 				byte ackLng = 4, analogMSB = 0, analogLSB = 0;
-				word analogRead = 0;
-				//word analogRead = rand() % (1023 + 1 - 0) + 0;
-				if (analogVal < 1024) {
-				    analogRead = ++analogVal;
+        //analogValue = analogRead(2);
+        if (analogValue < 1024) {
+          analogValue++;
 				} else {
-				    analogVal = 0;
+				  analogValue = 0;
 				}
-				analogMSB = ((analogRead >> 8) & 0x03);
-				analogLSB = (analogRead & 0x0FF);
+        analogMSB = ((analogValue >> 8) & 0x03);
+				analogLSB = (analogValue & 0x0FF);
 				word analogValue = ((analogMSB << 8) + analogLSB);
 				byte acknowledge[4] = { 0 };
 				acknowledge[0] = opCodeAck;
 				acknowledge[1] = analogMSB;
 				acknowledge[2] = analogLSB;
 				acknowledge[3] = CalculateCRC(acknowledge, ackLng - 1); // Prepare CRC for Reply
+
+        //int g = 0;                          // DEBUG - REMOVE FOR PRODUCTION
+        //while (g < 32500) {                 // DEBUG - REMOVE FOR PRODUCTION
+        //  g++;                              // DEBUG - REMOVE FOR PRODUCTION
+        //}                                   // DEBUG - REMOVE FOR PRODUCTION
+
 				for (int i = 0; i < ackLng; i++) {
 					TinyWireS.send(acknowledge[i]);
+          /*int g = 0;*/                            // DEBUG - REMOVE FOR PRODUCTION
+          //while (g < 32500) {                 // DEBUG - REMOVE FOR PRODUCTION
+          //  g++;                              // DEBUG - REMOVE FOR PRODUCTION
+          //}                                   // DEBUG - REMOVE FOR PRODUCTION
 				}
 				break;
 			}
-							// *************************
-							// * Unknown Command Reply *
-							//**************************
+			//*************************
+			//* Unknown Command Reply *
+			//*************************
 			default: {
 				//byte acknowledge[1] = { 0 };
 				//acknowledge[0] = 0xFA;
@@ -239,8 +256,8 @@ byte CalculateCRC(byte* block, size_t blockLength) {
 
 // Function Heartbit
 void heartbit() {
-	digitalWrite(LED_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
+	digitalWrite(PB1, HIGH);   // turn the LED on (HIGH is the voltage level)
 	delay(500);                    // wait for a second
-	digitalWrite(LED_PIN, LOW);    // turn the LED off by making the voltage LOW
+	digitalWrite(PB1, LOW);    // turn the LED off by making the voltage LOW
 	delay(500);                    // wait for a second
 }

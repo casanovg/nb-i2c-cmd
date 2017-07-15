@@ -99,11 +99,9 @@ void setup() {
 	TinyWireS.onReceive(receiveEvent);
 	// register the onRequest() callback function
 	TinyWireS.onRequest(requestEvent);
-
   pinMode(PB1, OUTPUT);
   pinMode(PB3, OUTPUT);
   pinMode(4, INPUT);          // PB4 = ADC2
-
 }
 
 //
@@ -120,7 +118,7 @@ void loop() {
 	// otherwise empty loop
 }
 
-// Gets called when the ATtiny receives an i2c write slave request
+// Gets called when the ATtiny receives an I2C write slave request
 void receiveEvent(byte commandbytes) {
 	// save the number of bytes sent from the master
 	commandLength = commandbytes;
@@ -130,13 +128,13 @@ void receiveEvent(byte commandbytes) {
 	}
 }
 
-// Gets called when the ATtiny receives an i2c read slave request
+// Gets called when the ATtiny receives an I2C read slave request
 void requestEvent() {
 
 	if (testReplies == false) {
-		
-		// operating mode ... ##########
-
+    //··················
+    //· Operating mode .
+    //··················
     byte opCodeAck = ~command[0]; // Command Operation Code acknowledge => Command Bitwise "Not".
 		switch (command[0]) {
 			//******************
@@ -172,9 +170,7 @@ void requestEvent() {
         byte ackLng = 2;
 				byte acknowledge[2] = { 0 };
 				acknowledge[0] = opCodeAck;
-
-        command[1] = command[1] & 0xEF; // ERROR INJECTED IN SOME OPERANDS RECEIVED TO TEST CRC - REMOVE THIS LINE FOR PRODUCTION !!! 
-
+        //command[1] = command[1] & 0xEF; // ERROR INJECTED IN SOME OPERANDS RECEIVED TO TEST CRC - REMOVE FOR PRODUCTION 
         acknowledge[1] = CalculateCRC(command, 3);
 				digitalWrite(PB1, HIGH);   // turn the LED on (HIGH is the voltage level)
 				for (int i = 0; i < ackLng; i++) {
@@ -201,18 +197,17 @@ void requestEvent() {
 				acknowledge[1] = analogMSB;
 				acknowledge[2] = analogLSB;
 				acknowledge[3] = CalculateCRC(acknowledge, ackLng - 1); // Prepare CRC for Reply
-
-        //int g = 0;                          // DEBUG - REMOVE FOR PRODUCTION
-        //while (g < 32500) {                 // DEBUG - REMOVE FOR PRODUCTION
-        //  g++;                              // DEBUG - REMOVE FOR PRODUCTION
-        //}                                   // DEBUG - REMOVE FOR PRODUCTION
-
+        //int g = 0;                                // TEST - REMOVE FOR PRODUCTION
+        //while (g < 32500) {                       // TEST - REMOVE FOR PRODUCTION
+        //  g++;                                    // TEST - REMOVE FOR PRODUCTION
+        //}                                         // TEST - REMOVE FOR PRODUCTION
+        digitalWrite(PB1, LOW);    // turn the LED off by making the voltage LOW
 				for (int i = 0; i < ackLng; i++) {
 					TinyWireS.send(acknowledge[i]);
-          /*int g = 0;*/                            // DEBUG - REMOVE FOR PRODUCTION
-          //while (g < 32500) {                 // DEBUG - REMOVE FOR PRODUCTION
-          //  g++;                              // DEBUG - REMOVE FOR PRODUCTION
-          //}                                   // DEBUG - REMOVE FOR PRODUCTION
+          /*int g = 0;*/                            // TEST - REMOVE FOR PRODUCTION
+          //while (g < 32500) {                     // TEST - REMOVE FOR PRODUCTION
+          //  g++;                                  // TEST - REMOVE FOR PRODUCTION
+          //}                                       // TEST - REMOVE FOR PRODUCTION
 				}
 				break;
 			}
@@ -228,14 +223,12 @@ void requestEvent() {
 				break;
 			}
 		}
-
     // TinyWireS_stop_check();
-
 	}
 	else {
-
-		// Test mode ... ##########
-
+    //·············
+		//· Test mode .
+    //·············
 		// Just reply the command inverted (Not-command)
 		for (int i = 0; i < commandLength; i++) {
 			TinyWireS.send(~command[i]);

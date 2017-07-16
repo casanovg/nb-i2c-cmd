@@ -197,11 +197,14 @@ void loop() {
         byte cmdTX[3] = { STANAPB3, 0, 0 };
         //byte txSize = sizeof(cmdTX);
         byte txSize = 3;
-        byte operandValue = 0;
+        byte operandValue = 0;              // PROD - REMOVE FOR TESTING
         Serial.print("Please enter a value between 0 and 255 for this command: ");
         while (newByte == false) {
-          //operandValue = ReadByte();      // PROD - REMOVE FOR TESTING
-          operandValue = random(1, 255);    // TEST - REMOVE FOR PRODUCTION
+          //operandValue = ReadByte();            // PROD - REMOVE FOR TESTING
+          operandValue = (byte)random(0, 256);    // TEST - REMOVE FOR PRODUCTION
+          Serial.println(operandValue);           // TEST - REMOVE FOR PRODUCTION
+          delay(500);                             // TEST - REMOVE FOR PRODUCTION
+          newByte = true;                         // TEST - REMOVE FOR PRODUCTION
         }
         if (newByte == true) {
           Serial.println("");

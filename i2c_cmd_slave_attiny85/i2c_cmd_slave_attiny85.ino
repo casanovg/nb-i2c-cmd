@@ -170,7 +170,7 @@ void requestEvent() {
         byte ackLng = 2;
 				byte acknowledge[2] = { 0 };
 				acknowledge[0] = opCodeAck;
-        //command[1] = command[1] & 0xEF; // ERROR INJECTED IN SOME OPERANDS RECEIVED TO TEST CRC - REMOVE FOR PRODUCTION 
+        command[1] = command[1] & 0xEF; // ERROR INJECTED IN SOME OPERANDS RECEIVED TO TEST CRC - REMOVE FOR PRODUCTION 
         acknowledge[1] = CalculateCRC(command, 3);
 				digitalWrite(PB1, HIGH);   // turn the LED on (HIGH is the voltage level)
 				for (int i = 0; i < ackLng; i++) {

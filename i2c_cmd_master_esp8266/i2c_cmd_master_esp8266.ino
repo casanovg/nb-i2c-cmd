@@ -47,8 +47,8 @@ byte slaveAddress = 0;
 byte blockRXSize = 0;
 bool newKey = false, newByte = false;
 char key = '\0';
-//long opcodeErrors = 0;    // This is for stress testing READADC2 only - TEST FOR PRODUCTION
-//long loopsREADADC2 = 0;   // This is for stress testing READADC2 only - TEST FOR PRODUCTION
+long opcodeErrors = 0;    // This is for stress testing READADC2 only - TEST FOR PRODUCTION
+long loopsREADADC2 = 0;   // This is for stress testing READADC2 only - TEST FOR PRODUCTION
 
 // CRC Table: Polynomial=0x9C, CRC size=8-bit, HD=5, Word Length=9 bytes
 byte crcTable[256] = {
@@ -308,7 +308,7 @@ void loop() {
           Serial.print(ackRX[2]);
           Serial.print(" | CRC=");
           Serial.println(ackRX[3]);
-          //ackRX[2] = ackRX[2] & 0xDF; // Generate a CRC Error for testing - REMOVE FOR PRODUCTION
+          ackRX[2] = ackRX[2] & 0xDF; // Generate a CRC Error for testing - REMOVE FOR PRODUCTION
           byte checkCRC = CalculateCRC(ackRX, sizeof(ackRX));
           if (checkCRC == 0) {
             Serial.println("************************");
@@ -328,12 +328,12 @@ void loop() {
           Serial.print(cmdTX[0]);
           Serial.print(" command! <<< ");
           Serial.println(ackRX[0]);
-        //opcodeErrors++;                                                   // DEBUG - REMOVE FOR PRODUCTION
+        opcodeErrors++;                                                   // DEBUG - REMOVE FOR PRODUCTION
         }
-        //Serial.print("/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\ LOOPS: ");  // DEBUG - REMOVE FOR PRODUCTION
-        //Serial.print(++loopsREADADC2);                                    // DEBUG - REMOVE FOR PRODUCTION
-        //Serial.print(" /\\/\\/\\/\\/\\ OPCODE ERRORS: ");                 // DEBUG - REMOVE FOR PRODUCTION
-        //Serial.println(opcodeErrors);                                     // DEBUG - REMOVE FOR PRODUCTION
+        Serial.print("/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\ LOOPS: ");  // DEBUG - REMOVE FOR PRODUCTION
+        Serial.print(++loopsREADADC2);                                    // DEBUG - REMOVE FOR PRODUCTION
+        Serial.print(" /\\/\\/\\/\\/\\ OPCODE ERRORS: ");                 // DEBUG - REMOVE FOR PRODUCTION
+        Serial.println(opcodeErrors);                                     // DEBUG - REMOVE FOR PRODUCTION
         break;
       }
       // *******************
@@ -349,10 +349,10 @@ void loop() {
     Serial.println("");
     Serial.println("Please type a command ('a', 's', 'd' or 'f'):");
   }
-  ReadChar();           // PROD - REMOVE FOR TESTING
-  //delay(150);         // TEST - REMOVE FOR PRODUCTION
-  //key = 'f';          // TEST - REMOVE FOR PRODUCTION
-  //newKey = true;      // TEST - REMOVE FOR PRODUCTION
+  //ReadChar();           // PROD - REMOVE FOR TESTING
+  delay(150);         // TEST - REMOVE FOR PRODUCTION
+  key = 'f';          // TEST - REMOVE FOR PRODUCTION
+  newKey = true;      // TEST - REMOVE FOR PRODUCTION
 }
 
 // Function ScanI2C

@@ -200,7 +200,8 @@ void loop() {
         byte operandValue = 0;
         Serial.print("Please enter a value between 0 and 255 for this command: ");
         while (newByte == false) {
-          operandValue = ReadByte();
+          //operandValue = ReadByte();      // PROD - REMOVE FOR TESTING
+          operandValue = random(1, 255);    // TEST - REMOVE FOR PRODUCTION
         }
         if (newByte == true) {
           Serial.println("");
@@ -351,7 +352,7 @@ void loop() {
   }
   //ReadChar();           // PROD - REMOVE FOR TESTING
   delay(150);         // TEST - REMOVE FOR PRODUCTION
-  key = 'f';          // TEST - REMOVE FOR PRODUCTION
+  key = 'd';          // TEST - REMOVE FOR PRODUCTION
   newKey = true;      // TEST - REMOVE FOR PRODUCTION
 }
 

@@ -18,12 +18,10 @@ f - (READADC2) Read ATtiny85 ADC2 (the reply has 2 data bytes + 1 CRC byte)
 
 Test mode:
 ----------
-Loop continuously with command 'd' (STANAPB3) or 'f' . Command's 'd' (READADC2).
-For command 'd', PWM value input is simulated with random values.
+Loop continuously with command 'd' (STANAPB3) or 'f' (READADC2).
 
 Errors simulated:
 -----------------
 Mask 0xDF applied to operand 2 of READADC2 command received in ESP8266
+
 Mask 0xEF applied to operand of STANAPB3 command received in ATtiny85
-
-

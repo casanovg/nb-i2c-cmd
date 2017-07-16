@@ -18,5 +18,5 @@ f - (READADC2) Read ATtiny85 ADC2 (the reply has 2 data bytes + 1 CRC byte)
 
 Test mode:
 ----------
-Loops continuously with command 'd' (STANAPB3). Command's 'd' PWM value input is simulated with random values
+Loop continuously with command 'd' (STANAPB3). Command's 'd' PWM value input is simulated with random values
 

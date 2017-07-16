@@ -354,9 +354,14 @@ void loop() {
     Serial.println("Please type a command ('a', 's', 'd' or 'f'):");
   }
   //ReadChar();           // PROD - REMOVE FOR TESTING
-  delay(150);         // TEST - REMOVE FOR PRODUCTION
-  key = 'd';          // TEST - REMOVE FOR PRODUCTION
-  newKey = true;      // TEST - REMOVE FOR PRODUCTION
+  delay(150);           // TEST - REMOVE FOR PRODUCTION
+  if (key != 'd') {     // TEST - REMOVE FOR PRODUCTION
+    key = 'd';          // TEST - REMOVE FOR PRODUCTION
+  }                     // TEST - REMOVE FOR PRODUCTION
+  else {                // TEST - REMOVE FOR PRODUCTION
+    key = 'f';          // TEST - REMOVE FOR PRODUCTION
+  }                     // TEST - REMOVE FOR PRODUCTION
+  newKey = true;        // TEST - REMOVE FOR PRODUCTION
 }
 
 // Function ScanI2C

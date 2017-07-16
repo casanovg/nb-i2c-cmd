@@ -386,14 +386,6 @@ byte CalculateCRC(byte* block, size_t blockLength) {
   return crc;
 }
 
-// Function Clear Screen
-void clrscr() {
-  Serial.write(27);       // ESC command
-  Serial.print("[2J");    // clear screen command
-  Serial.write(27);       // ESC command
-  Serial.print("[H");     // cursor to home command
-}
-
 // Function ReadChar
 void ReadChar() {
   if (Serial.available() > 0) {
@@ -430,4 +422,12 @@ byte ReadByte() {
     Serial.println((byte)atoi(serialData));
   }
   return((byte)atoi(serialData));
+}
+
+// Function Clear Screen
+void clrscr() {
+  Serial.write(27);       // ESC command
+  Serial.print("[2J");    // clear screen command
+  Serial.write(27);       // ESC command
+  Serial.print("[H");     // cursor to home command
 }

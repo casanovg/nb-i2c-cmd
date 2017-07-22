@@ -101,7 +101,8 @@ void setup() {
 	TinyWireS.onRequest(requestEvent);
   pinMode(PB1, OUTPUT);
   pinMode(PB3, OUTPUT);
-  pinMode(4, INPUT);          // PB4 = ADC2
+  //pinMode(4, INPUT);          // PB4 = ADC2
+  initADC();
 }
 
 //
@@ -294,7 +295,7 @@ void initADC() {
 
 // Function ReadADC
 int analogRead(void) {
-  initADC();
+  //initADC();
   uint8_t adc_lobyte; // to hold the low byte of the ADC register (ADCL)
   uint16_t raw_adc;
   //while (1) {

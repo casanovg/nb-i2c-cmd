@@ -312,7 +312,7 @@ void loop() {
           Serial.print(ackRX[2]);
           Serial.print(" | CRC=");
           Serial.println(ackRX[3]);
-          ackRX[2] = ackRX[2] & 0xDF; // Generate a CRC Error for testing - REMOVE FOR PRODUCTION
+          //ackRX[2] = ackRX[2] & 0xDF; // Generate a CRC Error for testing - REMOVE FOR PRODUCTION
           byte checkCRC = CalculateCRC(ackRX, sizeof(ackRX));
           if (checkCRC == 0) {
             Serial.println("************************");
@@ -382,6 +382,7 @@ byte scanI2C() {
     scanAddr++;
   }
   return slaveAddr;
+  Wire.
 }
 
 // Function CalculateCRC (CRC-8)

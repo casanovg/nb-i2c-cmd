@@ -183,10 +183,11 @@ void requestEvent() {
 			//******************
 			case READADC2: {
 				byte ackLng = 4, analogMSB = 0, analogLSB = 0;
-        //analogValue = analogRead(2);
+        //analogValue = analogRead();
         if (analogValue < 1024) {
           analogValue++;
-				} else {
+				}
+        else {
 				  analogValue = 0;
 				}
         analogMSB = ((analogValue >> 8) & 0x03);
@@ -253,4 +254,61 @@ void heartbit() {
 	delay(500);                    // wait for a second
 	digitalWrite(PB1, LOW);    // turn the LED off by making the voltage LOW
 	delay(500);                    // wait for a second
+}
+
+void initADC() {
+
+  /* this function initialises the ADC
+
+  For more information, see table 17.5 "ADC Prescaler Selections" in
+  chapter 17.13.2 "ADCSRA – ADC Control and Status Register A"
+  (pages 140 and 141 on the complete ATtiny25/45/85 datasheet, Rev. 2586M–AVR–07/10)
+  
+  // 10-bit resolution
+  // set ADLAR to 0 to disable left-shifting the result (bits ADC9 + ADC8 are in ADC[H/L] and
+  // bits ADC7..ADC0 are in ADC[H/L])
+  // use uint16_t variable to read ADC (intead of ADCH or ADCL)
+
+  */
+
+  ADMUX =
+    (0 << ADLAR) |    // do not left shift result (for 10-bit values)
+    (0 << REFS2) |    // Sets ref. voltage to internal 1.1V, bit 2
+    (1 << REFS1) |    // Sets ref. voltage to internal 1.1V, bit 1   
+    (0 << REFS0) |    // Sets ref. voltage to internal 1.1V, bit 0
+    (0 << MUX3) |     // use ADC2 for input (PB4), MUX bit 3
+    (0 << MUX2) |     // use ADC2 for input (PB4), MUX bit 2
+    (1 << MUX1) |     // use ADC2 for input (PB4), MUX bit 1
+    (0 << MUX0);      // use ADC2 for input (PB4), MUX bit 0
+    //(0 << MUX3) |      // use ADC1 for input (PB2), MUX bit 3
+    //(0 << MUX2) |      // use ADC1 for input (PB2), MUX bit 2
+    //(0 << MUX1) |      // use ADC1 for input (PB2), MUX bit 1
+    //(1 << MUX0);       // use ADC1 for input (PB2), MUX bit 0
+
+  ADCSRA =
+    (1 << ADEN) |     // Enable ADC 
+    (1 << ADPS2) |     // set prescaler to 128, bit 2 
+    (1 << ADPS1) |     // set prescaler to 128, bit 1 
+    (1 << ADPS0);      // set prescaler to 128, bit 0  
+}
+
+// Function ReadADC
+int analogRead(void) {
+  initADC();
+  uint8_t adc_lobyte; // to hold the low byte of the ADC register (ADCL)
+  uint16_t raw_adc;
+  //while (1) {
+    ADCSRA |= (1 << ADSC);          // start ADC measurement
+    while (ADCSRA & (1 << ADSC));   // wait till conversion complete 
+                                    // for 10-bit resolution:
+    adc_lobyte = ADCL; // get the sample value from ADCL
+    raw_adc = ADCH << 8 | adc_lobyte;   // add lobyte and hibyte
+    if (raw_adc > 512) {
+      // ADC input voltage is more than half of the internal 1.1V reference voltage
+    }
+    else {
+      // ADC input voltage is less than half of the internal 1.1V reference voltage
+    }
+  //}
+  return 0;
 }

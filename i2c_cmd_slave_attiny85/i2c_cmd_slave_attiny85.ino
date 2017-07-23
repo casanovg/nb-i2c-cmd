@@ -36,7 +36,7 @@
 
 #define PB1 1
 #define PB3 3
-#define ADC2 2
+#define ADCPIN A2
 
 #define STDPB1_1 0xE9 // Command to Set ATtiny85 PB1 = 1
 #define AKDPB1_1 0x16 // Acknowledge Command PB1 = 1
@@ -101,8 +101,8 @@ void setup() {
 	TinyWireS.onRequest(requestEvent);
   pinMode(PB1, OUTPUT);
   pinMode(PB3, OUTPUT);
-  //pinMode(4, INPUT);          // PB4 = ADC2
-  initADC();
+  pinMode(ADCPIN, INPUT);          // PB4 = ADC2
+  //initADC();
 }
 
 //
@@ -184,7 +184,7 @@ void requestEvent() {
 			//******************
 			case READADC2: {
 				byte ackLng = 4, analogMSB = 0, analogLSB = 0;
-        //analogValue = analogRead();
+        //analogValue = analogRead(ADCPIN);
         if (analogValue < 1024) {
           analogValue++;
 				}
@@ -294,7 +294,7 @@ void initADC() {
 }
 
 // Function ReadADC
-int analogRead(void) {
+int analogRead2(void) {
   //initADC();
   uint8_t adc_lobyte; // to hold the low byte of the ADC register (ADCL)
   uint16_t raw_adc;

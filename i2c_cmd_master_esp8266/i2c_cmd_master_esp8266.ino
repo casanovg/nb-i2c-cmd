@@ -97,12 +97,12 @@ void setup() {
   delay(1000); // Wait 2 seconds for slave init sequence
   // Search continuouly for slave addresses
   while (slaveAddress == 0) {
-    slaveAddress = scanI2C();
-    delay(1000);
+    slaveAddress = ScanI2C();
+    delay(3000);
   }
   clrscr();
-  Serial.println("Nicebots I2C Commands Test");
-  Serial.println("==========================");
+  Serial.println("I2C Commands Test");
+  Serial.println("=================");
   Serial.println("Please type a command ('a', 's', 'd' or 'f'):");
 }
 
@@ -365,7 +365,7 @@ void loop() {
 }
 
 // Function ScanI2C
-byte scanI2C() {
+byte ScanI2C() {
   Serial.println("Scanning I2C bus ...");
   byte slaveAddr = 0, scanAddr = 8;
   while (scanAddr < 120) {
@@ -382,7 +382,6 @@ byte scanI2C() {
     scanAddr++;
   }
   return slaveAddr;
-  Wire.
 }
 
 // Function CalculateCRC (CRC-8)

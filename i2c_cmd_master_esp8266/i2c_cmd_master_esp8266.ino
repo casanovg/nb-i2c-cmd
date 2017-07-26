@@ -101,8 +101,8 @@ void setup() {
     delay(1000);
   }
   clrscr();
-  Serial.println("Nicebots I2C Commands Test");
-  Serial.println("==========================");
+  Serial.println("I2C Commands Test");
+  Serial.println("=================");
   Serial.println("Please type a command ('a', 's', 'd' or 'f'):");
 }
 

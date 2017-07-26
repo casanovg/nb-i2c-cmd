@@ -23,6 +23,7 @@
 // d - (STANAPB3) Set ATtiny85 PB3 = PWMx (the command asks for a PWM value input)
 // f - (READADC2) Read ATtiny85 ADC2 (the reply has 2 data bytes + 1 CRC byte)
 
+#include <dummy.h>
 #include <Wire.h>
 
 #define SLAVE_RESET_PIN 2

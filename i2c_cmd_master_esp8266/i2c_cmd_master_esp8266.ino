@@ -244,7 +244,7 @@ void loop() {
           if (ackRX[1] == 0) {
             Serial.print("ESP8266 - Operand ");
             Serial.print(cmdTX[1]);
-            Serial.print(" parsed OK <<< ATtiny85 CRC Check = ");
+            Serial.print(" parsed OK by slave <<< ATtiny85 CRC Check = ");
             Serial.println(ackRX[1]);
           }
           else {
@@ -308,7 +308,7 @@ void loop() {
           Serial.print(ackRX[2]);
           Serial.print(" | CRC=");
           Serial.println(ackRX[3]);
-          //ackRX[2] = ackRX[2] & 0xDF; // Generate a CRC Error for testing - REMOVE FOR PRODUCTION
+          //ackRX[2] = ackRX[2] & 0xDF; // ERROR INJECTED IN SOME OPERANDS RECEIVED TO TEST CRC - REMOVE FOR PRODUCTION
           byte checkCRC = CalculateCRC(ackRX, sizeof(ackRX));
           if (checkCRC == 0) {
             Serial.println("************************");

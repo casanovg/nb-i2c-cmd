@@ -36,7 +36,8 @@
 
 #define PB1 1
 #define PB3 3
-#define ADC2 2
+//#define ADCCHANNEL A3
+#define ADCCHANNEL A2
 
 #define STDPB1_1 0xE9 // Command to Set ATtiny85 PB1 = 1
 #define AKDPB1_1 0x16 // Acknowledge Command PB1 = 1

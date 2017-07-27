@@ -280,6 +280,9 @@ void loop() {
           Wire.write(transmitData[i]);
           Wire.endTransmission();
         }
+
+        //delay(2000); // LONG DELAY FOR TESTING - REMOVE FOR PRODUCTION
+
         // Receive acknowledgement
         blockRXSize = Wire.requestFrom(slaveAddress, (byte)4);
         byte ackRX[4] = { 0 };   // Data received from slave

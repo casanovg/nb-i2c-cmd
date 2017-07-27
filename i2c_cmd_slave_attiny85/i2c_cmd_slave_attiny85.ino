@@ -37,7 +37,7 @@
 #define PB1 1
 #define PB3 3
 //#define ADCCHANNEL A3
-#define ADCCHANNEL A2
+#define ADCCHANNEL A0
 
 #define STDPB1_1 0xE9 // Command to Set ATtiny85 PB1 = 1
 #define AKDPB1_1 0x16 // Acknowledge Command PB1 = 1
@@ -52,10 +52,10 @@
 #define ACKNADC2 0x25 // Acknowledge Command Read ADC2
 
 // Global Variables
-bool testReplies = false;   // Activates test mode
-byte command[4] = { 0 };    // Command received from master
-int commandLength = 0;      // Command number of bytes
-int analogValue = 0;          // Pseudo ADC value
+bool testReplies = false;       // Activates test mode
+byte command[4] = { 0 };        // Command received from master
+int commandLength = 0;          // Command number of bytes
+volatile int analogValue = 0;   // ADC value
 
 
 // CRC Table: Polynomial=0x9C, CRC size=8-bit, HD=5, Word Length=9 bytes
@@ -117,6 +117,9 @@ void loop() {
 	// This needs to be here
 	//TinyWireS_stop_check();
 	// otherwise empty loop
+
+  analogValue = analogRead(ADCCHANNEL); // Actual analog value read from ADC Channel
+
 }
 
 // Gets called when the ATtiny receives an I2C write slave request
@@ -184,7 +187,7 @@ void requestEvent() {
 			//******************
 			case READADC2: {
 				byte ackLng = 4, analogMSB = 0, analogLSB = 0;
-        analogValue = analogRead(ADCCHANNEL);
+        //analogValue = analogRead(ADCCHANNEL);
     //    if (analogValue < 1024) {
     //      analogValue++;
 				//} else {

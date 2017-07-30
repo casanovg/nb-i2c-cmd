@@ -36,8 +36,8 @@
 
 #define PB1 1
 #define PB3 3
-//#define ADCCHANNEL A3
-#define ADCCHANNEL A0
+#define AD2 A2
+//#define AD0 A0
 
 #define STDPB1_1 0xE9 // Command to Set ATtiny85 PB1 = 1
 #define AKDPB1_1 0x16 // Acknowledge Command PB1 = 1
@@ -100,9 +100,10 @@ void setup() {
 	TinyWireS.onReceive(receiveEvent);
 	// register the onRequest() callback function
 	TinyWireS.onRequest(requestEvent);
+  InitADC();
   pinMode(PB1, OUTPUT);
   //pinMode(PB3, OUTPUT);
-  pinMode(ADCCHANNEL, INPUT);          // PB4 = ADC2
+  pinMode(AD2, INPUT);          // PB4 = ADC2
 }
 
 //
@@ -118,7 +119,7 @@ void loop() {
 	//TinyWireS_stop_check();
 	// otherwise empty loop
 
-  analogValue = analogRead(ADCCHANNEL); // Actual analog value read from ADC Channel
+  analogValue = analogRead(AD2); // Actual analog value read from ADC Channel
 
 }
 
@@ -187,7 +188,7 @@ void requestEvent() {
 			//******************
 			case READADC2: {
 				byte ackLng = 4, analogMSB = 0, analogLSB = 0;
-        //analogValue = analogRead(ADCCHANNEL);
+        //analogValue = analogRead(AD2);
     //    if (analogValue < 1024) {
     //      analogValue++;
 				//} else {
@@ -259,7 +260,7 @@ void heartbit() {
 	delay(500);                    // wait for a second
 }
 
-void initADC() {
+void InitADC() {
 
   /* this function initialises the ADC
 
@@ -296,7 +297,7 @@ void initADC() {
 }
 
 // Function ReadADC
-int analogRead2(void) {
+int AnalogRead2(void) {
   //initADC();
   uint8_t adc_lobyte; // to hold the low byte of the ADC register (ADCL)
   uint16_t raw_adc;

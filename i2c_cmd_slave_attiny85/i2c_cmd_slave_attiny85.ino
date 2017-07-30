@@ -34,10 +34,10 @@
 
 #define I2C_SLAVE_ADDR 0x2E             // I2C slave address (46, can be changed)
 
-#define PB1 1
-#define PB3 3
-#define AD2 A2
-//#define AD0 A0
+#define PB1 1         // Output Pin for STDPB1_1 command
+#define PB3 3         // Output Pin for STANAPB3 command
+#define AD2 A2        //  Input Pin for READADC2 command
+#define ADR 1023.0    // ADC Resolution (10 bit = 2^10)
 
 #define STDPB1_1 0xE9 // Command to Set ATtiny85 PB1 = 1
 #define AKDPB1_1 0x16 // Acknowledge Command PB1 = 1
@@ -102,8 +102,8 @@ void setup() {
 	TinyWireS.onRequest(requestEvent);
   InitADC();
   pinMode(PB1, OUTPUT);
-  //pinMode(PB3, OUTPUT);
-  pinMode(AD2, INPUT);          // PB4 = ADC2
+  pinMode(PB3, OUTPUT);
+  pinMode(AD2, INPUT);
 }
 
 //
@@ -177,7 +177,8 @@ void requestEvent() {
 				acknowledge[0] = opCodeAck;
         //command[1] = command[1] & 0xEF; // ERROR INJECTED IN SOME OPERANDS RECEIVED TO TEST CRC - REMOVE FOR PRODUCTION 
         acknowledge[1] = CalculateCRC(command, 3);
-				digitalWrite(PB1, HIGH);   // turn the LED on (HIGH is the voltage level)
+        //analogWrite(PB3, command[1]);   // turn the LED on at the voltage level indicated by the command operand
+        analogWrite(PB1, command[1]);   // turn the LED on at the voltage level indicated by the command operand
 				for (int i = 0; i < ackLng; i++) {
 					TinyWireS.send(acknowledge[i]);
 				}
@@ -315,4 +316,28 @@ int AnalogRead2(void) {
   }
   //}
   return 0;
+}
+
+// Fuction getVPP
+float getVPP(int sensorPin, int sampleTime) {
+  float result;
+  float readValue;      //value read from the sensor
+  float maxValue = 0;   // store max value here
+  float minValue = ADR; // store min value here
+  uint32_t start_time = millis();
+  while ((millis() - start_time) < sampleTime) { // 500 = sample for 250 mSec
+    readValue = analogRead(sensorPin);
+    // see if you have a new maxValue
+    if (readValue > maxValue) {
+      /*record the maximum sensor value*/
+      maxValue = readValue;
+    }
+    if (readValue < minValue) {
+      /*record the maximum sensor value*/
+      minValue = readValue;
+    }
+  }
+  //result = ((maxValue - minValue) * PSUVOLTAGE) / ADCRESOLUTION;
+  result = (maxValue - minValue);
+  return result;
 }

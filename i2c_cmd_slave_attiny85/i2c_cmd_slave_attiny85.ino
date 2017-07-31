@@ -34,23 +34,23 @@
 
 #define I2C_SLAVE_ADDR 0x2E             // I2C slave address (46, can be changed)
 
-#define PB1 1         // Output Pin for STDPB1_1 command
-#define PB3 3         // Output Pin for STANAPB3 command
-#define AD2 A2        // Input Pin for READADC2 command
-#define ADR 1023.0    // ADC Resolution (10 bit = 2^10)
-#define SAMPLETIME 500        // Sampling time in ms per reading
+#define PB1 1             // Output Pin for STDPB1_1 command
+#define PB3 3             // Output Pin for STANAPB3 command
+#define AD2 A2            // Input Pin for READADC2 command
+#define ADR 1023.0        // ADC Resolution (10 bit = 2^10)
+#define SAMPLETIME 500    // Sampling time in ms per reading
 
-#define STDPB1_1 0xE9 // Command to Set ATtiny85 PB1 = 1
-#define AKDPB1_1 0x16 // Acknowledge Command PB1 = 1
+#define STDPB1_1 0xE9     // Command to Set ATtiny85 PB1 = 1
+#define AKDPB1_1 0x16     // Acknowledge Command PB1 = 1
 
-#define STDPB1_0 0xE1 // Command to Set ATtiny85 PB1 = 0
-#define AKDPB1_0 0x1E // Acknowledge Command PB1 = 0
+#define STDPB1_0 0xE1     // Command to Set ATtiny85 PB1 = 0
+#define AKDPB1_0 0x1E     // Acknowledge Command PB1 = 0
 
-#define STANAPB3 0xFB // Command to Set ATtiny85 PB3 = PWMx
-#define ACKNAPB3 0x04 // Acknowledge Command PB3 = PWMx
+#define STANAPB3 0xFB     // Command to Set ATtiny85 PB3 = PWMx
+#define ACKNAPB3 0x04     // Acknowledge Command PB3 = PWMx
 
-#define READADC2 0xDA // Command to Read ATtiny85 ADC2
-#define ACKNADC2 0x25 // Acknowledge Command Read ADC2
+#define READADC2 0xDA     // Command to Read ATtiny85 ADC2
+#define ACKNADC2 0x25     // Acknowledge Command Read ADC2
 
 // Global Variables
 bool testReplies = false;       // Activates test mode
@@ -120,8 +120,8 @@ void loop() {
 	//TinyWireS_stop_check();
 	// otherwise empty loop
 
-  analogValue = analogRead(AD2); // Actual analog value read from ADC Channel
-  //analogValue = GetVPP(AD2, SAMPLETIME);
+  //analogValue = analogRead(AD2); // Actual analog value read from ADC Channel
+  analogValue = GetVPP(AD2, SAMPLETIME);
 }
 
 // Gets called when the ATtiny receives an I2C write slave request

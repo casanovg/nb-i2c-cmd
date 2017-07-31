@@ -120,8 +120,8 @@ void loop() {
 	//TinyWireS_stop_check();
 	// otherwise empty loop
 
-  //analogValue = analogRead(AD2); // Actual analog value read from ADC Channel
-  analogValue = GetVPP(AD2, SAMPLETIME);
+  analogValue = analogRead(AD2); // Actual analog value read from ADC Channel
+  //analogValue = GetVPP(AD2, SAMPLETIME);
 }
 
 // Gets called when the ATtiny receives an I2C write slave request
@@ -322,20 +322,17 @@ int AnalogRead2(void) {
 // Fuction GetVPP
 float GetVPP(int sensorPin, int sampleTime) {
   float result;
-  float readValue;      //value read from the sensor
-  float maxValue = 0;   // store max value here
-  float minValue = ADR; // store min value here
+  float readValue;            //value read from the sensor
+  float maxValue = 0;         // store max value, initialize with min
+  float minValue = ADR;       // store min value, initialize with max
   uint32_t start_time = millis();
-  while ((millis() - start_time) < sampleTime) { // 500 = sample for 250 mSec
+  while ((millis() - start_time) < sampleTime) {
     readValue = analogRead(sensorPin);
-    // see if you have a new maxValue
     if (readValue > maxValue) {
-      /*record the maximum sensor value*/
-      maxValue = readValue;
+      maxValue = readValue;   // if there is a new maximum, record it 
     }
     if (readValue < minValue) {
-      /*record the maximum sensor value*/
-      minValue = readValue;
+      minValue = readValue;   // if there is a new minimum, record it
     }
   }
   //result = ((maxValue - minValue) * PSUVOLTAGE) / ADCRESOLUTION;

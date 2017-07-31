@@ -286,10 +286,10 @@ void InitADC() {
     (0 << MUX2) |     // use ADC2 for input (PB4), MUX bit 2
     (1 << MUX1) |     // use ADC2 for input (PB4), MUX bit 1
     (0 << MUX0);      // use ADC2 for input (PB4), MUX bit 0
-                      //(0 << MUX3) |      // use ADC1 for input (PB2), MUX bit 3
-                      //(0 << MUX2) |      // use ADC1 for input (PB2), MUX bit 2
-                      //(0 << MUX1) |      // use ADC1 for input (PB2), MUX bit 1
-                      //(1 << MUX0);       // use ADC1 for input (PB2), MUX bit 0
+    //(0 << MUX3) |      // use ADC1 for input (PB2), MUX bit 3
+    //(0 << MUX2) |      // use ADC1 for input (PB2), MUX bit 2
+    //(0 << MUX1) |      // use ADC1 for input (PB2), MUX bit 1
+    //(1 << MUX0);       // use ADC1 for input (PB2), MUX bit 0
 
   ADCSRA =
     (1 << ADEN) |     // Enable ADC 

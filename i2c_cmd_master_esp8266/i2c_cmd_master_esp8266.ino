@@ -204,7 +204,7 @@ void loop() {
           //operandValue = ReadByte();            // PROD - REMOVE FOR TESTING
           operandValue = (byte)random(0, 256);    // TEST - REMOVE FOR PRODUCTION
           Serial.println(operandValue);           // TEST - REMOVE FOR PRODUCTION
-          delay(500);                             // TEST - REMOVE FOR PRODUCTION
+          delay(1000);                             // TEST - REMOVE FOR PRODUCTION
           newByte = true;                         // TEST - REMOVE FOR PRODUCTION
         }
         if (newByte == true) {
@@ -355,7 +355,7 @@ void loop() {
     Serial.println("Please type a command ('a', 's', 'd' or 'f'):");
   }
   //ReadChar();           // PROD - REMOVE FOR TESTING
-  delay(150);           // TEST - REMOVE FOR PRODUCTION
+  delay(50);           // TEST - REMOVE FOR PRODUCTION
   if (key != 'd') {     // TEST - REMOVE FOR PRODUCTION
     key = 'd';          // TEST - REMOVE FOR PRODUCTION
   }                     // TEST - REMOVE FOR PRODUCTION

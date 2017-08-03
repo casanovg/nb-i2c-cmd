@@ -32,7 +32,7 @@
 
 #include "TinyWireS.h"                  // wrapper class for I2C slave routines
 
-#define I2C_SLAVE_ADDR 0x2E             // I2C slave address (46, can be changed)
+#define I2C_SLAVE_ADDR 0x2F             // I2C slave address (47, can be changed)
 
 #define PB1 1             // Output Pin for STDPB1_1 command
 #define PB3 3             // Output Pin for STANAPB3 command

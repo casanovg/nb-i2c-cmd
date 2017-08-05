@@ -354,8 +354,8 @@ void loop() {
     Serial.println("");
     Serial.println("Please type a command ('a', 's', 'd' or 'f'):");
   }
-  //ReadChar();           // PROD - REMOVE FOR TESTING
-  delay(50);           // TEST - REMOVE FOR PRODUCTION
+  //ReadChar();         // PROD - REMOVE FOR TESTING
+  delay(50);            // TEST - REMOVE FOR PRODUCTION
   if (key != 'd') {     // TEST - REMOVE FOR PRODUCTION
     key = 'd';          // TEST - REMOVE FOR PRODUCTION
   }                     // TEST - REMOVE FOR PRODUCTION

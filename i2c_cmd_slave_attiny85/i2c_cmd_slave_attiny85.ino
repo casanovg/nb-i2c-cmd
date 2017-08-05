@@ -120,8 +120,8 @@ void loop() {
 	//TinyWireS_stop_check();
 	// otherwise empty loop
 
-  analogValue = analogRead(AD2); // Actual analog value read from ADC Channel
-  //analogValue = GetVPP(AD2, SAMPLETIME);
+  //analogValue = analogRead(AD2); // Actual analog value read from ADC Channel
+  analogValue = GetVPP(AD2, SAMPLETIME);
 }
 
 // Gets called when the ATtiny receives an I2C write slave request

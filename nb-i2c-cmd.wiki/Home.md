@@ -1,3 +1,0 @@
-Welcome to the nb-i2c-cmd wiki!
-
-Here there are some guides for hardware and software setup ...

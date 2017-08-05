@@ -25,8 +25,6 @@
 
 #include <Wire.h>
 
-#define SLAVE_RESET_PIN 2
-
 #define STDPB1_1 0xE9 // Command to Set ATtiny85 PB1 = 1
 #define AKDPB1_1 0x16 // Acknowledge Command PB1 = 1
 #define STDPB1_0 0xE1 // Command to Set ATtiny85 PB1 = 0
@@ -85,19 +83,16 @@ byte crcTable[256] = {
 //***************************
 //
 void setup() {
-  pinMode(SLAVE_RESET_PIN, OUTPUT); // Set pin modes
   Serial.begin(9600); // Init the serial port
-  // Init the Wire object for I2C
-  Wire.begin(); // Standard pins SDA on D2 and SCL on D1 (NodeMCU)
-  //Wire.begin(D3, D4); // Set SDA on D3 and SCL on D4 (NodeMCU)
-  digitalWrite(SLAVE_RESET_PIN, LOW); // Reset the slave
-  delay(10);
-  digitalWrite(SLAVE_RESET_PIN, HIGH);
-  delay(1000); // Wait 2 seconds for slave init sequence
-  // Search continuouly for slave addresses
+                      // Init the Wire object for I2C
+  Wire.begin(0, 2); // GPIO0 - GPIO2 (ESP-01) // D3 - D4 (NodeMCU)
+                    //Wire.begin(); // Standard pins SDA on D2 and SCL on D1 (NodeMCU)
+                    //Wire.begin(D3, D4); // Set SDA on D3 and SCL on D4 (NodeMCU)
+  delay(1000); // Wait 1 seconds for slave init sequence
+               // Search continuouly for slave addresses
   while (slaveAddress == 0) {
     slaveAddress = ScanI2C();
-    delay(1000);
+    delay(3000);
   }
   clrscr();
   Serial.println("I2C Commands Test");

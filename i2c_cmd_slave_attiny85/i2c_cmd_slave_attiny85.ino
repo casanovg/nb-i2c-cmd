@@ -32,7 +32,7 @@
 
 #include "TinyWireS.h"                  // wrapper class for I2C slave routines
 
-#define I2C_SLAVE_ADDR 0x2F             // I2C slave address (47, can be changed)
+#define I2C_SLAVE_ADDR 0x9              // I2C slave address (47, can be changed) 0x2F
 
 #define PB1 1             // Output Pin for STDPB1_1 command
 #define PB3 3             // Output Pin for STANAPB3 command
@@ -106,8 +106,6 @@ void setup() {
   pinMode(PB3, OUTPUT);
   pinMode(AD2, INPUT);
 }
-
-//
 //**********************************
 //* Main Loop, (Runs continuously) *
 //**********************************
@@ -120,8 +118,8 @@ void loop() {
 	//TinyWireS_stop_check();
 	// otherwise empty loop
 
-  //analogValue = analogRead(AD2); // Actual analog value read from ADC Channel
-  analogValue = GetVPP(AD2, SAMPLETIME);
+  analogValue = analogRead(AD2); // Actual analog value read from ADC Channel
+  //analogValue = GetVPP(AD2, SAMPLETIME);
 }
 
 // Gets called when the ATtiny receives an I2C write slave request
@@ -129,7 +127,9 @@ void receiveEvent(byte commandbytes) {
 	// save the number of bytes sent from the master
 	commandLength = commandbytes;
 	// store the data from the master into the data buffer
-	for (int i = 0; i < commandLength; i++) {
+
+
+//	for (int i = 0; i < commandLength; i++) {
 		command[i] = TinyWireS.receive();
 	}
 }

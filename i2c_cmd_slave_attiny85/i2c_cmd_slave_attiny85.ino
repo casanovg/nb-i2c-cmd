@@ -129,7 +129,7 @@ void receiveEvent(byte commandbytes) {
 	// store the data from the master into the data buffer
 
 
-//	for (int i = 0; i < commandLength; i++) {
+	for (int i = 0; i < commandLength; i++) {
 		command[i] = TinyWireS.receive();
 	}
 }

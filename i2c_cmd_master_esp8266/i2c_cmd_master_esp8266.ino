@@ -85,18 +85,18 @@ byte crcTable[256] = {
 void setup() {
   Serial.begin(9600); // Init the serial port
                       // Init the Wire object for I2C
-  Wire.begin(0, 2); // GPIO0 - GPIO2 (ESP-01) // D3 - D4 (NodeMCU)
-                    //Wire.begin(); // Standard pins SDA on D2 and SCL on D1 (NodeMCU)
-                    //Wire.begin(D3, D4); // Set SDA on D3 and SCL on D4 (NodeMCU)
-  delay(1000); // Wait 1 seconds for slave init sequence
-               // Search continuouly for slave addresses
+  Wire.begin(0, 2);   // GPIO0 - GPIO2 (ESP-01) // D3 - D4 (NodeMCU)
+  //Wire.begin(); // Standard pins SDA on D2 and SCL on D1 (NodeMCU)
+  //Wire.begin(D3, D4); // Set SDA on D3 and SCL on D4 (NodeMCU)
+  delay(1000);        // Wait 1 seconds for slave init sequence
+  // Search continuouly for slave addresses
   while (slaveAddress == 0) {
     slaveAddress = ScanI2C();
     delay(3000);
   }
   clrscr();
-  Serial.println("I2C Commands Test");
-  Serial.println("=================");
+  Serial.println("Nicebots I2C Commands Test");
+  Serial.println("==========================");
   Serial.println("Please type a command ('a', 's', 'd' or 'f'):");
 }
 

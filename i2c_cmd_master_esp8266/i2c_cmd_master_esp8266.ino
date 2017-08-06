@@ -295,29 +295,28 @@ void loop() {
             Serial.print(" received OK <<< ");
             Serial.println(ackRX[i]);
           }
-          Serial.print("ESP8266 - Analog Data=");
+          Serial.println("*************************");
+          Serial.print("* Analog Data: ");
           Serial.print(analogValue);
           Serial.print("(");
-          Serial.print(analogValue);
-          Serial.print(") >>> | MSB=");
+          Serial.print(analogValue, HEX);
+          Serial.println(") *");
+          Serial.println("*************************");
+          Serial.print("ESP8266 - MSB = ");
           Serial.print(ackRX[1]);
           Serial.print(" | LSB=");
           Serial.print(ackRX[2]);
           Serial.print(" | CRC=");
-          Serial.println(ackRX[3]);
+          Serial.print(ackRX[3]);
           //ackRX[2] = ackRX[2] & 0xDF; // ERROR INJECTED IN SOME OPERANDS RECEIVED TO TEST CRC - REMOVE FOR PRODUCTION
           byte checkCRC = CalculateCRC(ackRX, sizeof(ackRX));
           if (checkCRC == 0) {
-            Serial.println("************************");
-            Serial.print("******  CRC OK!  *******   ");
+            Serial.print("   >>> CRC OK! <<<   ");
             Serial.println(checkCRC);
-            Serial.println("************************");
           }
           else {
-            Serial.println("########################");
-            Serial.print("#####   CRC ERROR  #####   ");
+            Serial.print("   ### CRC ERROR! ###   ");
             Serial.println(checkCRC);
-            Serial.println("########################");
           }
         }
         else {

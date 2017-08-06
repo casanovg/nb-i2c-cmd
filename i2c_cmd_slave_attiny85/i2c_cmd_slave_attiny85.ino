@@ -38,7 +38,7 @@
 #define PB3 3             // Output Pin for STANAPB3 command
 #define AD2 A2            // Input Pin for READADC2 command
 #define ADR 1023.0        // ADC Resolution (10 bit = 2^10)
-#define SAMPLETIME 500    // Sampling time in ms per reading
+#define SAMPLETIME 1000   // Sampling time in ms per reading
 
 #define STDPB1_1 0xE9     // Command to Set ATtiny85 PB1 = 1
 #define AKDPB1_1 0x16     // Acknowledge Command PB1 = 1
@@ -118,8 +118,8 @@ void loop() {
 	//TinyWireS_stop_check();
 	// otherwise empty loop
 
-  analogValue = analogRead(AD2); // Actual analog value read from ADC Channel
-  //analogValue = GetVPP(AD2, SAMPLETIME);
+  //analogValue = analogRead(AD2);                // Direct analog ADC read for DC
+  analogValue = GetVPP(AD2, SAMPLETIME);          // ADC analog function for AC
 }
 
 // Gets called when the ATtiny receives an I2C write slave request
@@ -208,7 +208,7 @@ void requestEvent() {
         //while (g < 32500) {                       // TEST - REMOVE FOR PRODUCTION
         //  g++;                                    // TEST - REMOVE FOR PRODUCTION
         //}                                         // TEST - REMOVE FOR PRODUCTION
-        digitalWrite(PB1, LOW);    // turn the LED off by making the voltage LOW
+        //digitalWrite(PB1, LOW);                   // TEST - REMOVE FOR PRODUCTION
 				for (int i = 0; i < ackLng; i++) {
 					TinyWireS.send(acknowledge[i]);
           /*int g = 0;*/                            // TEST - REMOVE FOR PRODUCTION

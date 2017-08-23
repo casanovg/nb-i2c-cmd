@@ -22,19 +22,21 @@
 // s - (STDPB1_0) Set ATtiny85 PB1 = 0
 // d - (STANAPB3) Set ATtiny85 PB3 = PWMx (the command asks for a PWM value input)
 // f - (READADC2) Read ATtiny85 ADC2 (the reply has 2 data bytes + 1 CRC byte)
+// g - (GET_INFO) Get useful information regarding various slave paramenters.
 
 #include <Wire.h>
 
-#define STDPB1_1 0xE9 // Command to Set ATtiny85 PB1 = 1
-#define AKDPB1_1 0x16 // Acknowledge Command PB1 = 1
-#define STDPB1_0 0xE1 // Command to Set ATtiny85 PB1 = 0
-#define AKDPB1_0 0x1E // Acknowledge Command PB1 = 0
-#define STANAPB3 0xFB // Command to Set ATtiny85 PB3 = PWMx
-#define ACKNAPB3 0x04 // Acknowledge Command PB3 = PWMx
-#define READADC2 0xDA // Command to Read ATtiny85 ADC2
-#define ACKNADC2 0x25 // Acknowledge Command Read ADC2
-#define GET_INFO 0x0D // Command to Read Generic Info
-#define ACK_GETI 0xF2 // Acknowledge Command Read Info
+#define STDPB1_1 0xE9     // Command to Set ATtiny85 PB1 = 1
+#define AKDPB1_1 0x16     // Acknowledge Command PB1 = 1
+#define STDPB1_0 0xE1     // Command to Set ATtiny85 PB1 = 0
+#define AKDPB1_0 0x1E     // Acknowledge Command PB1 = 0
+#define STANAPB3 0xFB     // Command to Set ATtiny85 PB3 = PWMx
+#define ACKNAPB3 0x04     // Acknowledge Command PB3 = PWMx
+#define READADC2 0xDA     // Command to Read ATtiny85 ADC2
+#define ACKNADC2 0x25     // Acknowledge Command Read ADC2
+#define GET_INFO 0x0D     // Command to Read Generic Info
+#define ACK_GETI 0xF2     // Acknowledge Command Read Info
+#define UNKNOWNC 0xFF     // Unknown Command Reply
 
 //typedef uint8_t byte; //  8 bit data type
 //typedef uint16_t word; // 16 bit data type
@@ -95,8 +97,8 @@ void setup() {
     delay(3000);
   }
   clrscr();
-  Serial.println("Nicebots I2C Commands Test");
-  Serial.println("==========================");
+  Serial.println("Nicebots I2C Command Test");
+  Serial.println("=========================");
   Serial.println("Please type a command ('a', 's', 'd' or 'f'):");
 }
 
@@ -332,6 +334,66 @@ void loop() {
         //Serial.println(opcodeErrors);                                     // DEBUG - REMOVE FOR PRODUCTION
         break;
       }
+
+      // ********************
+      // * GET_INFO Command *
+      //*********************      
+      case 'g': case 'G': {
+        byte cmdTX[1] = { GET_INFO };
+        byte txSize = sizeof(cmdTX), rxSize = 0;
+        Serial.print("ESP8266 - Sending Opcode >>> ");
+        Serial.print(cmdTX[0]);
+        Serial.println("(GET_INFO)");
+        // Transmit command
+        byte transmitData[1] = { 0 };
+        for (int i = 0; i < txSize; i++) {
+          transmitData[i] = cmdTX[i];
+          Wire.beginTransmission(slaveAddress);
+          Wire.write(transmitData[i]);
+          Wire.endTransmission();
+        }
+        // Receive acknowledgement
+        blockRXSize = Wire.requestFrom(slaveAddress, (byte)16);
+        byte ackRX[16] = { 0 };   // Data received from slave
+        for (int i = 0; i < blockRXSize; i++) {
+          ackRX[i] = Wire.read();
+        }
+
+        if (ackRX[0] == ACK_GETI) {
+          Serial.print("ESP8266 - Command ");
+          Serial.print(cmdTX[0]);
+          Serial.print(" parsed OK <<< ");
+          Serial.println(ackRX[0]);
+          for (int i = 1; i < rxSize; i++) {
+            Serial.print("ESP8266 - Data Byte ");
+            Serial.print(i + 1);
+            Serial.print(" received OK <<< ");
+            Serial.println(ackRX[i]);
+          }
+          byte checkCRC = CalculateCRC(ackRX, sizeof(ackRX));
+          if (checkCRC == 0) {
+            Serial.print("   >>> CRC OK! <<<   ");
+            Serial.println(checkCRC);
+          }
+          else {
+            Serial.print("   ### CRC ERROR! ###   ");
+            Serial.println(checkCRC);
+          }
+        }
+        else {
+          Serial.print("ESP8266 - Error parsing ");
+          Serial.print(cmdTX[0]);
+          Serial.print(" command! <<< ");
+          Serial.println(ackRX[0]);
+          //opcodeErrors++;                                                   // DEBUG - REMOVE FOR PRODUCTION
+        }
+        //Serial.print("/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\ LOOPS: ");  // DEBUG - REMOVE FOR PRODUCTION
+        //Serial.print(++loopsREADADC2);                                    // DEBUG - REMOVE FOR PRODUCTION
+        //Serial.print(" /\\/\\/\\/\\/\\ OPCODE ERRORS: ");                 // DEBUG - REMOVE FOR PRODUCTION
+        //Serial.println(opcodeErrors);                                     // DEBUG - REMOVE FOR PRODUCTION
+        break;
+      }
+
       // *******************
       // * Unknown Command *
       //********************      

@@ -42,15 +42,15 @@
 
 #define STDPB1_1 0xE9     // Command to Set ATtiny85 PB1 = 1
 #define AKDPB1_1 0x16     // Acknowledge Command PB1 = 1
-
 #define STDPB1_0 0xE1     // Command to Set ATtiny85 PB1 = 0
 #define AKDPB1_0 0x1E     // Acknowledge Command PB1 = 0
-
 #define STANAPB3 0xFB     // Command to Set ATtiny85 PB3 = PWMx
 #define ACKNAPB3 0x04     // Acknowledge Command PB3 = PWMx
-
 #define READADC2 0xDA     // Command to Read ATtiny85 ADC2
 #define ACKNADC2 0x25     // Acknowledge Command Read ADC2
+#define GET_INFO 0x0D     // Command to Read Generic Info
+#define ACK_GETI 0xF2     // Acknowledge Command Read Info
+#define UNKNOWNC 0xFF     // Unknown Command Reply
 
 // Global Variables
 bool testReplies = false;       // Activates test mode
@@ -225,7 +225,8 @@ void requestEvent() {
 				//byte acknowledge[1] = { 0 };
 				//acknowledge[0] = 0xFA;
         for (int i = 0; i < commandLength; i++) {
-          TinyWireS.send(~command[i]);
+          //TinyWireS.send(~command[i]);
+          TinyWireS.send(UNKNOWNC);
         }
 				break;
 			}

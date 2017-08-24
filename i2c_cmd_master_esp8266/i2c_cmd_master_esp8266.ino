@@ -383,12 +383,7 @@ void loop() {
           Serial.print(cmdTX[0]);
           Serial.print(" command! <<< ");
           Serial.println(ackRX[0]);
-          //opcodeErrors++;                                                 // DEBUG - REMOVE FOR PRODUCTION
         }
-        //Serial.print("/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\ LOOPS: ");  // DEBUG - REMOVE FOR PRODUCTION
-        //Serial.print(++loopsREADADC2);                                    // DEBUG - REMOVE FOR PRODUCTION
-        //Serial.print(" /\\/\\/\\/\\/\\ OPCODE ERRORS: ");                 // DEBUG - REMOVE FOR PRODUCTION
-        //Serial.println(opcodeErrors);                                     // DEBUG - REMOVE FOR PRODUCTION
         break;
       }
       // *******************
@@ -418,6 +413,7 @@ void loop() {
 
 // Function ScanI2C
 byte ScanI2C() {
+  clrscr();
   Serial.println("Scanning I2C bus ...");
   byte slaveAddr = 0, scanAddr = 8;
   while (scanAddr < 120) {

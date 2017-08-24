@@ -80,9 +80,9 @@ byte crcTable[256] = {
 };
 
 //
-//***************************
-//* Setup Block (Runs once) *
-//***************************
+// ***************************
+// * Setup Block (Runs once) *
+// ***************************
 //
 void setup() {
   Serial.begin(9600); // Init the serial port
@@ -99,13 +99,13 @@ void setup() {
   clrscr();
   Serial.println("Nicebots I2C Command Test");
   Serial.println("=========================");
-  Serial.println("Please type a command ('a', 's', 'd' or 'f'):");
+  Serial.println("Please type a command ('a', 's', 'd', 'f', 'g' or 'z' to reboot):");
 }
 
 //
-//**********************************
-//* Main Loop, (Runs continuously) *
-//**********************************
+// **********************************
+// * Main Loop, (Runs continuously) *
+// **********************************
 //
 void loop() {
   if (newKey == true) {
@@ -114,7 +114,7 @@ void loop() {
     switch (key) {
       // ********************
       // * STDPB1_1 Command *
-      //*********************
+      // ********************
       case 'a': case 'A': {
         byte cmdTX[1] = { STDPB1_1 };
         byte txSize = sizeof(cmdTX);
@@ -151,7 +151,7 @@ void loop() {
       }
       // ********************
       // * STDPB1_0 Command *
-      //*********************      
+      // ********************
       case 's': case 'S': {
         byte cmdTX[1] = { STDPB1_0 };
         byte txSize = sizeof(cmdTX);
@@ -188,7 +188,7 @@ void loop() {
       }
       // ********************
       // * STANAPB3 Command *
-      //*********************       
+      // ********************
       case 'd': case 'D': {
         byte cmdTX[3] = { STANAPB3, 0, 0 };
         //byte txSize = sizeof(cmdTX);
@@ -261,7 +261,7 @@ void loop() {
       }
       // ********************
       // * READADC2 Command *
-      //*********************      
+      // ********************
       case 'f': case 'F': {
         byte cmdTX[1] = { READADC2 };
         byte txSize = sizeof(cmdTX), rxSize = 0;
@@ -334,10 +334,9 @@ void loop() {
         //Serial.println(opcodeErrors);                                     // DEBUG - REMOVE FOR PRODUCTION
         break;
       }
-
       // ********************
       // * GET_INFO Command *
-      //*********************      
+      // ********************
       case 'g': case 'G': {
         byte cmdTX[1] = { GET_INFO };
         byte txSize = sizeof(cmdTX), rxSize = 0;
@@ -358,7 +357,6 @@ void loop() {
         for (int i = 0; i < blockRXSize; i++) {
           ackRX[i] = Wire.read();
         }
-
         if (ackRX[0] == ACK_GETI) {
           Serial.print("ESP8266 - Command ");
           Serial.print(cmdTX[0]);
@@ -385,7 +383,7 @@ void loop() {
           Serial.print(cmdTX[0]);
           Serial.print(" command! <<< ");
           Serial.println(ackRX[0]);
-          //opcodeErrors++;                                                   // DEBUG - REMOVE FOR PRODUCTION
+          //opcodeErrors++;                                                 // DEBUG - REMOVE FOR PRODUCTION
         }
         //Serial.print("/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\ LOOPS: ");  // DEBUG - REMOVE FOR PRODUCTION
         //Serial.print(++loopsREADADC2);                                    // DEBUG - REMOVE FOR PRODUCTION
@@ -393,10 +391,15 @@ void loop() {
         //Serial.println(opcodeErrors);                                     // DEBUG - REMOVE FOR PRODUCTION
         break;
       }
-
+      // *******************
+      // * Restart ESP8266 *
+      // *******************
+      case 'z': case 'Z': {
+        ESP.restart();
+      }
       // *******************
       // * Unknown Command *
-      //********************      
+      // *******************
       default: {
         Serial.print("ESP8266 - Command '");
         Serial.print(key);

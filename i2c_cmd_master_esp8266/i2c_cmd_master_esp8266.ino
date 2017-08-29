@@ -30,24 +30,21 @@
 
 byte slaveAddress = 0;
 
-//**************************
-//* Setup Block, Runs Once *
-//**************************
+// **************************
+// * Setup Block, Runs Once *
+// **************************
 //
 void setup() {
-  pinMode(SLAVE_RESET_PIN, OUTPUT); // Set pin modes
   Serial.begin(9600); // Init the serial port
-                        // Init the Wire object for I2C
-  Wire.begin(); // Standard pins SDA on D2 and SCL on D1 (NodeMCU)
-                //Wire.begin(D3, D4); // Set SDA on D3 and SCL on D4 (NodeMCU)
-  digitalWrite(SLAVE_RESET_PIN, LOW); // Reset the slave
-  delay(10);
-  digitalWrite(SLAVE_RESET_PIN, HIGH);
-  delay(2000); // Wait 2 seconds for slave init sequence
-               // Search continuouly for slave addresses
+                      // Init the Wire object for I2C
+  Wire.begin(0, 2);   // GPIO0 - GPIO2 (ESP-01) // D3 - D4 (NodeMCU)
+                      //Wire.begin(); // Standard pins SDA on D2 and SCL on D1 (NodeMCU)
+                      //Wire.begin(D3, D4); // Set SDA on D3 and SCL on D4 (NodeMCU)
+  delay(500);        // Wait 1/2 second for slave init sequence
+                     // Search continuouly for slave addresses
   while (slaveAddress == 0) {
-    slaveAddress = scanI2C();
-    delay(1000);
+    slaveAddress = ScanI2C();
+    delay(3000);
   }
 }
 int blockTXSize = 1;
@@ -58,9 +55,9 @@ int maxBlockSize = blockTXSize;
 int accRXErrors = cntRXErrors;
 bool possibleLimit = true;
 
-//**************************************
-//* Main Loop Block, Runs Continuously *
-//**************************************
+// **************************************
+// * Main Loop Block, Runs Continuously *
+// **************************************
 //
 void loop() {
 
@@ -143,7 +140,7 @@ void loop() {
 }
 
 // Function ScanI2C
-byte scanI2C() {
+byte ScanI2C() {
   Serial.println("Scanning I2C bus ...");
   byte slaveAddr = 0, scanAddr = 8;
   while (scanAddr < 120) {

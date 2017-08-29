@@ -75,8 +75,11 @@ void requestEvent()
   master_bytes = 2;
 }
 
-void setup()
-{
+// **************************
+// * Setup Block, Runs Once *
+// **************************
+//
+void setup() {
   // initialize the TinyWireS and usiTwiSlave libraries
   TinyWireS.begin(I2C_SLAVE_ADDR);      // init I2C Slave mode
 
@@ -87,6 +90,10 @@ void setup()
   TinyWireS.onRequest(requestEvent);
 }
 
+// **************************************
+// * Main Loop Block, Runs Continuously *
+// **************************************
+//
 void loop() {
   heartbit();
   // This needs to be here

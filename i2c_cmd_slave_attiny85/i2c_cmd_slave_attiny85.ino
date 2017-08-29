@@ -43,8 +43,7 @@ byte master_data[16];
 int master_bytes;
 
 // Gets called when the ATtiny receives an i2c write slave request
-void receiveEvent(byte num_bytes)
-{
+void receiveEvent(byte num_bytes) {
   int i;
 
   // save the number of bytes sent from the master
@@ -53,12 +52,10 @@ void receiveEvent(byte num_bytes)
   // store the data from the master into the data buffer
   for (i = 0; i < master_bytes; i++)
     master_data[i] = TinyWireS.receive();
-
 }
 
 // Gets called when the ATtiny receives an i2c read slave request
-void requestEvent()
-{
+void requestEvent() {
   int i;
 
   // send the data buffer back to the master

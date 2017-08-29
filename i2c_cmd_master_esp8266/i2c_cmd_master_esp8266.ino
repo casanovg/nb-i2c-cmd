@@ -36,7 +36,7 @@ byte slaveAddress = 0;
 //
 void setup() {
   pinMode(SLAVE_RESET_PIN, OUTPUT); // Set pin modes
-  Serial.begin(115200); // Init the serial port
+  Serial.begin(9600); // Init the serial port
                         // Init the Wire object for I2C
   Wire.begin(); // Standard pins SDA on D2 and SCL on D1 (NodeMCU)
                 //Wire.begin(D3, D4); // Set SDA on D3 and SCL on D4 (NodeMCU)

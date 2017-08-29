@@ -1,9 +1,9 @@
-ESP8266 ATtiny85 I2C Communications
-===================================
+ESP8266 ATtiny85 I2C Stress Test
+================================
 This program finds the max amount of bytes that can be exchanged within one transmission block among a master and a slave.
 
-Steps:
-------
+Steps executed:
+-------------- 
 1-Scans I2C addresses looking for an ATtiny85 slaves.
 
 2-Loops through a series of incremental quantity of random bytes

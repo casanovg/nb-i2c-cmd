@@ -1,18 +1,19 @@
 ESP8266 ATtiny85 I2C Communications
 ===================================
-This test implements a basic four I2C command set to control an ATtiny85 MCU from an ESP8266 through the serial console. In those commands where there are data replies, there is a plain CRC-8 check implemented.
+This program finds the max amount of bytes that can be exchanged within one transmission block among a master and a slave.
 
-Command path to Attiny85:
--------------------------------
-User (serial console) --> ESP8266 --> Attiny85
+Steps:
+------
+1-Scans I2C addresses looking for an ATtiny85 slaves.
 
-Available commands:
--------------------
-a - (STDPB1_1) Set ATtiny85 PB1 = 1
+2-Loops through a series of incremental quantity of random bytes
+  that are sent to the slave, starting with 1.
 
-s - (STDPB1_0) Set ATtiny85 PB1 = 0
+3-If the slave answers the same random value correctly, it
+  increments to 2 random bytes for the next loop, an so on.
 
-d - (STANAPB3) Set ATtiny85 PB3 = PWMx (the command asks for a PWM value input)
+4-If a wrong answers is found, it decrements 1 byte until is
+  stable again.
 
-f - (READADC2) Read ATtiny85 ADC2 (the reply has 2 data bytes + 1 CRC byte)
+5-Reports the maximum safe transmission block size.
 

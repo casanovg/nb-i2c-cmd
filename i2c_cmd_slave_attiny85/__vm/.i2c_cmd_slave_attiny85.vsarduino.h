@@ -15,7 +15,7 @@
 #define __AVR_ATtiny85__
 #define __AVR_ATTINY85__
 #define F_CPU 16500000L
-#define ARDUINO 10801
+#define ARDUINO 10803
 #define ARDUINO_AVR_DIGISPARK
 #define ARDUINO_ARCH_AVR
 #define __cplusplus 201103L
@@ -62,7 +62,7 @@ typedef void *__builtin_va_list;
 
 
 
-#include <Arduino.h>
+#include <wprogram.h>
 #include <pins_arduino.h> 
 #undef F
 #define F(string_literal) ((const PROGMEM char *)(string_literal))

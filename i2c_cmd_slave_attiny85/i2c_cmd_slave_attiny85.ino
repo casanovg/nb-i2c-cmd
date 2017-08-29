@@ -81,13 +81,10 @@ void requestEvent()
 //
 void setup() {
   // initialize the TinyWireS and usiTwiSlave libraries
-  TinyWireS.begin(I2C_SLAVE_ADDR);      // init I2C Slave mode
-
-                                        // register the onReceive() callback function
-  TinyWireS.onReceive(receiveEvent);
-
-  // register the onRequest() callback function
-  TinyWireS.onRequest(requestEvent);
+  TinyWireS.begin(I2C_SLAVE_ADDR);      // Init I2C Slave mode
+  TinyWireS.onReceive(receiveEvent);    // Register the onReceive() callback function
+  TinyWireS.onRequest(requestEvent);    // Register the onRequest() callback function
+  pinMode(LED_PIN, OUTPUT);                 // Init heartbit led pin
 }
 
 // **************************************

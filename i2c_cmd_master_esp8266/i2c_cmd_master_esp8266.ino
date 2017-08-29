@@ -69,9 +69,9 @@ void loop() {
   Serial.print("Starting transmission block ");
   Serial.print(blockNumber);
   Serial.println(" ...");
-  Serial.print("TX Block Size: ");
+  Serial.print("TX Block Size: >>> ");
   Serial.print(blockTXSize);
-  Serial.print(" (Max: ");
+  Serial.print(" <<< (Max: ");
   Serial.print(maxBlockSize - 1);
   Serial.println(")");
   Serial.print("RX Errors: ");
@@ -92,7 +92,7 @@ void loop() {
     Wire.endTransmission();
   }
 
-  //delay(10);
+  delay(250);
 
   // Reception data block
   blockRXSize = Wire.requestFrom(slaveAddress, (int)blockTXSize);

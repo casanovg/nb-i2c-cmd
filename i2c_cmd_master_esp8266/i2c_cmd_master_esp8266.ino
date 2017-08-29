@@ -276,9 +276,6 @@ void loop() {
           Wire.write(transmitData[i]);
           Wire.endTransmission();
         }
-
-        //delay(2000); // LONG DELAY FOR TESTING - REMOVE FOR PRODUCTION
-
         // Receive acknowledgement
         blockRXSize = Wire.requestFrom(slaveAddress, (byte)4);
         byte ackRX[4] = { 0 };   // Data received from slave
@@ -310,7 +307,6 @@ void loop() {
           Serial.print(ackRX[2]);
           Serial.print(" | CRC=");
           Serial.print(ackRX[3]);
-          //ackRX[2] = ackRX[2] & 0xDF; // ERROR INJECTED IN SOME OPERANDS RECEIVED TO TEST CRC - REMOVE FOR PRODUCTION
           byte checkCRC = CalculateCRC(ackRX, sizeof(ackRX));
           if (checkCRC == 0) {
             Serial.print("   >>> CRC OK! <<<   ");
@@ -326,17 +322,12 @@ void loop() {
           Serial.print(cmdTX[0]);
           Serial.print(" command! <<< ");
           Serial.println(ackRX[0]);
-        //opcodeErrors++;                                                   // DEBUG - REMOVE FOR PRODUCTION
         }
-        //Serial.print("/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\ LOOPS: ");  // DEBUG - REMOVE FOR PRODUCTION
-        //Serial.print(++loopsREADADC2);                                    // DEBUG - REMOVE FOR PRODUCTION
-        //Serial.print(" /\\/\\/\\/\\/\\ OPCODE ERRORS: ");                 // DEBUG - REMOVE FOR PRODUCTION
-        //Serial.println(opcodeErrors);                                     // DEBUG - REMOVE FOR PRODUCTION
         break;
       }
-      // ********************
-      // * GET_INFO Command *
-      // ********************
+      // ***********************************
+      // * GET_INFO Command (16 bit reply) *
+      // ***********************************
       case 'g': case 'G': {
         byte cmdTX[1] = { GET_INFO };
         byte txSize = sizeof(cmdTX), rxSize = 0;

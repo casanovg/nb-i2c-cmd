@@ -90,7 +90,7 @@ void setup() {
   Wire.begin(0, 2);   // GPIO0 - GPIO2 (ESP-01) // D3 - D4 (NodeMCU)
   //Wire.begin(); // Standard pins SDA on D2 and SCL on D1 (NodeMCU)
   //Wire.begin(D3, D4); // Set SDA on D3 and SCL on D4 (NodeMCU)
-  delay(1000);        // Wait 1 seconds for slave init sequence
+  delay(500);        // Wait 1/2 second for slave init sequence
   // Search continuouly for slave addresses
   while (slaveAddress == 0) {
     slaveAddress = ScanI2C();
@@ -403,7 +403,7 @@ void loop() {
       }
     }
     Serial.println("");
-    Serial.println("Please type a command ('a', 's', 'd' or 'f'):");
+    Serial.println("Please type a command ('a', 's', 'd', 'f', 'g' or 'z' to reboot):");
   }
   ReadChar();           // PROD - REMOVE FOR TESTING
   //delay(150);         // TEST - REMOVE FOR PRODUCTION
@@ -424,7 +424,7 @@ byte ScanI2C() {
       Serial.print(" (0x");
       Serial.print(scanAddr, HEX);
       Serial.println(")");
-      delay(1000);
+      delay(500);
       slaveAddr = scanAddr;
     }
     scanAddr++;

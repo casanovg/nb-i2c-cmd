@@ -355,11 +355,11 @@ void loop() {
           Serial.println(ackRX[0]);
           for (int i = 1; i < blockRXSize - 1; i++) {
             Serial.print("ESP8266 - Data Byte ");
+            if (i < 9) {
+              Serial.print("0");
+            }
             Serial.print(i + 1);
             Serial.print(" received OK <<< ");
-            if (i < 9) {
-              Serial.print(" ");
-            }
             Serial.println((char)ackRX[i]);
           }
           byte checkCRC = CalculateCRC(ackRX, sizeof(ackRX));

@@ -325,9 +325,9 @@ void loop() {
         }
         break;
       }
-      // ***********************************
-      // * GET_INFO Command (16 bit reply) *
-      // ***********************************
+      // ************************************
+      // * GET_INFO Command (16 byte reply) *
+      // ************************************
       case 'g': case 'G': {
         byte cmdTX[1] = { GET_INFO };
         byte txSize = sizeof(cmdTX);

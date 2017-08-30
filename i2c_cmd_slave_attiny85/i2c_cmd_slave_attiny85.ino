@@ -90,9 +90,9 @@ byte crcTable[256] = {
 };
 
 //
-//***************************
-//* Setup Block (Runs once) *
-//***************************
+// ***************************
+// * Setup Block (Runs once) *
+// ***************************
 //
 void setup() {
 	// initialize the TinyWireS and usiTwiSlave libraries
@@ -106,9 +106,9 @@ void setup() {
   pinMode(PB3, OUTPUT);
   pinMode(AD2, INPUT);
 }
-//**********************************
-//* Main Loop, (Runs continuously) *
-//**********************************
+// **********************************
+// * Main Loop, (Runs continuously) *
+// **********************************
 //
 void loop() {
 	if (testReplies == true) {
@@ -138,14 +138,14 @@ void receiveEvent(byte commandbytes) {
 void requestEvent() {
 
 	if (testReplies == false) {
-    //··················
-    //· Operating mode .
-    //··················
+    // ··················
+    // · Operating mode .
+    // ··················
     byte opCodeAck = ~command[0]; // Command Operation Code acknowledge => Command Bitwise "Not".
 		switch (command[0]) {
-			//******************
-			//* STDPB1_1 Reply *
-			//******************     
+			// ******************
+			// * STDPB1_1 Reply *
+			// ******************     
 			case STDPB1_1: {
 				byte ackLng = 1;
 				byte acknowledge[1] = { 0 };
@@ -156,9 +156,9 @@ void requestEvent() {
 				}
 				break;
 			}
-			//******************
-			//* STDPB1_0 Reply *
-			//******************
+			// ******************
+			// * STDPB1_0 Reply *
+			// ******************
 			case STDPB1_0: {
 				byte ackLng = 1;
 				byte acknowledge[1] = { 0 };
@@ -169,9 +169,9 @@ void requestEvent() {
 				}
 				break;
 			}
-			//******************
-			//* STANAPB3 Reply *
-			//******************
+			// ******************
+			// * STANAPB3 Reply *
+			// ******************
 			case STANAPB3: {
         byte ackLng = 2;
 				byte acknowledge[2] = { 0 };
@@ -185,17 +185,17 @@ void requestEvent() {
 				}
 				break;
 			}
-			//******************
-			//* READADC2 Reply *
-			//******************
+			// ******************
+			// * READADC2 Reply *
+			// ******************
 			case READADC2: {
 				byte ackLng = 4, analogMSB = 0, analogLSB = 0;
-        //analogValue = analogRead(AD2);
-    //    if (analogValue < 1024) {
-    //      analogValue++;
-				//} else {
-				//  analogValue = 0;
-				//}
+        // analogValue = analogRead(AD2);
+        // if (analogValue < 1024) {
+        //   analogValue++;
+				// } else {
+				//   analogValue = 0;
+				// }
         analogMSB = ((analogValue >> 8) & 0x03);
 				analogLSB = (analogValue & 0x0FF);
 				word analogValue = ((analogMSB << 8) + analogLSB);
@@ -204,11 +204,11 @@ void requestEvent() {
 				acknowledge[1] = analogMSB;
 				acknowledge[2] = analogLSB;
 				acknowledge[3] = CalculateCRC(acknowledge, ackLng - 1); // Prepare CRC for Reply
-        //int g = 0;                                // TEST - REMOVE FOR PRODUCTION
-        //while (g < 32500) {                       // TEST - REMOVE FOR PRODUCTION
+        // int g = 0;                                // TEST - REMOVE FOR PRODUCTION
+        // while (g < 32500) {                       // TEST - REMOVE FOR PRODUCTION
         //  g++;                                    // TEST - REMOVE FOR PRODUCTION
-        //}                                         // TEST - REMOVE FOR PRODUCTION
-        //digitalWrite(PB1, LOW);                   // TEST - REMOVE FOR PRODUCTION
+        // }                                         // TEST - REMOVE FOR PRODUCTION
+        // digitalWrite(PB1, LOW);                   // TEST - REMOVE FOR PRODUCTION
 				for (int i = 0; i < ackLng; i++) {
 					TinyWireS.send(acknowledge[i]);
           /*int g = 0;*/                            // TEST - REMOVE FOR PRODUCTION
@@ -218,9 +218,9 @@ void requestEvent() {
 				}
 				break;
 			}
-			//*************************
-			//* Unknown Command Reply *
-			//*************************
+			// *************************
+			// * Unknown Command Reply *
+			// *************************
 			default: {
 				//byte acknowledge[1] = { 0 };
 				//acknowledge[0] = 0xFA;
@@ -234,9 +234,9 @@ void requestEvent() {
     // TinyWireS_stop_check();
 	}
 	else {
-    //·············
-		//· Test mode .
-    //·············
+    // ·············
+		// · Test mode .
+    // ·············
 		// Just reply the command inverted (Not-command)
 		for (int i = 0; i < commandLength; i++) {
 			TinyWireS.send(~command[i]);

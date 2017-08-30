@@ -353,7 +353,7 @@ void loop() {
           Serial.print(cmdTX[0]);
           Serial.print(" parsed OK <<< ");
           Serial.println(ackRX[0]);
-          for (int i = 1; i < rxSize; i++) {
+          for (int i = 1; i < rxSize - 1; i++) {
             Serial.print("ESP8266 - Data Byte ");
             Serial.print(i + 1);
             Serial.print(" received OK <<< ");

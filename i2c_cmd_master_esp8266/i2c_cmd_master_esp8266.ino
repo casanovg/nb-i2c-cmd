@@ -264,7 +264,7 @@ void loop() {
       // ********************
       case 'f': case 'F': {
         byte cmdTX[1] = { READADC2 };
-        byte txSize = sizeof(cmdTX), rxSize = 0;
+        byte txSize = sizeof(cmdTX);
         Serial.print("ESP8266 - Sending Opcode >>> ");
         Serial.print(cmdTX[0]);
         Serial.println("(READADC2)");
@@ -288,7 +288,7 @@ void loop() {
           Serial.print(cmdTX[0]);
           Serial.print(" parsed OK <<< ");
           Serial.println(ackRX[0]);
-          for (int i = 1; i < rxSize; i++) {
+          for (int i = 1; i < blockRXSize; i++) {
             Serial.print("ESP8266 - Data Byte ");
             Serial.print(i + 1);
             Serial.print(" received OK <<< ");
@@ -330,7 +330,7 @@ void loop() {
       // ***********************************
       case 'g': case 'G': {
         byte cmdTX[1] = { GET_INFO };
-        byte txSize = sizeof(cmdTX), rxSize = 0;
+        byte txSize = sizeof(cmdTX);
         Serial.print("ESP8266 - Sending Opcode >>> ");
         Serial.print(cmdTX[0]);
         Serial.println("(GET_INFO)");
@@ -353,11 +353,14 @@ void loop() {
           Serial.print(cmdTX[0]);
           Serial.print(" parsed OK <<< ");
           Serial.println(ackRX[0]);
-          for (int i = 1; i < rxSize - 1; i++) {
+          for (int i = 1; i < blockRXSize - 1; i++) {
             Serial.print("ESP8266 - Data Byte ");
             Serial.print(i + 1);
             Serial.print(" received OK <<< ");
-            Serial.println(ackRX[i]);
+            if (i < 9) {
+              Serial.print(" ");
+            }
+            Serial.println((char)ackRX[i]);
           }
           byte checkCRC = CalculateCRC(ackRX, sizeof(ackRX));
           if (checkCRC == 0) {

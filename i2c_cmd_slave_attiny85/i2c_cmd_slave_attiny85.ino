@@ -199,7 +199,7 @@ void requestEvent() {
         analogMSB = ((analogValue >> 8) & 0x03);
 				analogLSB = (analogValue & 0x0FF);
 				word analogValue = ((analogMSB << 8) + analogLSB);
-				byte acknowledge[4] = { 0 };
+				byte acknowledge[ackLng] = { 0 };
 				acknowledge[0] = opCodeAck;
 				acknowledge[1] = analogMSB;
 				acknowledge[2] = analogLSB;
@@ -218,6 +218,33 @@ void requestEvent() {
 				}
 				break;
 			}
+      // ******************
+      // * GET_INFO Reply *
+      // ******************
+      case GET_INFO: {
+        byte ackLng = 16;
+        byte acknowledge[ackLng] = { 0 };
+        acknowledge[0] = opCodeAck;
+        acknowledge[1] = 71;
+        acknowledge[2] = 85;
+        acknowledge[3] = 83;
+        acknowledge[4] = 84;
+        acknowledge[5] = 65;
+        acknowledge[6] = 86;
+        acknowledge[7] = 79;
+        acknowledge[8] = 78;
+        acknowledge[9] = 73;
+        acknowledge[10] = 67;
+        acknowledge[11] = 69;
+        acknowledge[12] = 66;
+        acknowledge[13] = 79;
+        acknowledge[14] = 84;
+        acknowledge[15] = CalculateCRC(acknowledge, ackLng - 1); // Prepare CRC for Reply
+        for (int i = 0; i < ackLng; i++) {
+          TinyWireS.send(acknowledge[i]);
+        }
+        break;
+      }
 			// *************************
 			// * Unknown Command Reply *
 			// *************************

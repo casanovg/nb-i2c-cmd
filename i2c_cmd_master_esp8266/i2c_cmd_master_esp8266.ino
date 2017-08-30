@@ -46,8 +46,8 @@ byte slaveAddress = 0;
 byte blockRXSize = 0;
 bool newKey = false, newByte = false;
 char key = '\0';
-//long opcodeErrors = 0;    // This is for stress testing READADC2 only - TEST FOR PRODUCTION
-//long loopsREADADC2 = 0;   // This is for stress testing READADC2 only - TEST FOR PRODUCTION
+//long opcodeErrors = 0;    // This is for stress testing READADC2 only - REMOVE FOR PRODUCTION
+//long loopsREADADC2 = 0;   // This is for stress testing READADC2 only - REMOVE FOR PRODUCTION
 
 // CRC Table: Polynomial=0x9C, CRC size=8-bit, HD=5, Word Length=9 bytes
 byte crcTable[256] = {

@@ -22,21 +22,21 @@
 // s - (STDPB1_0) Set ATtiny85 PB1 = 0
 // d - (STANAPB3) Set ATtiny85 PB3 = PWMx (the command asks for a PWM value input)
 // f - (READADC2) Read ATtiny85 ADC2 (the reply has 2 data bytes + 1 CRC byte)
+// g - (GET_INFO) Get useful information regarding various slave parameters.
 
 #include <Wire.h>
 
-#define SLAVE_RESET_PIN 2
-
-#define STDPB1_1 0xE9 // Command to Set ATtiny85 PB1 = 1
-#define AKDPB1_1 0x16 // Acknowledge Command PB1 = 1
-#define STDPB1_0 0xE1 // Command to Set ATtiny85 PB1 = 0
-#define AKDPB1_0 0x1E // Acknowledge Command PB1 = 0
-#define STANAPB3 0xFB // Command to Set ATtiny85 PB3 = PWMx
-#define ACKNAPB3 0x04 // Acknowledge Command PB3 = PWMx
-#define READADC2 0xDA // Command to Read ATtiny85 ADC2
-#define ACKNADC2 0x25 // Acknowledge Command Read ADC2
-#define GET_INFO 0x0D // Command to Read Generic Info
-#define ACK_GETI 0xF2 // Acknowledge Command Read Info
+#define STDPB1_1 0xE9     // Command to Set ATtiny85 PB1 = 1
+#define AKDPB1_1 0x16     // Acknowledge Command PB1 = 1
+#define STDPB1_0 0xE1     // Command to Set ATtiny85 PB1 = 0
+#define AKDPB1_0 0x1E     // Acknowledge Command PB1 = 0
+#define STANAPB3 0xFB     // Command to Set ATtiny85 PB3 = PWMx
+#define ACKNAPB3 0x04     // Acknowledge Command PB3 = PWMx
+#define READADC2 0xDA     // Command to Read ATtiny85 ADC2
+#define ACKNADC2 0x25     // Acknowledge Command Read ADC2
+#define GET_INFO 0x0D     // Command to Read Generic Info
+#define ACK_GETI 0xF2     // Acknowledge Command Read Info
+#define UNKNOWNC 0xFF     // Unknown Command Reply
 
 //typedef uint8_t byte; //  8 bit data type
 //typedef uint16_t word; // 16 bit data type
@@ -46,8 +46,8 @@ byte slaveAddress = 0;
 byte blockRXSize = 0;
 bool newKey = false, newByte = false;
 char key = '\0';
-//long opcodeErrors = 0;    // This is for stress testing READADC2 only - TEST FOR PRODUCTION
-//long loopsREADADC2 = 0;   // This is for stress testing READADC2 only - TEST FOR PRODUCTION
+//long opcodeErrors = 0;    // This is for stress testing READADC2 only - REMOVE FOR PRODUCTION
+//long loopsREADADC2 = 0;   // This is for stress testing READADC2 only - REMOVE FOR PRODUCTION
 
 // CRC Table: Polynomial=0x9C, CRC size=8-bit, HD=5, Word Length=9 bytes
 byte crcTable[256] = {
@@ -80,35 +80,32 @@ byte crcTable[256] = {
 };
 
 //
-//***************************
-//* Setup Block (Runs once) *
-//***************************
+// ***************************
+// * Setup Block (Runs once) *
+// ***************************
 //
 void setup() {
-  pinMode(SLAVE_RESET_PIN, OUTPUT); // Set pin modes
   Serial.begin(9600); // Init the serial port
-  // Init the Wire object for I2C
-  Wire.begin(); // Standard pins SDA on D2 and SCL on D1 (NodeMCU)
+                      // Init the Wire object for I2C
+  Wire.begin(0, 2);   // GPIO0 - GPIO2 (ESP-01) // D3 - D4 (NodeMCU)
+  //Wire.begin(); // Standard pins SDA on D2 and SCL on D1 (NodeMCU)
   //Wire.begin(D3, D4); // Set SDA on D3 and SCL on D4 (NodeMCU)
-  digitalWrite(SLAVE_RESET_PIN, LOW); // Reset the slave
-  delay(10);
-  digitalWrite(SLAVE_RESET_PIN, HIGH);
-  delay(1000); // Wait 2 seconds for slave init sequence
+  delay(500);        // Wait 1/2 second for slave init sequence
   // Search continuouly for slave addresses
   while (slaveAddress == 0) {
     slaveAddress = ScanI2C();
-    delay(1000);
+    delay(3000);
   }
   clrscr();
-  Serial.println("I2C Commands Test");
-  Serial.println("=================");
-  Serial.println("Please type a command ('a', 's', 'd' or 'f'):");
+  Serial.println("Nicebots I2C Command Test");
+  Serial.println("=========================");
+  Serial.println("Please type a command ('a', 's', 'd', 'f', 'g' or 'z' to reboot):");
 }
 
 //
-//**********************************
-//* Main Loop, (Runs continuously) *
-//**********************************
+// **********************************
+// * Main Loop, (Runs continuously) *
+// **********************************
 //
 void loop() {
   if (newKey == true) {
@@ -117,7 +114,7 @@ void loop() {
     switch (key) {
       // ********************
       // * STDPB1_1 Command *
-      //*********************
+      // ********************
       case 'a': case 'A': {
         byte cmdTX[1] = { STDPB1_1 };
         byte txSize = sizeof(cmdTX);
@@ -154,7 +151,7 @@ void loop() {
       }
       // ********************
       // * STDPB1_0 Command *
-      //*********************      
+      // ********************
       case 's': case 'S': {
         byte cmdTX[1] = { STDPB1_0 };
         byte txSize = sizeof(cmdTX);
@@ -191,7 +188,7 @@ void loop() {
       }
       // ********************
       // * STANAPB3 Command *
-      //*********************       
+      // ********************
       case 'd': case 'D': {
         byte cmdTX[3] = { STANAPB3, 0, 0 };
         //byte txSize = sizeof(cmdTX);
@@ -264,10 +261,10 @@ void loop() {
       }
       // ********************
       // * READADC2 Command *
-      //*********************      
+      // ********************
       case 'f': case 'F': {
         byte cmdTX[1] = { READADC2 };
-        byte txSize = sizeof(cmdTX), rxSize = 0;
+        byte txSize = sizeof(cmdTX);
         Serial.print("ESP8266 - Sending Opcode >>> ");
         Serial.print(cmdTX[0]);
         Serial.println("(READADC2)");
@@ -279,9 +276,6 @@ void loop() {
           Wire.write(transmitData[i]);
           Wire.endTransmission();
         }
-
-        //delay(2000); // LONG DELAY FOR TESTING - REMOVE FOR PRODUCTION
-
         // Receive acknowledgement
         blockRXSize = Wire.requestFrom(slaveAddress, (byte)4);
         byte ackRX[4] = { 0 };   // Data received from slave
@@ -294,35 +288,33 @@ void loop() {
           Serial.print(cmdTX[0]);
           Serial.print(" parsed OK <<< ");
           Serial.println(ackRX[0]);
-          for (int i = 1; i < rxSize; i++) {
+          for (int i = 1; i < blockRXSize; i++) {
             Serial.print("ESP8266 - Data Byte ");
             Serial.print(i + 1);
             Serial.print(" received OK <<< ");
             Serial.println(ackRX[i]);
           }
-          Serial.print("ESP8266 - Analog Data=");
+          Serial.println("*************************");
+          Serial.print("* Analog Data: ");
           Serial.print(analogValue);
           Serial.print("(");
-          Serial.print(analogValue);
-          Serial.print(") >>> | MSB=");
+          Serial.print(analogValue, HEX);
+          Serial.println(") *");
+          Serial.println("*************************");
+          Serial.print("ESP8266 - MSB = ");
           Serial.print(ackRX[1]);
           Serial.print(" | LSB=");
           Serial.print(ackRX[2]);
           Serial.print(" | CRC=");
-          Serial.println(ackRX[3]);
-          //ackRX[2] = ackRX[2] & 0xDF; // ERROR INJECTED IN SOME OPERANDS RECEIVED TO TEST CRC - REMOVE FOR PRODUCTION
+          Serial.print(ackRX[3]);
           byte checkCRC = CalculateCRC(ackRX, sizeof(ackRX));
           if (checkCRC == 0) {
-            Serial.println("************************");
-            Serial.print("******  CRC OK!  *******   ");
+            Serial.print("   >>> CRC OK! <<<   ");
             Serial.println(checkCRC);
-            Serial.println("************************");
           }
           else {
-            Serial.println("########################");
-            Serial.print("#####   CRC ERROR  #####   ");
+            Serial.print("   ### CRC ERROR! ###   ");
             Serial.println(checkCRC);
-            Serial.println("########################");
           }
         }
         else {
@@ -330,17 +322,73 @@ void loop() {
           Serial.print(cmdTX[0]);
           Serial.print(" command! <<< ");
           Serial.println(ackRX[0]);
-        //opcodeErrors++;                                                   // DEBUG - REMOVE FOR PRODUCTION
         }
-        //Serial.print("/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\ LOOPS: ");  // DEBUG - REMOVE FOR PRODUCTION
-        //Serial.print(++loopsREADADC2);                                    // DEBUG - REMOVE FOR PRODUCTION
-        //Serial.print(" /\\/\\/\\/\\/\\ OPCODE ERRORS: ");                 // DEBUG - REMOVE FOR PRODUCTION
-        //Serial.println(opcodeErrors);                                     // DEBUG - REMOVE FOR PRODUCTION
+        break;
+      }
+      // ************************************
+      // * GET_INFO Command (16 byte reply) *
+      // ************************************
+      case 'g': case 'G': {
+        byte cmdTX[1] = { GET_INFO };
+        byte txSize = sizeof(cmdTX);
+        Serial.print("ESP8266 - Sending Opcode >>> ");
+        Serial.print(cmdTX[0]);
+        Serial.println("(GET_INFO)");
+        // Transmit command
+        byte transmitData[1] = { 0 };
+        for (int i = 0; i < txSize; i++) {
+          transmitData[i] = cmdTX[i];
+          Wire.beginTransmission(slaveAddress);
+          Wire.write(transmitData[i]);
+          Wire.endTransmission();
+        }
+        // Receive acknowledgement
+        blockRXSize = Wire.requestFrom(slaveAddress, (byte)16);
+        byte ackRX[16] = { 0 };   // Data received from slave
+        for (int i = 0; i < blockRXSize; i++) {
+          ackRX[i] = Wire.read();
+        }
+        if (ackRX[0] == ACK_GETI) {
+          Serial.print("ESP8266 - Command ");
+          Serial.print(cmdTX[0]);
+          Serial.print(" parsed OK <<< ");
+          Serial.println(ackRX[0]);
+          for (int i = 1; i < blockRXSize - 1; i++) {
+            Serial.print("ESP8266 - Data Byte ");
+            if (i < 9) {
+              Serial.print("0");
+            }
+            Serial.print(i + 1);
+            Serial.print(" received OK <<< ");
+            Serial.println((char)ackRX[i]);
+          }
+          byte checkCRC = CalculateCRC(ackRX, sizeof(ackRX));
+          if (checkCRC == 0) {
+            Serial.print("   >>> CRC OK! <<<   ");
+            Serial.println(checkCRC);
+          }
+          else {
+            Serial.print("   ### CRC ERROR! ###   ");
+            Serial.println(checkCRC);
+          }
+        }
+        else {
+          Serial.print("ESP8266 - Error parsing ");
+          Serial.print(cmdTX[0]);
+          Serial.print(" command! <<< ");
+          Serial.println(ackRX[0]);
+        }
         break;
       }
       // *******************
+      // * Restart ESP8266 *
+      // *******************
+      case 'z': case 'Z': {
+        ESP.restart();
+      }
+      // *******************
       // * Unknown Command *
-      //********************      
+      // *******************
       default: {
         Serial.print("ESP8266 - Command '");
         Serial.print(key);
@@ -349,7 +397,7 @@ void loop() {
       }
     }
     Serial.println("");
-    Serial.println("Please type a command ('a', 's', 'd' or 'f'):");
+    Serial.println("Please type a command ('a', 's', 'd', 'f', 'g' or 'z' to reboot):");
   }
   ReadChar();           // PROD - REMOVE FOR TESTING
   //delay(150);         // TEST - REMOVE FOR PRODUCTION
@@ -359,6 +407,7 @@ void loop() {
 
 // Function ScanI2C
 byte ScanI2C() {
+  clrscr();
   Serial.println("Scanning I2C bus ...");
   byte slaveAddr = 0, scanAddr = 8;
   while (scanAddr < 120) {
@@ -369,7 +418,7 @@ byte ScanI2C() {
       Serial.print(" (0x");
       Serial.print(scanAddr, HEX);
       Serial.println(")");
-      delay(1000);
+      delay(500);
       slaveAddr = scanAddr;
     }
     scanAddr++;

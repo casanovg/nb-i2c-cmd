@@ -32,7 +32,7 @@
 
 #include "TinyWireS.h"                  // wrapper class for I2C slave routines
 
-#define I2C_SLAVE_ADDR 0x2F            // I2C slave address (46, can be changed)
+#define I2C_SLAVE_ADDR 0xAA            // I2C slave address (46, can be changed)
 
 #define PB1 1
 #define PB3 3
@@ -40,13 +40,10 @@
 
 #define STDPB1_1 0xE9 // Command to Set ATtiny85 PB1 = 1
 #define AKDPB1_1 0x16 // Acknowledge Command PB1 = 1
-
 #define STDPB1_0 0xE1 // Command to Set ATtiny85 PB1 = 0
 #define AKDPB1_0 0x1E // Acknowledge Command PB1 = 0
-
 #define STANAPB3 0xFB // Command to Set ATtiny85 PB3 = PWMx
 #define ACKNAPB3 0x04 // Acknowledge Command PB3 = PWMx
-
 #define READADC2 0xDA // Command to Read ATtiny85 ADC2
 #define ACKNADC2 0x25 // Acknowledge Command Read ADC2
 

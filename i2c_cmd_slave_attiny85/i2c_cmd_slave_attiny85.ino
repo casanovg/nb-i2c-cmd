@@ -149,7 +149,7 @@ void requestEvent() {
 			// * STDPB1_1 Reply *
 			// ******************     
 			case STDPB1_1: {
-				byte ackLng = 1;
+				const byte ackLng = 1;
 				byte acknowledge[1] = { 0 };
 				acknowledge[0] = opCodeAck;
 				digitalWrite(PB1, HIGH);   // turn the LED on (HIGH is the voltage level)
@@ -162,7 +162,7 @@ void requestEvent() {
 			// * STDPB1_0 Reply *
 			// ******************
 			case STDPB1_0: {
-				byte ackLng = 1;
+				const byte ackLng = 1;
 				byte acknowledge[1] = { 0 };
 				acknowledge[0] = opCodeAck;
 				digitalWrite(PB1, LOW);    // turn the LED off by making the voltage LOW
@@ -175,7 +175,7 @@ void requestEvent() {
 			// * STANAPB3 Reply *
 			// ******************
 			case STANAPB3: {
-        byte ackLng = 2;
+        const byte ackLng = 2;
 				byte acknowledge[2] = { 0 };
 				acknowledge[0] = opCodeAck;
         //command[1] = command[1] & 0xEF; // ERROR INJECTED IN SOME OPERANDS RECEIVED TO TEST CRC - REMOVE FOR PRODUCTION 

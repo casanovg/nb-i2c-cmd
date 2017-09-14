@@ -25,7 +25,7 @@
 // Setup:
 // AtTiny Pin 5 (PB0/SDA) = I2C SDA
 //     connect to SDA on master with external pull-up (~4.7K)
-// AtTiny Pin 7 (PB0/SCL) = I2C SCL
+// AtTiny Pin 7 (PB2/SCL) = I2C SCL
 //     connect to SCL on master with external pull-up (~4.7K)
 // AtTiny Pin 1 (PB5/!RST)
 //     connect to reset on master (or just pull-up)
@@ -33,7 +33,7 @@
 
 #include "TinyWireS.h"                  // wrapper class for I2C slave routines
 
-#define I2C_SLAVE_ADDR 0x2F             // I2C slave address (47, can be changed) 0x2F
+#define I2C_SLAVE_ADDR 0x33             // I2C slave address (47, can be changed) 0x2F
 
 #define PB1 1             // Output Pin for STDPB1_1 command
 #define PB3 3             // Output Pin for STANAPB3 command
@@ -107,6 +107,7 @@ void setup() {
   pinMode(PB3, OUTPUT);
   pinMode(AD2, INPUT);
 }
+
 // **********************************
 // * Main Loop, (Runs continuously) *
 // **********************************
@@ -190,7 +191,8 @@ void requestEvent() {
 			// * READADC2 Reply *
 			// ******************
 			case READADC2: {
-				byte ackLng = 4, analogMSB = 0, analogLSB = 0;
+        const byte ackLng = 4;
+        byte analogMSB = 0, analogLSB = 0;
         // analogValue = analogRead(AD2);
         // if (analogValue < 1024) {
         //   analogValue++;
@@ -223,7 +225,7 @@ void requestEvent() {
       // * GET_INFO Reply *
       // ******************
       case GET_INFO: {
-        byte ackLng = 16;
+        const byte ackLng = 16;
         byte acknowledge[ackLng] = { 0 };
         acknowledge[0] = opCodeAck;
         acknowledge[1] = 71;

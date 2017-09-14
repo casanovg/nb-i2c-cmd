@@ -407,7 +407,7 @@ void loop() {
 
 // Function ScanI2C
 byte ScanI2C() {
-  clrscr();
+  //clrscr();
   Serial.println("Scanning I2C bus ...");
   byte slaveAddr = 0, scanAddr = 8;
   while (scanAddr < 120) {

@@ -25,7 +25,7 @@
 // Setup:
 // AtTiny Pin 5 (PB0/SDA) = I2C SDA
 //     connect to SDA on master with external pull-up (~4.7K)
-// AtTiny Pin 7 (PB0/SCL) = I2C SCL
+// AtTiny Pin 7 (PB2/SCL) = I2C SCL
 //     connect to SCL on master with external pull-up (~4.7K)
 // AtTiny Pin 1 (PB5/!RST)
 //     connect to reset on master (or just pull-up)
@@ -191,7 +191,8 @@ void requestEvent() {
 			// * READADC2 Reply *
 			// ******************
 			case READADC2: {
-				byte ackLng = 4, analogMSB = 0, analogLSB = 0;
+        const byte ackLng = 4;
+        byte analogMSB = 0, analogLSB = 0;
         // analogValue = analogRead(AD2);
         // if (analogValue < 1024) {
         //   analogValue++;
@@ -224,7 +225,7 @@ void requestEvent() {
       // * GET_INFO Reply *
       // ******************
       case GET_INFO: {
-        byte ackLng = 16;
+        const byte ackLng = 16;
         byte acknowledge[ackLng] = { 0 };
         acknowledge[0] = opCodeAck;
         acknowledge[1] = 71;

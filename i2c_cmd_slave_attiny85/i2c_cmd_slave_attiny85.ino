@@ -118,25 +118,26 @@ void setup() {
 // **********************************
 //
 void loop() {
-  //if (initialized == false) {
-  //  if (ledToggleTimer++ >= TOGGLETIME) {
-  //    if (ledOnStatus == false) {
-  //      digitalWrite(PB1, HIGH);   // turn the LED on
-  //      ledOnStatus = true;
-  //    }
-  //    else {
-  //      digitalWrite(PB1, LOW);   // turn the LED on
-  //      ledOnStatus = false;
-  //    }
-  //    ledToggleTimer = 0;
-  //  }
-  //}
+  if (initialized == false) {
+    if (ledToggleTimer++ >= TOGGLETIME) {
+      if (ledOnStatus == false) {
+        digitalWrite(PB1, HIGH);   // turn the LED on
+        ledOnStatus = true;
+      }
+      else {
+        digitalWrite(PB1, LOW);   // turn the LED on
+        ledOnStatus = false;
+      }
+      ledToggleTimer = 0;
+    }
+  }
+    else {
 
- // else {
- //   if (testReplies == true) {
- //     heartbit(500);
- //   }
-	//}
+    if (testReplies == true) {
+      heartbit(500);
+    }
+  
+ }
 
 	// This needs to be here
 	//TinyWireS_stop_check();
@@ -275,11 +276,12 @@ void requestEvent() {
       // ******************
       case INITTINY: {
         const byte ackLng = 1;
-        byte acknowledge[ackLng] = { opCodeAck };
-        digitalWrite(PB1, HIGH);
+        byte acknowledge[1] = { 0 };
+        acknowledge[0] = opCodeAck;
         initialized = true;
+        digitalWrite(PB1, LOW);    // turn the LED off by making the voltage LOW
         for (int i = 0; i < ackLng; i++) {
-          TinyWireS.send(acknowledge[0]);
+          TinyWireS.send(acknowledge[i]);
         }
         break;
       }

@@ -103,6 +103,7 @@ void setup() {
   Wire.write(cmdTX[0]);
   Wire.endTransmission();
   blockRXSize = Wire.requestFrom(slaveAddress, (byte)1);
+  blockRXSize = 0;
 
   clrscr();
   Serial.println("Nicebots I2C Command Test");

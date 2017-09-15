@@ -33,7 +33,7 @@
 
 #include "TinyWireS.h"                  // wrapper class for I2C slave routines
 
-#define I2C_SLAVE_ADDR 0x2E             // I2C slave address
+#define I2C_SLAVE_ADDR 0x09             // I2C slave address
 #define LED_PIN 1
 
 // global buffer to store data sent from the master.

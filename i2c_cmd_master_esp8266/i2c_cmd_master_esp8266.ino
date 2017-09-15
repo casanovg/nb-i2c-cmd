@@ -37,7 +37,7 @@
 #define GET_INFO 0x0D     // Command to Read Generic Info
 #define ACK_GETI 0xF2     // Acknowledge Command Read Info
 #define UNKNOWNC 0xFF     // Unknown Command Reply
-#define INITTINY 0x01     // Command to initialize ATtiny85
+#define INITTINY 0x99     // Command to initialize ATtiny85
 
 //typedef uint8_t byte; //  8 bit data type
 //typedef uint16_t word; // 16 bit data type
@@ -102,6 +102,7 @@ void setup() {
   Wire.beginTransmission(slaveAddress);
   Wire.write(cmdTX[0]);
   Wire.endTransmission();
+  Wire.requestFrom(slaveAddress, (byte)1);
 
   clrscr();
   Serial.println("Nicebots I2C Command Test");

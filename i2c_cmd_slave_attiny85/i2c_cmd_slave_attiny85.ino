@@ -40,6 +40,7 @@
 #define AD2 A2            // Input Pin for READADC2 command
 #define ADR 1023.0        // ADC Resolution (10 bit = 2^10)
 #define SAMPLETIME 500    // Sampling time in ms per reading
+#define TOGGLETIME 0xFFF  // Toggletime
 
 #define STDPB1_1 0xE9     // Command to Set ATtiny85 PB1 = 1
 #define AKDPB1_1 0x16     // Acknowledge Command PB1 = 1
@@ -52,12 +53,16 @@
 #define GET_INFO 0x0D     // Command to Read Generic Info
 #define ACK_GETI 0xF2     // Acknowledge Command Read Info
 #define UNKNOWNC 0xFF     // Unknown Command Reply
+#define INITTINY 0x01     // Command to initialize ATtiny85
 
 // Global Variables
-bool testReplies = false;       // Activates test mode
+volatile bool testReplies = false;       // Activates test mode
+volatile bool initialized = false;       // Keeps status of initialization by master
 byte command[4] = { 0 };        // Command received from master
 int commandLength = 0;          // Command number of bytes
-volatile int analogValue = 0;   // ADC value
+volatile int analogValue = 0;            // ADC value
+uint16_t ledToggleTimer = 0;
+bool ledOnStatus = false;
 
 
 // CRC Table: Polynomial=0x9C, CRC size=8-bit, HD=5, Word Length=9 bytes
@@ -113,9 +118,26 @@ void setup() {
 // **********************************
 //
 void loop() {
-	if (testReplies == true) {
-		heartbit();
-	}
+  if (initialized == false) {
+    //heartbit(500);
+    if (ledToggleTimer++ >= TOGGLETIME) {
+      if (ledOnStatus == false) {
+        digitalWrite(PB1, HIGH);   // turn the LED on
+        ledOnStatus = true;
+      }
+      else {
+        digitalWrite(PB1, LOW);   // turn the LED on
+        ledOnStatus = false;
+      }
+      ledToggleTimer = 0;
+    }
+  }
+ // else {
+ //   if (testReplies == true) {
+ //     heartbit(1000);
+ //   }
+	//}
+
 	// This needs to be here
 	//TinyWireS_stop_check();
 	// otherwise empty loop
@@ -248,6 +270,18 @@ void requestEvent() {
         }
         break;
       }
+      // ******************
+      // * INITTINY Reply *
+      // ******************
+      case INITTINY: {
+        digitalWrite(PB1, LOW);
+        //for (int i = 0; i < 10; i++) {
+        //  heartbit(250);
+        //}
+        //digitalWrite(PB1, LOW);
+        initialized = true;
+        break;
+      }
 			// *************************
 			// * Unknown Command Reply *
 			// *************************
@@ -286,11 +320,11 @@ byte CalculateCRC(byte* block, size_t blockLength) {
 }
 
 // Function Heartbit
-void heartbit() {
+void heartbit(int blinkDelay) {
 	digitalWrite(PB1, HIGH);   // turn the LED on (HIGH is the voltage level)
-	delay(500);                    // wait for a second
+	delay(blinkDelay);                    // wait for a second
 	digitalWrite(PB1, LOW);    // turn the LED off by making the voltage LOW
-	delay(500);                    // wait for a second
+	delay(blinkDelay);                    // wait for a second
 }
 
 void InitADC() {

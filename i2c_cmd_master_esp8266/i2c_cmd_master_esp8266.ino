@@ -37,6 +37,7 @@
 #define GET_INFO 0x0D     // Command to Read Generic Info
 #define ACK_GETI 0xF2     // Acknowledge Command Read Info
 #define UNKNOWNC 0xFF     // Unknown Command Reply
+#define INITTINY 0x01     // Command to initialize ATtiny85
 
 //typedef uint8_t byte; //  8 bit data type
 //typedef uint16_t word; // 16 bit data type
@@ -96,6 +97,9 @@ void setup() {
     slaveAddress = ScanI2C();
     delay(3000);
   }
+  Wire.beginTransmission(slaveAddress);
+  Wire.write(INITTINY);
+  Wire.endTransmission();
   clrscr();
   Serial.println("Nicebots I2C Command Test");
   Serial.println("=========================");
@@ -411,8 +415,12 @@ byte ScanI2C() {
   //clrscr();
   Serial.println("Scanning I2C bus ...");
   byte slaveAddr = 0, scanAddr = 8;
+  //byte cmdTX[1] = { INITTINY };
+  //byte transmitData[1] = { 0 };
   while (scanAddr < 120) {
+    //transmitData[0] = cmdTX[0];
     Wire.beginTransmission(scanAddr);
+    //Wire.write(INITTINY);
     if (Wire.endTransmission() == 0) {
       Serial.print("Found ATtiny85 at address: ");
       Serial.print(scanAddr, DEC);

@@ -274,10 +274,13 @@ void requestEvent() {
       // * INITTINY Reply *
       // ******************
       case INITTINY: {
+        const byte ackLng = 1;
+        byte acknowledge[ackLng] = { opCodeAck };
         digitalWrite(PB1, HIGH);
-        byte acknowledge[1] = { opCodeAck };
-        TinyWireS.send(acknowledge[0]);
         initialized = true;
+        for (int i = 0; i < ackLng; i++) {
+          TinyWireS.send(acknowledge[0]);
+        }
         break;
       }
 			// *************************

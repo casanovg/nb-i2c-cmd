@@ -97,9 +97,12 @@ void setup() {
     slaveAddress = ScanI2C();
     delay(3000);
   }
+
+  byte cmdTX[1] = { INITTINY };
   Wire.beginTransmission(slaveAddress);
-  Wire.write(INITTINY);
+  Wire.write(cmdTX[0]);
   Wire.endTransmission();
+
   clrscr();
   Serial.println("Nicebots I2C Command Test");
   Serial.println("=========================");
@@ -415,12 +418,8 @@ byte ScanI2C() {
   //clrscr();
   Serial.println("Scanning I2C bus ...");
   byte slaveAddr = 0, scanAddr = 8;
-  //byte cmdTX[1] = { INITTINY };
-  //byte transmitData[1] = { 0 };
   while (scanAddr < 120) {
-    //transmitData[0] = cmdTX[0];
     Wire.beginTransmission(scanAddr);
-    //Wire.write(INITTINY);
     if (Wire.endTransmission() == 0) {
       Serial.print("Found ATtiny85 at address: ");
       Serial.print(scanAddr, DEC);

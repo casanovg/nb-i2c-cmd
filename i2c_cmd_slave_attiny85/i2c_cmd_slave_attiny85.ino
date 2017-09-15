@@ -40,7 +40,7 @@
 #define AD2 A2            // Input Pin for READADC2 command
 #define ADR 1023.0        // ADC Resolution (10 bit = 2^10)
 #define SAMPLETIME 500    // Sampling time in ms per reading
-#define TOGGLETIME 0xFFF  // Toggletime
+#define TOGGLETIME 0xFFF  // Pre-init Led Toggletime
 
 #define STDPB1_1 0xE9     // Command to Set ATtiny85 PB1 = 1
 #define AKDPB1_1 0x16     // Acknowledge Command PB1 = 1
@@ -56,8 +56,8 @@
 #define INITTINY 0x01     // Command to initialize ATtiny85
 
 // Global Variables
-volatile bool testReplies = false;       // Activates test mode
-volatile bool initialized = false;       // Keeps status of initialization by master
+bool testReplies = false;       // Activates test mode
+bool initialized = false;       // Keeps status of initialization by master
 byte command[4] = { 0 };        // Command received from master
 int commandLength = 0;          // Command number of bytes
 volatile int analogValue = 0;            // ADC value
@@ -118,23 +118,23 @@ void setup() {
 // **********************************
 //
 void loop() {
-  if (initialized == false) {
-    //heartbit(500);
-    if (ledToggleTimer++ >= TOGGLETIME) {
-      if (ledOnStatus == false) {
-        digitalWrite(PB1, HIGH);   // turn the LED on
-        ledOnStatus = true;
-      }
-      else {
-        digitalWrite(PB1, LOW);   // turn the LED on
-        ledOnStatus = false;
-      }
-      ledToggleTimer = 0;
-    }
-  }
+  //if (initialized == false) {
+  //  if (ledToggleTimer++ >= TOGGLETIME) {
+  //    if (ledOnStatus == false) {
+  //      digitalWrite(PB1, HIGH);   // turn the LED on
+  //      ledOnStatus = true;
+  //    }
+  //    else {
+  //      digitalWrite(PB1, LOW);   // turn the LED on
+  //      ledOnStatus = false;
+  //    }
+  //    ledToggleTimer = 0;
+  //  }
+  //}
+
  // else {
  //   if (testReplies == true) {
- //     heartbit(1000);
+ //     heartbit(500);
  //   }
 	//}
 
@@ -274,7 +274,7 @@ void requestEvent() {
       // * INITTINY Reply *
       // ******************
       case INITTINY: {
-        digitalWrite(PB1, LOW);
+        digitalWrite(PB1, HIGH);
         //for (int i = 0; i < 10; i++) {
         //  heartbit(250);
         //}

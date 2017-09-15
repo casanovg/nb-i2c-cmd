@@ -119,6 +119,10 @@ void setup() {
 //
 void loop() {
   if (initialized == false) {
+    // ·······························
+    // ·· Not initialized by master ··
+    // ·······························
+    // Blinks on every main loop pass at TOGGLETIME interval
     if (ledToggleTimer++ >= TOGGLETIME) {
       if (ledOnStatus == false) {
         digitalWrite(PB1, HIGH);   // turn the LED on
@@ -131,12 +135,14 @@ void loop() {
       ledToggleTimer = 0;
     }
   }
-    else {
-
+  else {
+    // ···························
+    // ·· Initialized by master ··
+    // ···························
+    // digitalWrite(PB1, LOW);    // turn the LED off by making the voltage LOW
     if (testReplies == true) {
       heartbit(500);
     }
-  
  }
 
 	// This needs to be here
@@ -232,7 +238,7 @@ void requestEvent() {
 				acknowledge[3] = CalculateCRC(acknowledge, ackLng - 1); // Prepare CRC for Reply
         // int g = 0;                                // TEST - REMOVE FOR PRODUCTION
         // while (g < 32500) {                       // TEST - REMOVE FOR PRODUCTION
-        //  g++;                                    // TEST - REMOVE FOR PRODUCTION
+        //  g++;                                     // TEST - REMOVE FOR PRODUCTION
         // }                                         // TEST - REMOVE FOR PRODUCTION
         // digitalWrite(PB1, LOW);                   // TEST - REMOVE FOR PRODUCTION
 				for (int i = 0; i < ackLng; i++) {
@@ -279,7 +285,7 @@ void requestEvent() {
         byte acknowledge[1] = { 0 };
         acknowledge[0] = opCodeAck;
         initialized = true;
-        digitalWrite(PB1, LOW);    // turn the LED off by making the voltage LOW
+        digitalWrite(PB1, LOW);    // turn the LED off to show initialization, in case that the blink ended turned on
         for (int i = 0; i < ackLng; i++) {
           TinyWireS.send(acknowledge[i]);
         }

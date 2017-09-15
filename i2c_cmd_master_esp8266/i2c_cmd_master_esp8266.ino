@@ -98,6 +98,7 @@ void setup() {
     delay(3000);
   }
 
+  // Run ATtiny85 initialization command
   byte cmdTX[1] = { INITTINY };
   Wire.beginTransmission(slaveAddress);
   Wire.write(cmdTX[0]);

@@ -22,18 +22,22 @@
 // f - (READADC2) Read ATtiny85 ADC2 (the reply has 2 data bytes + 1 CRC byte)
 // g - (GET_INFO) Get useful information regarding various slave parameters.
 //
-// Setup:
+// Connections:
 // AtTiny Pin 5 (PB0/SDA) = I2C SDA
 //     connect to SDA on master with external pull-up (~4.7K)
-// AtTiny Pin 7 (PB2/SCL) = I2C SCL
+// AtTiny Pin 7 (PB0/SCL) = I2C SCL
 //     connect to SCL on master with external pull-up (~4.7K)
+// Optional:
 // AtTiny Pin 1 (PB5/!RST)
 //     connect to reset on master (or just pull-up)
+//
+// ATtiny85 tested setup:
+// Fuses: Low=0xE1, High=0xDD, Extended=0xFE 
 //
 
 #include "TinyWireS.h"                  // wrapper class for I2C slave routines
 
-#define I2C_SLAVE_ADDR 0x66             // I2C slave address (47, can be changed) 0x2F
+#define I2C_SLAVE_ADDR 0x33             // I2C slave address (47, can be changed) 0x2F
 
 #define PB1 1             // Output Pin for STDPB1_1 command
 #define PB3 3             // Output Pin for STANAPB3 command

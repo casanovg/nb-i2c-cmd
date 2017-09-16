@@ -21,7 +21,7 @@
 // d - (STANAPB3) Set ATtiny85 PB3 = PWMx (the command asks for a PWM value input)
 // f - (READADC2) Read ATtiny85 ADC2 (the reply has 2 data bytes + 1 CRC byte)
 //
-// Setup:
+// Connections:
 // AtTiny Pin 5 (PB0/SDA) = I2C SDA
 //     connect to SDA on master with external pull-up (~4.7K)
 // AtTiny Pin 7 (PB0/SCL) = I2C SCL

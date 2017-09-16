@@ -26,8 +26,12 @@
 //     connect to SDA on master with external pull-up (~4.7K)
 // AtTiny Pin 7 (PB0/SCL) = I2C SCL
 //     connect to SCL on master with external pull-up (~4.7K)
+// Optional:
 // AtTiny Pin 1 (PB5/!RST)
 //     connect to reset on master (or just pull-up)
+//
+// ATtiny85 tested setup:
+// Fuses: Low=0xE1, High=0xDD, Extended=0xFE 
 //
 
 #include "TinyWireS.h"                  // wrapper class for I2C slave routines

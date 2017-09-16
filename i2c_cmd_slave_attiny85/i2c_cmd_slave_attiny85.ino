@@ -57,7 +57,7 @@
 #define GET_INFO 0x0D     // Command to Read Generic Info
 #define ACK_GETI 0xF2     // Acknowledge Command Read Info
 #define UNKNOWNC 0xFF     // Unknown Command Reply
-#define INITTINY 0x99     // Command to initialize ATtiny85
+#define INITTINY 0x01     // Command to initialize ATtiny85
 
 // Global Variables
 bool testReplies = false;       // Activates test mode

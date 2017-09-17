@@ -31,8 +31,9 @@
 // AtTiny Pin 1 (PB5/!RST)
 //     connect to reset on master (or just pull-up)
 //
-// ATtiny85 tested setup:
-// Fuses: Low=0xE1, High=0xDD, Extended=0xFE 
+// Tested fuse configurations:
+//  8 MHz clock (RC):  Low=0xE2, High=0xDD, Extended=0xFE
+// 16 MHz clock (PLL): Low=0xE1, High=0xDD, Extended=0xFE
 //
 
 #include "TinyWireS.h"                  // wrapper class for I2C slave routines
@@ -44,7 +45,7 @@
 #define AD2 A2            // Input Pin for READADC2 command
 #define ADR 1023.0        // ADC Resolution (10 bit = 2^10)
 #define SAMPLETIME 500    // Sampling time in ms per reading
-#define TOGGLETIME 0xFFF  // Pre-init Led Toggletime
+#define TOGGLETIME 0xFF   // Pre-init led toggle delay
 
 #define STDPB1_1 0xE9     // Command to Set ATtiny85 PB1 = 1
 #define AKDPB1_1 0x16     // Acknowledge Command PB1 = 1
@@ -60,14 +61,13 @@
 #define INITTINY 0x01     // Command to initialize ATtiny85
 
 // Global Variables
-bool testReplies = false;       // Activates test mode
-bool initialized = false;       // Keeps status of initialization by master
-byte command[4] = { 0 };        // Command received from master
-int commandLength = 0;          // Command number of bytes
-volatile int analogValue = 0;            // ADC value
-uint16_t ledToggleTimer = 0;
-bool ledOnStatus = false;
-
+bool testReplies = false;           // Activates test mode
+bool initialized = false;           // Keeps status of initialization by master
+byte command[4] = { 0 };            // Command received from master
+int commandLength = 0;              // Command number of bytes
+volatile uint16_t analogValue = 0;  // ADC value
+uint8_t ledToggleTimer = 0;         // Pre-init led toggle timer
+bool ledOnStatus = false;           // Pre-init led status
 
 // CRC Table: Polynomial=0x9C, CRC size=8-bit, HD=5, Word Length=9 bytes
 byte crcTable[256] = {

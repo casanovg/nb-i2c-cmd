@@ -40,7 +40,7 @@
 
 #define I2C_SLAVE_ADDR 0x2F             // I2C slave address (47, can be changed) 0x2F
 
-#define PB1 1             // Output Pin for STDPB1_1 command
+#define LED_PIN PB1       // Output Pin for STDPB1_1 command
 #define PB3 3             // Output Pin for STANAPB3 command
 #define AD2 A2            // Input Pin for READADC2 command
 #define ADR 1023.0        // ADC Resolution (10 bit = 2^10)
@@ -112,8 +112,8 @@ void setup() {
 	// register the onRequest() callback function
 	TinyWireS.onRequest(requestEvent);
   InitADC();
-  pinMode(PB1, OUTPUT);
-  pinMode(PB3, OUTPUT);
+  DDRB |= (1 << LED_PIN); // Set pin PB1 for output
+  //pinMode(PB3, OUTPUT);
   pinMode(AD2, INPUT);
 }
 
@@ -128,14 +128,7 @@ void loop() {
     // ·······························
     // Blinks on every main loop pass at TOGGLETIME interval
     if (ledToggleTimer++ >= TOGGLETIME) {
-      if (ledOnStatus == false) {
-        digitalWrite(PB1, HIGH);   // turn the LED on
-        ledOnStatus = true;
-      }
-      else {
-        digitalWrite(PB1, LOW);   // turn the LED on
-        ledOnStatus = false;
-      }
+      PORTB ^= (1 << LED_PIN);
       ledToggleTimer = 0;
     }
   }
@@ -143,9 +136,8 @@ void loop() {
     // ···························
     // ·· Initialized by master ··
     // ···························
-    // digitalWrite(PB1, LOW);    // turn the LED off by making the voltage LOW
     if (testReplies == true) {
-      heartbit(500);
+      Heartbeat(500);
     }
  }
 
@@ -185,7 +177,7 @@ void requestEvent() {
 				const byte ackLng = 1;
 				byte acknowledge[1] = { 0 };
 				acknowledge[0] = opCodeAck;
-				digitalWrite(PB1, HIGH);   // turn the LED on (HIGH is the voltage level)
+        PORTB |= (1 << PB1);  // turn PB1 on (Led pin)
 				for (int i = 0; i < ackLng; i++) {
 					TinyWireS.send(acknowledge[i]);
 				}
@@ -198,7 +190,7 @@ void requestEvent() {
 				const byte ackLng = 1;
 				byte acknowledge[1] = { 0 };
 				acknowledge[0] = opCodeAck;
-				digitalWrite(PB1, LOW);    // turn the LED off by making the voltage LOW
+        PORTB &= ~(1 << PB1); // turn PB1 off (Led pin)
 				for (int i = 0; i < ackLng; i++) {
 					TinyWireS.send(acknowledge[i]);
 				}
@@ -214,7 +206,7 @@ void requestEvent() {
         //command[1] = command[1] & 0xEF; // ERROR INJECTED IN SOME OPERANDS RECEIVED TO TEST CRC - REMOVE FOR PRODUCTION 
         acknowledge[1] = CalculateCRC(command, 3);
         //analogWrite(PB3, command[1]);   // turn the LED on at the voltage level indicated by the command operand
-        analogWrite(PB1, command[1]);   // turn the LED on at the voltage level indicated by the command operand
+        analogWrite(LED_PIN, command[1]);   // turn the LED on at the voltage level indicated by the command operand
 				for (int i = 0; i < ackLng; i++) {
 					TinyWireS.send(acknowledge[i]);
 				}
@@ -244,7 +236,7 @@ void requestEvent() {
         // while (g < 32500) {                       // TEST - REMOVE FOR PRODUCTION
         //  g++;                                     // TEST - REMOVE FOR PRODUCTION
         // }                                         // TEST - REMOVE FOR PRODUCTION
-        // digitalWrite(PB1, LOW);                   // TEST - REMOVE FOR PRODUCTION
+        // digitalWrite(LED_PIN, LOW);                   // TEST - REMOVE FOR PRODUCTION
 				for (int i = 0; i < ackLng; i++) {
 					TinyWireS.send(acknowledge[i]);
           /*int g = 0;*/                            // TEST - REMOVE FOR PRODUCTION
@@ -289,7 +281,7 @@ void requestEvent() {
         byte acknowledge[1] = { 0 };
         acknowledge[0] = opCodeAck;
         initialized = true;
-        digitalWrite(PB1, LOW);    // turn the LED off to show initialization, in case that the blink ended turned on
+        digitalWrite(LED_PIN, LOW);    // turn the LED off to show initialization, in case that the blink ended turned on
         for (int i = 0; i < ackLng; i++) {
           TinyWireS.send(acknowledge[i]);
         }
@@ -333,10 +325,10 @@ byte CalculateCRC(byte* block, size_t blockLength) {
 }
 
 // Function Heartbit
-void heartbit(int blinkDelay) {
-	digitalWrite(PB1, HIGH);   // turn the LED on (HIGH is the voltage level)
+void Heartbeat(int blinkDelay) {
+	digitalWrite(LED_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
 	delay(blinkDelay);                    // wait for a second
-	digitalWrite(PB1, LOW);    // turn the LED off by making the voltage LOW
+	digitalWrite(LED_PIN, LOW);    // turn the LED off by making the voltage LOW
 	delay(blinkDelay);                    // wait for a second
 }
 

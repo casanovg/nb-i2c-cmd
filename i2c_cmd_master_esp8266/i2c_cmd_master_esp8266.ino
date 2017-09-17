@@ -106,7 +106,7 @@ void setup() {
   blockRXSize = Wire.requestFrom(slaveAddress, (byte)1);
   blockRXSize = 0;
 
-  clrscr();
+  ClrScr();
   Serial.println("Nicebots I2C Command Test");
   Serial.println("=========================");
   Serial.println("Please type a command ('a', 's', 'd', 'f', 'g' or 'z' to reboot):");
@@ -487,7 +487,7 @@ byte ReadByte() {
 }
 
 // Function Clear Screen
-void clrscr() {
+void ClrScr() {
   Serial.write(27);       // ESC command
   Serial.print("[2J");    // clear screen command
   Serial.write(27);       // ESC command

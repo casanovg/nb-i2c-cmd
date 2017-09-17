@@ -177,7 +177,7 @@ void requestEvent() {
 				const byte ackLng = 1;
 				byte acknowledge[1] = { 0 };
 				acknowledge[0] = opCodeAck;
-        PORTB |= (1 << PB1);  // turn PB1 on (Led pin)
+        PORTB |= (1 << PB1);  // turn PB1 pin on (Led pin)
 				for (int i = 0; i < ackLng; i++) {
 					TinyWireS.send(acknowledge[i]);
 				}
@@ -190,7 +190,7 @@ void requestEvent() {
 				const byte ackLng = 1;
 				byte acknowledge[1] = { 0 };
 				acknowledge[0] = opCodeAck;
-        PORTB &= ~(1 << PB1); // turn PB1 off (Led pin)
+        PORTB &= ~(1 << PB1); // turn PB1 pin off (Led pin)
 				for (int i = 0; i < ackLng; i++) {
 					TinyWireS.send(acknowledge[i]);
 				}

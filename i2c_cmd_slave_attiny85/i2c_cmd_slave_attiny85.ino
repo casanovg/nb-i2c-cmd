@@ -409,3 +409,10 @@ float GetVPP(int sensorPin, int sampleTime) {
   result = (maxValue - minValue);
   return result;
 }
+
+// Function InitTimer
+static inline void InitTimer(void) {
+  TCCR0A |= (1 << WGM01); /* CTC mode */
+  TCCR0A |= (1 << COM0A0); /* Toggles pin each cycle through */
+  TCCR0B |= (1 << CS00) | (1 << CS01); /* CPU clock / 64 */
+}

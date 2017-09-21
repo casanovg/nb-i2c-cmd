@@ -207,12 +207,28 @@ void requestEvent() {
         const byte ackLng = 2;
 				byte acknowledge[2] = { 0 };
 				acknowledge[0] = opCodeAck;
-        //command[1] = command[1] & 0xEF; // ERROR INJECTED IN SOME OPERANDS RECEIVED TO TEST CRC - REMOVE FOR PRODUCTION 
         acknowledge[1] = CalculateCRC(command, 3);
-        //analogWrite(PB3, command[1]);   // turn the LED on at the voltage level indicated by the command operand
-        TCCR0B |= (1 << CS01);    // Turn on timer PWM -> Prescaler = CPUclk / 8
-        TCCR0A |= (1 << COM0B1);  // Connects timer-controlled OC0B output compare pins to override PB1 I/O pin.
-        analogWrite(LED_PIN, command[1]);   // turn the LED on at the voltage level indicated by the command operand
+        switch (command[1]) {
+          case 0: {
+            TCCR0A &= ~(1 << COM0B1); // Disconnects timer-controlled OC0B output compare pins from PB1 I/O pin.
+            TCCR0B &= ~((1 << CS02) | (1 << CS01) | (1 << CS00)); // Turn off timer PWM
+            PORTB &= ~(1 << PB1); // turn PB1 pin off (Led pin)
+            break;
+          }
+          case 255: {
+            TCCR0A &= ~(1 << COM0B1); // Disconnects timer-controlled OC0B output compare pins from PB1 I/O pin.
+            TCCR0B &= ~((1 << CS02) | (1 << CS01) | (1 << CS00)); // Turn off timer PWM
+            PORTB |= (1 << PB1);  // turn PB1 pin on (Led pin)
+            break;
+          }
+          default: {
+            TCCR0A |= ((1 << WGM01) | (1 << WGM00));  // Set timer 0 fast PWM mode
+            TCCR0B |= (1 << CS01);  // Set timer 0 prescaler = CPUclk / 8
+            TCCR0A |= (1 << COM0B1);  // Connect timer-controlled OC0B output compare pins to override PB1 I/O pin
+            OCR0B = command[1]; // Set PWM duty cycle with STANAPB3 operand value
+            break;
+          }
+        }
 				for (int i = 0; i < ackLng; i++) {
 					TinyWireS.send(acknowledge[i]);
 				}

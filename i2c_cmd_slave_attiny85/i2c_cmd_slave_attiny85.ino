@@ -177,8 +177,8 @@ void requestEvent() {
 				const byte ackLng = 1;
 				byte acknowledge[1] = { 0 };
 				acknowledge[0] = opCodeAck;
-        // TCCR0A &= ~(1 << COM0A1);
-        //TCCR0B &= ~((1 << CS02) | (1 << CS01) | (1 << CS00)); // Turn off timer PWM
+        TCCR0A &= ~(1 << COM0A1);
+        TCCR0B &= ~((1 << CS02) | (1 << CS01) | (1 << CS00)); // Turn off timer PWM
         PORTB |= (1 << PB1);  // turn PB1 pin on (Led pin)
 				for (int i = 0; i < ackLng; i++) {
 					TinyWireS.send(acknowledge[i]);
@@ -192,8 +192,8 @@ void requestEvent() {
 				const byte ackLng = 1;
 				byte acknowledge[1] = { 0 };
 				acknowledge[0] = opCodeAck;
-        // TCCR0A &= ~(1 << COM0A1);
-        //TCCR0B &= ~((1 << CS02) | (1 << CS01) | (1 << CS00)); // Turn off timer PWM
+        TCCR0A &= ~(1 << COM0A1);
+        TCCR0B &= ~((1 << CS02) | (1 << CS01) | (1 << CS00)); // Turn off timer PWM
         PORTB &= ~(1 << PB1); // turn PB1 pin off (Led pin)
 				for (int i = 0; i < ackLng; i++) {
 					TinyWireS.send(acknowledge[i]);
@@ -211,7 +211,7 @@ void requestEvent() {
         acknowledge[1] = CalculateCRC(command, 3);
         //analogWrite(PB3, command[1]);   // turn the LED on at the voltage level indicated by the command operand
         TCCR0B |= (1 << CS01); // Turn on timer PWM -> Prescaler = CPUclk / 8
-        // TCCR0A |= (1 << COM0A1);
+        TCCR0A |= (1 << COM0A1);
         analogWrite(LED_PIN, command[1]);   // turn the LED on at the voltage level indicated by the command operand
 				for (int i = 0; i < ackLng; i++) {
 					TinyWireS.send(acknowledge[i]);

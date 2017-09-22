@@ -211,18 +211,18 @@ void requestEvent() {
         switch (command[1]) {
           case 0: {
             TCCR0A &= ~(1 << COM0B1); // Disconnects timer-controlled OC0B output compare pins from PB1 I/O pin.
-            TCCR0B &= ~((1 << CS02) | (1 << CS01) | (1 << CS00)); // Turn off timer PWM
+            //TCCR0B &= ~((1 << CS02) | (1 << CS01) | (1 << CS00)); // Turn off timer PWM
             PORTB &= ~(1 << PB1); // turn PB1 pin off (Led pin)
             break;
           }
           case 255: {
             TCCR0A &= ~(1 << COM0B1); // Disconnects timer-controlled OC0B output compare pins from PB1 I/O pin.
-            TCCR0B &= ~((1 << CS02) | (1 << CS01) | (1 << CS00)); // Turn off timer PWM
+            //TCCR0B &= ~((1 << CS02) | (1 << CS01) | (1 << CS00)); // Turn off timer PWM
             PORTB |= (1 << PB1);  // turn PB1 pin on (Led pin)
             break;
           }
           default: {
-            TCCR0A |= ((1 << WGM01) | (1 << WGM00));  // Set timer 0 fast PWM mode
+            //TCCR0A |= ((1 << WGM01) | (1 << WGM00));  // Set timer 0 fast PWM mode
             TCCR0B |= (1 << CS01);  // Set timer 0 prescaler = CPUclk / 8
             TCCR0A |= (1 << COM0B1);  // Connect timer-controlled OC0B output compare pins to override PB1 I/O pin
             OCR0B = command[1]; // Set PWM duty cycle with STANAPB3 operand value

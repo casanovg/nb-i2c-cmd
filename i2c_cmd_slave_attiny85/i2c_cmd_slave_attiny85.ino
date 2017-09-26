@@ -36,7 +36,10 @@
 // 16 MHz clock (PLL): Low=0xE1, High=0xDD, Extended=0xFE
 //
 
+
+
 #include "TinyWireS.h"                  // wrapper class for I2C slave routines
+#include "usiTwiSlave.h"
 
 #define I2C_SLAVE_ADDR 0x2F             // I2C slave address (47, can be changed) 0x2F
 
@@ -106,7 +109,10 @@ byte crcTable[256] = {
 //
 void setup() {
 	// initialize the TinyWireS and usiTwiSlave libraries
-	TinyWireS.begin(I2C_SLAVE_ADDR);      // init I2C Slave mode
+	//TinyWireS.begin(I2C_SLAVE_ADDR);      // init I2C Slave mode
+
+  usiTwiSlaveInit(I2C_SLAVE_ADDR);
+
 	// register the onReceive() callback function
 	TinyWireS.onReceive(receiveEvent);
 	// register the onRequest() callback function

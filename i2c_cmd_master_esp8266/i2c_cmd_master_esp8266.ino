@@ -370,7 +370,10 @@ void loop() {
             }
             Serial.print(i + 1);
             Serial.print(" received OK <<< ");
-            Serial.println((char)ackRX[i]);
+            Serial.print((char)ackRX[i]);
+            Serial.print(" (numeric: ");
+            Serial.print(ackRX[i]);
+            Serial.println(")");
           }
           byte checkCRC = CalculateCRC(ackRX, sizeof(ackRX));
           if (checkCRC == 0) {

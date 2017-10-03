@@ -23,6 +23,8 @@
 // d - (STANAPB3) Set ATtiny85 PB3 = PWMx (the command asks for a PWM value input)
 // f - (READADC2) Read ATtiny85 ADC2 (the reply has 2 data bytes + 1 CRC byte)
 // g - (GET_INFO) Get useful information regarding various slave parameters.
+// z - (INITTINY) Reboot ESP-8266 and initialize ATtiny85
+// x - (RESETINY) Reset ATtiny85
 
 #include <Wire.h>
 
@@ -38,6 +40,8 @@
 #define ACK_GETI 0xF2     // Acknowledge Command Read Info
 #define UNKNOWNC 0xFF     // Unknown Command Reply
 #define INITTINY 0x01     // Command to initialize ATtiny85
+#define RESETINY 0x02     // Command to Reset ATtiny85
+#define ACKRESTY 0xFD     // Acknowledge Command Reset
 
 //typedef uint8_t byte; //  8 bit data type
 //typedef uint16_t word; // 16 bit data type
@@ -109,7 +113,7 @@ void setup() {
   ClrScr();
   Serial.println("Nicebots I2C Command Test");
   Serial.println("=========================");
-  Serial.println("Please type a command ('a', 's', 'd', 'f', 'g' or 'z' to reboot):");
+  Serial.println("Please type a command ('a', 's', 'd', 'f', 'g', 'z' reboot or 'x' reset tiny):");
 }
 
 //
@@ -400,6 +404,44 @@ void loop() {
         Serial.println("Resetting ESP8266 ...");
         ESP.restart();
       }
+      // ********************
+      // * RESETINY Command *
+      // ********************
+      case 'x': case 'X': {
+        Serial.println("Sending ATtiny85 Reset Command ...");
+        byte cmdTX[1] = { RESETINY };
+        byte txSize = sizeof(cmdTX);
+        Serial.print("ESP8266 - Sending Opcode >>> ");
+        Serial.print(cmdTX[0]);
+        Serial.println("(RESETINY)");
+        // Transmit command
+        byte transmitData[1] = { 0 };
+        for (int i = 0; i < txSize; i++) {
+          transmitData[i] = cmdTX[i];
+          Wire.beginTransmission(slaveAddress);
+          Wire.write(transmitData[i]);
+          Wire.endTransmission();
+        }
+        // Receive acknowledgement
+        blockRXSize = Wire.requestFrom(slaveAddress, (byte)1);
+        byte ackRX[1] = { 0 };   // Data received from slave
+        for (int i = 0; i < blockRXSize; i++) {
+          ackRX[i] = Wire.read();
+        }
+        if (ackRX[0] == ACKRESTY) {
+          Serial.print("ESP8266 - Command ");
+          Serial.print(cmdTX[0]);
+          Serial.print(" parsed OK <<< ");
+          Serial.println(ackRX[0]);
+        }
+        else {
+          Serial.print("ESP8266 - Error parsing ");
+          Serial.print(cmdTX[0]);
+          Serial.print(" command! <<< ");
+          Serial.println(ackRX[0]);
+        }
+        break;
+      }
       // *******************
       // * Unknown Command *
       // *******************
@@ -411,7 +453,7 @@ void loop() {
       }
     }
     Serial.println("");
-    Serial.println("Please type a command ('a', 's', 'd', 'f', 'g' or 'z' to reboot):");
+    Serial.println("Please type a command ('a', 's', 'd', 'f', 'g', 'z' reboot or 'x' reset tiny):");
   }
   ReadChar();           // PROD - REMOVE FOR TESTING
   //delay(150);         // TEST - REMOVE FOR PRODUCTION

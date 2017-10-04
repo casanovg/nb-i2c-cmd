@@ -6,7 +6,7 @@
 // *  Author: Gustavo Casanova                            *
 // *  ..................................................  *
 // *  Firmware Version: 0.1 | MCU: ESP8266                *
-// *  2017-07-01 gustavo.casanova@nicebots.com            *
+// *  2017-10-03 gustavo.casanova@nicebots.com            *
 // ********************************************************
 //
 // Run this master program on a NodeMCU, ESP-01 or ESP-12 Module

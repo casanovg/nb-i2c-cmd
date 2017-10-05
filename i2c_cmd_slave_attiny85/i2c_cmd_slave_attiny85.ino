@@ -5,8 +5,8 @@
 // *  ..................................................  *
 // *  Author: Gustavo Casanova                            *
 // *  ..................................................  *
-// *  Firmware Version: 0.1 | MCU: ATtiny85               *
-// *  2017-06-15 gustavo.casanova@nicebots.com            *
+// *  Firmware Version: 0.2 | MCU: ATtiny85               *
+// *  2017-10-03 gustavo.casanova@nicebots.com            *
 // ********************************************************
 //
 // Run this slave program on a Digispark or ATtiny85
@@ -23,9 +23,9 @@
 // g - (GET_INFO) Get useful information regarding various slave parameters.
 //
 // Connections:
-// AtTiny Pin 5 (PB0/SDA) = I2C SDA
+// ATtiny Pin 5 (PB0) <---> ESP8266 Pin  (NodeMCU D3) SDA
 //     connect to SDA on master with external pull-up (~4.7K)
-// AtTiny Pin 7 (PB0/SCL) = I2C SCL
+// ATtiny Pin 7 (PB0/SCL) = I2C SCL
 //     connect to SCL on master with external pull-up (~4.7K)
 // Optional:
 // AtTiny Pin 1 (PB5/!RST)

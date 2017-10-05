@@ -5,7 +5,7 @@
 // *  ..................................................  *
 // *  Author: Gustavo Casanova                            *
 // *  ..................................................  *
-// *  Firmware Version: 0.1 | MCU: ESP8266                *
+// *  Firmware Version: 0.2 | MCU: ESP8266                *
 // *  2017-10-03 gustavo.casanova@nicebots.com            *
 // ********************************************************
 //
@@ -111,8 +111,8 @@ void setup() {
   blockRXSize = 0;
 
   ClrScr();
-  Serial.println("Nicebots I2C Command Test");
-  Serial.println("=========================");
+  Serial.println("Nicebots I2C Command Test (v0.2");
+  Serial.println("===============================");
   Serial.println("Please type a command ('a', 's', 'd', 'f', 'g', 'z' reboot or 'x' reset tiny):");
 }
 
@@ -401,8 +401,43 @@ void loop() {
       // * Restart ESP8266 *
       // *******************
       case 'z': case 'Z': {
+        // RESET ATTINY85
+        Serial.println("Sending ATtiny85 Reset Command ...");
+        byte cmdTX[1] = { RESETINY };
+        byte txSize = sizeof(cmdTX);
+        Serial.print("ESP8266 - Sending Opcode >>> ");
+        Serial.print(cmdTX[0]);
+        Serial.println("(RESETINY)");
+        // Transmit command
+        byte transmitData[1] = { 0 };
+        for (int i = 0; i < txSize; i++) {
+          transmitData[i] = cmdTX[i];
+          Wire.beginTransmission(slaveAddress);
+          Wire.write(transmitData[i]);
+          Wire.endTransmission();
+        }
+        // Receive acknowledgement
+        blockRXSize = Wire.requestFrom(slaveAddress, (byte)1);
+        byte ackRX[1] = { 0 };   // Data received from slave
+        for (int i = 0; i < blockRXSize; i++) {
+          ackRX[i] = Wire.read();
+        }
+        if (ackRX[0] == ACKRESTY) {
+          Serial.print("ESP8266 - Command ");
+          Serial.print(cmdTX[0]);
+          Serial.print(" parsed OK <<< ");
+          Serial.println(ackRX[0]);
+        }
+        else {
+          Serial.print("ESP8266 - Error parsing ");
+          Serial.print(cmdTX[0]);
+          Serial.print(" command! <<< ");
+          Serial.println(ackRX[0]);
+        }
+        // RESET ESP8266
         Serial.println("Resetting ESP8266 ...");
         ESP.restart();
+        break;
       }
       // ********************
       // * RESETINY Command *

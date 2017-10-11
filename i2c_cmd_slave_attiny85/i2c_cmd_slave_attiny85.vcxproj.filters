@@ -21,5 +21,13 @@
     <ClInclude Include="__vm\.i2c_cmd_slave_attiny85.vsarduino.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\Google Drive\Arduino Sketchbook\libraries\TinyWireS\usiTwiSlave.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\Google Drive\Arduino Sketchbook\libraries\TinyWireS\usiTwiSlave.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

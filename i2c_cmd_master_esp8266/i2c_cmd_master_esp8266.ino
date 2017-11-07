@@ -366,7 +366,9 @@ void loop() {
           Serial.print(" | LSB=");
           Serial.print(ackRX[2]);
           Serial.print(" | CRC=");
-          Serial.print(ackRX[3]);
+          Serial.println(ackRX[3]);
+          Serial.print("CRC received ---> ");
+          Serial.println(ackRX[sizeof(ackRX)]);
           byte checkCRC = CalculateCRC(ackRX, sizeof(ackRX));
           if (checkCRC == 0) {
             Serial.print("   >>> CRC OK! <<<   ");
@@ -426,7 +428,7 @@ void loop() {
             Serial.println(")");
           }
           Serial.print("CRC received ---> ");
-          Serial.println(ackRX[sizeof(ackRX)]);
+          Serial.println(ackRX[15]);
           byte checkCRC = CalculateCRC(ackRX, sizeof(ackRX));
           if (checkCRC == 0) {
             Serial.print("   >>> CRC OK! <<<   ");

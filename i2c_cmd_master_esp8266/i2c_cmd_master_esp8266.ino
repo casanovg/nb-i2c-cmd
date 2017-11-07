@@ -6,7 +6,7 @@
 // *  Author: Gustavo Casanova                            *
 // *  ..................................................  *
 // *  Firmware Version: 0.2 | MCU: ESP8266                *
-// *  2017-10-03 gustavo.casanova@nicebots.com            *
+// *  2017-11-06 gustavo.casanova@nicebots.com            *
 // ********************************************************
 //
 // Run this master program on a NodeMCU, ESP-01 or ESP-12 Module
@@ -425,6 +425,8 @@ void loop() {
             Serial.print(ackRX[i]);
             Serial.println(")");
           }
+          Serial.print("CRC received ---> ");
+          Serial.println(ackRX[sizeof(ackRX)]);
           byte checkCRC = CalculateCRC(ackRX, sizeof(ackRX));
           if (checkCRC == 0) {
             Serial.print("   >>> CRC OK! <<<   ");

@@ -5,8 +5,8 @@
 // *  ..................................................  *
 // *  Author: Gustavo Casanova                            *
 // *  ..................................................  *
-// *  Firmware Version: 0.2 | MCU: ESP8266                *
-// *  2017-11-06 gustavo.casanova@nicebots.com            *
+// *  Firmware Version: 0.3 | MCU: ESP8266                *
+// *  2017-11-16 gustavo.casanova@nicebots.com            *
 // ********************************************************
 //
 // Run this master program on a NodeMCU, ESP-01 or ESP-12 Module
@@ -355,7 +355,7 @@ void loop() {
             Serial.println(ackRX[i]);
           }
           Serial.println("*************************");
-          Serial.print("* Analog Data: ");
+          Serial.print("* Analog Value: ");
           Serial.print(analogValue);
           Serial.print("(");
           Serial.print(analogValue, HEX);
@@ -387,9 +387,9 @@ void loop() {
         }
         break;
       }
-      // ************************************
-      // * GET_INFO Command (16 byte reply) *
-      // ************************************
+                // ************************************
+                // * GET_INFO Command (16 byte reply) *
+                // ************************************
       case 'g': case 'G': {
         byte cmdTX[1] = { GET_INFO };
         byte txSize = sizeof(cmdTX);
@@ -415,7 +415,8 @@ void loop() {
           Serial.print(cmdTX[0]);
           Serial.print(" parsed OK <<< ");
           Serial.println(ackRX[0]);
-          for (int i = 1; i < blockRXSize - 1; i++) {
+          //for (int i = 1; i < blockRXSize - 1; i++) {   // ----->
+          for (int i = 1; i < 12 - 1; i++) {              // ----->
             Serial.print("ESP8266 - Data Byte ");
             if (i < 9) {
               Serial.print("0");
@@ -427,8 +428,12 @@ void loop() {
             Serial.print(ackRX[i]);
             Serial.println(")");
           }
-          Serial.print("CRC received ---> ");
-          Serial.println(ackRX[15]);
+          Serial.print("# [][][] Analog Value: ");
+          Serial.print((ackRX[11] << 8) + ackRX[12]);
+          Serial.println(" [][][]");
+          Serial.print("# ~~~ ADC count: ");
+          Serial.print((ackRX[13] << 8) + ackRX[14]);
+          Serial.println(" ~~~ #");
           byte checkCRC = CalculateCRC(ackRX, sizeof(ackRX));
           if (checkCRC == 0) {
             Serial.print("   >>> CRC OK! <<<   ");
@@ -451,40 +456,6 @@ void loop() {
       // * Restart ESP8266 *
       // *******************
       case 'z': case 'Z': {
-        //// RESET ATTINY85
-        //Serial.println("Sending ATtiny85 Reset Command ...");
-        //byte cmdTX[1] = { RESETINY };
-        //byte txSize = sizeof(cmdTX);
-        //Serial.print("ESP8266 - Sending Opcode >>> ");
-        //Serial.print(cmdTX[0]);
-        //Serial.println("(RESETINY)");
-        //// Transmit command
-        //byte transmitData[1] = { 0 };
-        //for (int i = 0; i < txSize; i++) {
-        //  transmitData[i] = cmdTX[i];
-        //  Wire.beginTransmission(slaveAddress);
-        //  Wire.write(transmitData[i]);
-        //  Wire.endTransmission();
-        //}
-        //// Receive acknowledgement
-        //blockRXSize = Wire.requestFrom(slaveAddress, (byte)1);
-        //byte ackRX[1] = { 0 };   // Data received from slave
-        //for (int i = 0; i < blockRXSize; i++) {
-        //  ackRX[i] = Wire.read();
-        //}
-        //if (ackRX[0] == ACKRESTY) {
-        //  Serial.print("ESP8266 - Command ");
-        //  Serial.print(cmdTX[0]);
-        //  Serial.print(" parsed OK <<< ");
-        //  Serial.println(ackRX[0]);
-        //}
-        //else {
-        //  Serial.print("ESP8266 - Error parsing ");
-        //  Serial.print(cmdTX[0]);
-        //  Serial.print(" command! <<< ");
-        //  Serial.println(ackRX[0]);
-        //}
-        // RESET ESP8266
         Serial.println("\nResetting ESP8266 ...");
         ESP.restart();
         break;

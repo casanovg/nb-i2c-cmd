@@ -428,9 +428,9 @@ void loop() {
             Serial.print(ackRX[i]);
             Serial.println(")");
           }
-          Serial.print("# [][][] Analog Value: ");
+          Serial.print("# []* Analog Value: ");
           Serial.print((ackRX[11] << 8) + ackRX[12]);
-          Serial.println(" [][][]");
+          Serial.println(" *[]");
           Serial.print("# ~~~ ADC count: ");
           Serial.print((ackRX[13] << 8) + ackRX[14]);
           Serial.println(" ~~~ #");

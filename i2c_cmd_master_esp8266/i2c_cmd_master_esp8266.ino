@@ -387,9 +387,9 @@ void loop() {
         }
         break;
       }
-                // ************************************
-                // * GET_INFO Command (16 byte reply) *
-                // ************************************
+      // ************************************
+      // * GET_INFO Command (16 byte reply) *
+      // ************************************
       case 'g': case 'G': {
         byte cmdTX[1] = { GET_INFO };
         byte txSize = sizeof(cmdTX);
@@ -416,7 +416,7 @@ void loop() {
           Serial.print(" parsed OK <<< ");
           Serial.println(ackRX[0]);
           //for (int i = 1; i < blockRXSize - 1; i++) {   // ----->
-          for (int i = 1; i < 12 - 1; i++) {              // ----->
+          for (int i = 1; i < 6 - 1; i++) {              // ----->
             Serial.print("ESP8266 - Data Byte ");
             if (i < 9) {
               Serial.print("0");
@@ -428,12 +428,29 @@ void loop() {
             Serial.print(ackRX[i]);
             Serial.println(")");
           }
-          Serial.print("# []* Analog Value: ");
+          // --------------------------------------------------
+          // Sum of Vi (instantaneous voltages)
+          Serial.print("# <>* Sum of Vi's: ");
+          Serial.print((ackRX[5] << 24) + (ackRX[6] << 16) + (ackRX[7] << 8) + ackRX[8]);
+          Serial.print(" (");
+          Serial.print((ackRX[5] << 24) + (ackRX[6] << 16) + (ackRX[7] << 8) + ackRX[8]), HEX;
+          Serial.println(") *<>");
+          // --------------------------------------------------
+          // Vrms
+          Serial.print("# {}* Vrms (AC): ");
+          Serial.print((ackRX[9] << 8) + ackRX[10]);
+          Serial.println(" *{}");
+          // --------------------------------------------------
+          // Analog value (DC)
+          Serial.print("# []* Analog Value (DC): ");
           Serial.print((ackRX[11] << 8) + ackRX[12]);
           Serial.println(" *[]");
+          // --------------------------------------------------
+          // ADC conversions per AC half-cycle
           Serial.print("# ~~~ ADC count: ");
           Serial.print((ackRX[13] << 8) + ackRX[14]);
           Serial.println(" ~~~ #");
+          // --------------------------------------------------
           byte checkCRC = CalculateCRC(ackRX, sizeof(ackRX));
           if (checkCRC == 0) {
             Serial.print("   >>> CRC OK! <<<   ");

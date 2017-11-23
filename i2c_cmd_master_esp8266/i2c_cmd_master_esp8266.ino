@@ -28,6 +28,9 @@
 
 #include <Wire.h>
 
+#define VCC 3.3			  // PSU VCC 3.3 Volts
+#define ADCTOP 1023       // ADC Top Value @ 10-bit precision = 1023 (2^10)
+
 #define STDPB1_1 0xE9     // Command to Set ATtiny85 PB1 = 1
 #define AKDPB1_1 0x16     // Acknowledge Command PB1 = 1
 #define STDPB1_0 0xE1     // Command to Set ATtiny85 PB1 = 0
@@ -431,15 +434,19 @@ void loop() {
           // --------------------------------------------------
           // Sum of Vi (instantaneous voltages)
           Serial.print("# <>* Sum of Vi's: ");
-          Serial.print((ackRX[5] << 24) + (ackRX[6] << 16) + (ackRX[7] << 8) + ackRX[8]);
+          Serial.print((unsigned)(ackRX[5] << 24) + (ackRX[6] << 16) + (ackRX[7] << 8) + ackRX[8]);
           Serial.print(" (");
-          Serial.print((ackRX[5] << 24) + (ackRX[6] << 16) + (ackRX[7] << 8) + ackRX[8]), HEX;
+          Serial.print(((ackRX[5] << 24) + (ackRX[6] << 16) + (ackRX[7] << 8) + ackRX[8]), HEX);
           Serial.println(") *<>");
           // --------------------------------------------------
           // Vrms
+		  uint16_t vRMS = (ackRX[9] << 8) + ackRX[10];
+		  float volts = (vRMS * VCC) / ADCTOP;
           Serial.print("# {}* Vrms (AC): ");
-          Serial.print((ackRX[9] << 8) + ackRX[10]);
-          Serial.println(" *{}");
+          Serial.print(vRMS);
+          Serial.print(" *{} ---> { ");
+		  Serial.print(volts, 3);
+		  Serial.println(" Volts RMS }");
           // --------------------------------------------------
           // Analog value (DC)
           Serial.print("# []* Analog Value (DC): ");

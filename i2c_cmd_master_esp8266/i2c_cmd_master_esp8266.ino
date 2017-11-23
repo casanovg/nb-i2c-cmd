@@ -449,7 +449,7 @@ void loop() {
 		  Serial.println(" Volts RMS }");
           // --------------------------------------------------
           // Analog value (DC)
-          Serial.print("# []* Analog Value (DC): ");
+          Serial.print("# []* Analog Value (Last): ");
           Serial.print((ackRX[11] << 8) + ackRX[12]);
           Serial.println(" *[]");
           // --------------------------------------------------

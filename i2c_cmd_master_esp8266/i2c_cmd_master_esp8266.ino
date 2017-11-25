@@ -419,7 +419,7 @@ void loop() {
           Serial.print(" parsed OK <<< ");
           Serial.println(ackRX[0]);
           //for (int i = 1; i < blockRXSize - 1; i++) {   // ----->
-          for (int i = 1; i < 6 - 1; i++) {              // ----->
+          for (int i = 1; i < 4 - 1; i++) {               // ----->
             Serial.print("ESP8266 - Data Byte ");
             if (i < 9) {
               Serial.print("0");
@@ -431,28 +431,33 @@ void loop() {
             Serial.print(ackRX[i]);
             Serial.println(")");
           }
-          // --------------------------------------------------
-          // Sum of Vi (instantaneous voltages)
+		  // -----------------------------------------------------
+		  // // Half-cycle Vi Average
+		  Serial.print(":::* Half-cycle Vi Average: ");
+		  Serial.print((ackRX[3] << 8) + ackRX[4]);
+		  Serial.println(" *:::");
+          // -----------------------------------------------------
+          // Sum of squared Vi's (instantaneous voltages)
           Serial.print("# <>* Sum of Vi's: ");
           Serial.print((unsigned)(ackRX[5] << 24) + (ackRX[6] << 16) + (ackRX[7] << 8) + ackRX[8]);
           Serial.print(" (");
           Serial.print(((ackRX[5] << 24) + (ackRX[6] << 16) + (ackRX[7] << 8) + ackRX[8]), HEX);
           Serial.println(") *<>");
-          // --------------------------------------------------
-          // Vrms
+          // -----------------------------------------------------
+          // VRMS (Square root of sum of sqred VI's / ADC samples
 		  uint16_t vRMS = (ackRX[9] << 8) + ackRX[10];
 		  float volts = (vRMS * VCC) / ADCTOP;
           Serial.print("# {}* Vrms (AC): ");
           Serial.print(vRMS);
-          Serial.print(" *{} ---> { ");
+          Serial.print(" *{} -------------> {{ ");
 		  Serial.print(volts, 3);
-		  Serial.println(" Volts RMS }");
-          // --------------------------------------------------
-          // Analog value (DC)
+		  Serial.println(" Volts RMS }}");
+          // -----------------------------------------------------
+          // Last analog value readout (DC)
           Serial.print("# []* Analog Value (Last): ");
           Serial.print((ackRX[11] << 8) + ackRX[12]);
           Serial.println(" *[]");
-          // --------------------------------------------------
+          // -----------------------------------------------------
           // ADC conversions per AC half-cycle
           Serial.print("# ~~~ ADC count: ");
           Serial.print((ackRX[13] << 8) + ackRX[14]);

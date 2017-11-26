@@ -418,8 +418,6 @@ void loop() {
 			break;
 		}
 
-/*
-
 		// ********************
 		// * READBUFF Command *
 		// ********************
@@ -434,6 +432,7 @@ void loop() {
 				dataSize = ReadByte();
 			}
 			newByte = false;
+			Serial.println("");
 			Serial.print("Please enter the DSP buffer data start position: ");
 			while (newByte == false) {
 				dataIX = ReadByte();
@@ -492,8 +491,6 @@ void loop() {
 			}
 			break;
 		}
-
-*/
 
 		// *******************
 		// * Restart ESP8266 *

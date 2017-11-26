@@ -9,6 +9,8 @@
 // *  2017-11-25 gustavo.casanova@nicebots.com            *
 // ********************************************************
 
+// https://drive.google.com/open?id=1pu6hOd0GmKWU5qMEgDtN57TDMxKzHRv6
+
 // Hardware Commands
 #define STDPB1_1		0xE9				/* Command to Set ATtiny85 PB1 = 1 */
 #define AKDPB1_1		0x16				/* Acknowledge PB1 = 1 Command */

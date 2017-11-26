@@ -27,24 +27,9 @@
 // x - (RESETINY) Reset ATtiny85
 
 #include <Wire.h>
-
+#include "nb-i2c-cmd.h"
 #define VCC 3.3			  // PSU VCC 3.3 Volts
 #define ADCTOP 1023       // ADC Top Value @ 10-bit precision = 1023 (2^10)
-
-#define STDPB1_1 0xE9     // Command to Set ATtiny85 PB1 = 1
-#define AKDPB1_1 0x16     // Acknowledge Command PB1 = 1
-#define STDPB1_0 0xE1     // Command to Set ATtiny85 PB1 = 0
-#define AKDPB1_0 0x1E     // Acknowledge Command PB1 = 0
-#define STANAPB3 0xFB     // Command to Set ATtiny85 PB3 = PWMx
-#define ACKNAPB3 0x04     // Acknowledge Command PB3 = PWMx
-#define READADC2 0xDA     // Command to Read ATtiny85 ADC2
-#define ACKNADC2 0x25     // Acknowledge Command Read ADC2
-#define GET_INFO 0x0D     // Command to Read Generic Info
-#define ACK_GETI 0xF2     // Acknowledge Command Read Info
-#define UNKNOWNC 0xFF     // Unknown Command Reply
-#define INITTINY 0x01     // Command to initialize ATtiny85
-#define RESETINY 0x02     // Command to Reset ATtiny85
-#define ACKRESTY 0xFD     // Acknowledge Command Reset
 
 //typedef uint8_t byte; //  8 bit data type
 //typedef uint16_t word; // 16 bit data type
@@ -295,7 +280,7 @@ void loop() {
         for (int i = 0; i < blockRXSize; i++) {
           ackRX[i] = Wire.read();
         }
-        if (ackRX[0] == ACKNAPB3) {
+        if (ackRX[0] == ACKANPB3) {
           Serial.print("ESP8266 - Command ");
           Serial.print(cmdTX[0]);
           Serial.print(" parsed OK <<< ");

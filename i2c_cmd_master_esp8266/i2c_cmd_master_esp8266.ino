@@ -427,7 +427,7 @@ void loop() {
 			byte txSize = 3;
 			byte dataSize = 0;	// DSP buffer data size requested to ATtiny85
 			byte dataIX = 0;	// Requested DSP buffer data start position
-			Serial.print("Please enter the data size to retrieve from DSP buffer: ");
+			Serial.print("Please enter the 2-byte word amount to retrieve from the DSP buffer: ");
 			while (newByte == false) {
 				dataSize = ReadByte();
 			}
@@ -459,27 +459,22 @@ void loop() {
 				newByte = false;
 			}
 			// Receive acknowledgement
-			blockRXSize = Wire.requestFrom(slaveAddress, (byte)2);
-			byte ackRX[2] = { 0 };   // Data received from slave
+			blockRXSize = Wire.requestFrom(slaveAddress, (byte)((dataSize * 2) + 2));
+			byte ackRX[(dataSize * 2) + 2];   // Data received from slave
 			for (int i = 0; i < blockRXSize; i++) {
 				ackRX[i] = Wire.read();
 			}
-			if (ackRX[0] == ACKANPB3) {
+			if (ackRX[0] == ACKRDBUF) {
 				Serial.print("ESP8266 - Command ");
 				Serial.print(cmdTX[0]);
 				Serial.print(" parsed OK <<< ");
 				Serial.println(ackRX[0]);
-				if (ackRX[1] == 0) {
-					Serial.print("ESP8266 - Operand ");
-					Serial.print(cmdTX[1]);
-					Serial.print(" parsed OK by slave <<< ATtiny85 CRC Check = ");
-					Serial.println(ackRX[1]);
-				}
-				else {
-					Serial.print("ESP8266 - Operand ");
-					Serial.print(cmdTX[1]);
-					Serial.print(" parsed with {{{ERROR}}} <<< ATtiny85 CRC Check = ");
-					Serial.println(ackRX[1]);
+				
+				for (uint8_t i = 1; i < (dataSize * 2) + 1; i += 2) {
+					// ADC conversions per AC half-cycle
+					Serial.print("# ¬¬¬ KALAMA: ");
+					Serial.print((ackRX[i] << 8) + ackRX[i + 1]);
+					Serial.println(" ¬¬¬ #");
 				}
 
 			}

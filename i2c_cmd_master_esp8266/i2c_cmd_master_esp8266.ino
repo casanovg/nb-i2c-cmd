@@ -471,7 +471,7 @@ void loop() {
 				Serial.println(ackRX[0]);
 				
 				for (uint8_t i = 1; i < (dataSize * 2) + 1; i += 2) {
-					// DSP Buffer 2-Byte Words
+					// DSP Buffer 2-Byte Word
 					Serial.print("# %%% KOKOMO: ");
 					Serial.print((ackRX[i] << 8) + ackRX[i + 1]);
 					Serial.println(" %%% #");

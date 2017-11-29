@@ -670,7 +670,6 @@ void ReadBuffer(uint8_t dataIX, uint8_t dataSize) {
 	}
 }
 
-
 // Function DumpBuffer
 void DumpBuffer(void) {
 	byte cmdTX[3] = { READBUFF, 0, 0 };

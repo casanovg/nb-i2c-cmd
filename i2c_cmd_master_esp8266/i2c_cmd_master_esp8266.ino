@@ -427,7 +427,7 @@ void loop() {
 			byte txSize = 3;
 			byte dataSize = 0;	// DSP buffer data size requested to ATtiny85
 			byte dataIX = 0;	// Requested DSP buffer data start position
-			Serial.print("Please enter the 2-byte word amount to retrieve from the DSP buffer: ");
+			Serial.print("Please enter the word amount to retrieve from the DSP buffer (1 to 7): ");
 			while (newByte == false) {
 				dataSize = ReadByte();
 			}
@@ -459,7 +459,7 @@ void loop() {
 				newByte = false;
 			}
 			// Receive acknowledgement
-			blockRXSize = Wire.requestFrom(slaveAddress, (byte)((dataSize * 2) + 2));
+			blockRXSize = Wire.requestFrom(slaveAddress, (dataSize * 2) + 2);
 			byte ackRX[(dataSize * 2) + 2];   // Data received from slave
 			for (int i = 0; i < blockRXSize; i++) {
 				ackRX[i] = Wire.read();
@@ -472,11 +472,10 @@ void loop() {
 				
 				for (uint8_t i = 1; i < (dataSize * 2) + 1; i += 2) {
 					// ADC conversions per AC half-cycle
-					Serial.print("# ¬¬¬ KALAMA: ");
+					Serial.print("# %%% KOKOMO: ");
 					Serial.print((ackRX[i] << 8) + ackRX[i + 1]);
-					Serial.println(" ¬¬¬ #");
+					Serial.println(" %%% #");
 				}
-
 			}
 			else {
 				Serial.print("ESP8266 - Error parsing ");

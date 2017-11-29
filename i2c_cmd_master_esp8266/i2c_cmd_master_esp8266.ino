@@ -427,27 +427,27 @@ void loop() {
 			byte txSize = 3;
 			byte dataSize = 0;	// DSP buffer data size requested to ATtiny85
 			byte dataIX = 0;	// Requested DSP buffer data start position
-			Serial.print("Please enter the word amount to retrieve from the DSP buffer (1 to 7): ");
-			while (newByte == false) {
-				dataSize = ReadByte();
-			}
-			newByte = false;
-			Serial.println("");
 			Serial.print("Please enter the DSP buffer data start position: ");
 			while (newByte == false) {
 				dataIX = ReadByte();
 			}
+			newByte = false;
+			Serial.println("");
+			Serial.print("Please enter the word amount to retrieve from the DSP buffer (1 to 7): ");
+			while (newByte == false) {
+				dataSize = ReadByte();
+			}
 			if (newByte == true) {
 				Serial.println("");
 				Serial.println("");
-				cmdTX[1] = dataSize;
-				cmdTX[2] = dataIX;
+				cmdTX[1] = dataIX;
+				cmdTX[2] = dataSize;
 				Serial.print("ESP8266 - Sending Opcode >>> ");
 				Serial.print(cmdTX[0]);
 				Serial.println("(READBUFF)");
-				Serial.print("ESP8266 - Sending requested data size >>> ");
-				Serial.println(cmdTX[1]);
 				Serial.print("ESP8266 - Sending position IX >>> ");
+				Serial.println(cmdTX[1]);
+				Serial.print("ESP8266 - Sending requested data size >>> ");
 				Serial.println(cmdTX[2]);
 				byte transmitData[1] = { 0 };
 				for (int i = 0; i < txSize; i++) {
@@ -469,10 +469,11 @@ void loop() {
 				Serial.print(cmdTX[0]);
 				Serial.print(" parsed OK <<< ");
 				Serial.println(ackRX[0]);
-				
 				for (uint8_t i = 1; i < (dataSize * 2) + 1; i += 2) {
 					// DSP Buffer 2-Byte Word
-					Serial.print("# %%% KOKOMO: ");
+					Serial.print("# %%% DSP position ");
+					Serial.print(dataIX++);
+					Serial.print(": ");
 					Serial.print((ackRX[i] << 8) + ackRX[i + 1]);
 					Serial.println(" %%% #");
 				}

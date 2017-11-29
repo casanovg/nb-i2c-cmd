@@ -476,6 +476,15 @@ void loop() {
 					Serial.print((ackRX[i] << 8) + ackRX[i + 1]);
 					Serial.println(" %%% #");
 				}
+				byte checkCRC = CalculateCRC(ackRX, sizeof(ackRX));
+				if (checkCRC == 0) {
+					Serial.print("   >>> CRC OK! <<<   ");
+					Serial.println(checkCRC);
+				}
+				else {
+					Serial.print("   ### CRC ERROR! ###   ");
+					Serial.println(checkCRC);
+				}
 			}
 			else {
 				Serial.print("ESP8266 - Error parsing ");

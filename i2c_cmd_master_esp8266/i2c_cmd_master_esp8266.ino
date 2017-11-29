@@ -357,7 +357,7 @@ void loop() {
 				//for (int i = 1; i < blockRXSize - 1; i++) {   // ----->
 				for (int i = 1; i < 4 - 1; i++) {               // ----->
 					Serial.print("ESP8266 - Data Byte ");
-					if (i < 9) {
+					if (i < 10) {
 						Serial.print("0");
 					}
 					Serial.print(i + 1);
@@ -472,7 +472,7 @@ void loop() {
 				for (uint8_t i = 1; i < (dataSize * 2) + 1; i += 2) {
 					// DSP Buffer 2-Byte Word
 					Serial.print("# %%% DSP position ");
-					if (dataIX < 9) {
+					if (dataIX < 10) {
 						Serial.print("0");
 					}
 					Serial.print(dataIX++);

@@ -30,8 +30,12 @@
 
 #include <Wire.h>
 #include "nb-i2c-cmd.h"
-#define VCC 3.3			  // PSU VCC 3.3 Volts
-#define ADCTOP 1023       // ADC Top Value @ 10-bit precision = 1023 (2^10)
+
+#define VCC 3.3							/* PSU VCC 3.3 Volts */
+#define ADCTOP 1023						/* ADC Top Value @ 10-bit precision = 1023 (2^10) */
+#define DSPBUFFERSIZE	100 			/* DSP buffer size (16-bit elements) */
+#define MAXBUFFERTXLN	7				/* Maximum DPS buffer TX/RX size */
+
 
 // Global Variables
 byte slaveAddress = 0;
@@ -655,7 +659,7 @@ void DumpBuffer(void) {
 	byte transmitData[1] = { 0 };
 	Serial.println("ESP8266 - Dumping DSP Buffer ...");
 	Serial.println("");
-	for (uint8_t k = 1; k < 101; k += 5) {
+	for (uint8_t k = 1; k < DSPBUFFERSIZE + 1; k += 5) {
 		//byte dataSize = 0;	// DSP buffer data size requested to ATtiny85
 		//byte dataIX = 0;	// Requested DSP buffer data start position
 		dataIX = k;
@@ -701,6 +705,7 @@ void DumpBuffer(void) {
 			else {
 				Serial.print("   ### CRC ERROR! ###   ");
 				Serial.println(checkCRC);
+				k = DSPBUFFERSIZE + 1;
 			}
 		}
 		else {
@@ -709,6 +714,6 @@ void DumpBuffer(void) {
 			Serial.print(" command! <<< ");
 			Serial.println(ackRX[0]);
 		}
-		delay(250);
+		delay(500);
 	}
 }

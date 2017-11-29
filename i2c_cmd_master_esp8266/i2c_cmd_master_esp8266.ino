@@ -25,6 +25,7 @@
 // g - (GET_INFO) Get useful information regarding various slave parameters.
 // h - (READBUFF) Read N-bytes from the DSP buffer.
 // j - (DUMPBUFF) Read all the DSP buffer.
+// k - (DSPDEBUG) Digital Signal Processing debug data.
 // z - (INITTINY) Reboot ESP-8266 and initialize ATtiny85
 // x - (RESETINY) Reset ATtiny85
 
@@ -103,7 +104,7 @@ void setup() {
 	ClrScr();
 	Serial.println("Nicebots Pluggie I2C-PWM-ADC Test (v0.4)");
 	Serial.println("========================================");
-	Serial.println("Please type a command ('a', 's', 'd', 'f', 'g', 'h', 'j', 'z' reboot or 'x' reset tiny):");
+	Serial.println("Please type a command ('a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'z' reboot or 'x' reset tiny):");
 }
 
 //
@@ -342,11 +343,9 @@ void loop() {
 		// * READBUFF Command *
 		// ********************
 		case 'h': case 'H': {
-			byte cmdTX[3] = { READBUFF, 0, 0 };
-			//byte txSize = sizeof(cmdTX);
-			byte txSize = 3;
 			byte dataSize = 0;	// DSP buffer data size requested to ATtiny85
 			byte dataIX = 0;	// Requested DSP buffer data start position
+			newByte = false;
 			Serial.print("Please enter the DSP buffer data start position: ");
 			while (newByte == false) {
 				dataIX = ReadByte();
@@ -358,63 +357,7 @@ void loop() {
 				dataSize = ReadByte();
 			}
 			if (newByte == true) {
-				Serial.println("");
-				Serial.println("");
-				cmdTX[1] = dataIX;
-				cmdTX[2] = dataSize;
-				Serial.print("ESP8266 - Sending Opcode >>> ");
-				Serial.print(cmdTX[0]);
-				Serial.println("(READBUFF)");
-				Serial.print("ESP8266 - Sending position IX >>> ");
-				Serial.println(cmdTX[1]);
-				Serial.print("ESP8266 - Sending requested data size >>> ");
-				Serial.println(cmdTX[2]);
-				byte transmitData[1] = { 0 };
-				for (int i = 0; i < txSize; i++) {
-					transmitData[i] = cmdTX[i];
-					Wire.beginTransmission(slaveAddress);
-					Wire.write(transmitData[i]);
-					Wire.endTransmission();
-				}
-				newByte = false;
-			}
-			// Receive acknowledgement
-			blockRXSize = Wire.requestFrom(slaveAddress, (dataSize * 2) + 2);
-			byte ackRX[(dataSize * 2) + 2];   // Data received from slave
-			for (int i = 0; i < blockRXSize; i++) {
-				ackRX[i] = Wire.read();
-			}
-			if (ackRX[0] == ACKRDBUF) {
-				Serial.print("ESP8266 - Command ");
-				Serial.print(cmdTX[0]);
-				Serial.print(" parsed OK <<< ");
-				Serial.println(ackRX[0]);
-				for (uint8_t i = 1; i < (dataSize * 2) + 1; i += 2) {
-					// DSP Buffer 2-Byte Word
-					Serial.print("# %%% DSP position ");
-					if (dataIX < 10) {
-						Serial.print("0");
-					}
-					Serial.print(dataIX++);
-					Serial.print(": ");
-					Serial.print((ackRX[i] << 8) + ackRX[i + 1]);
-					Serial.println(" %%% #");
-				}
-				byte checkCRC = CalculateCRC(ackRX, sizeof(ackRX));
-				if (checkCRC == 0) {
-					Serial.print("   >>> CRC OK! <<<   ");
-					Serial.println(checkCRC);
-				}
-				else {
-					Serial.print("   ### CRC ERROR! ###   ");
-					Serial.println(checkCRC);
-				}
-			}
-			else {
-				Serial.print("ESP8266 - Error parsing ");
-				Serial.print(cmdTX[0]);
-				Serial.print(" command! <<< ");
-				Serial.println(ackRX[0]);
+				ReadBuffer(dataIX, dataSize);
 			}
 			break;
 		}
@@ -422,6 +365,16 @@ void loop() {
 		// * DUMPBUFF Command *
 		// ********************
 		case 'j': case 'J': {
+			DumpBuffer();
+			break;
+		}
+		// ********************
+		// * DSPDEBUG Command *
+		// ********************
+		case 'k': case 'K': {
+			GetInfo();
+			delay(250);
+			Serial.println("");
 			DumpBuffer();
 			break;
 		}
@@ -482,7 +435,7 @@ void loop() {
 		}
 		}
 		Serial.println("");
-		Serial.println("Please type a command ('a', 's', 'd', 'f', 'g', 'h', 'j', 'z' reboot or 'x' reset tiny):");
+		Serial.println("Please type a command ('a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'z' reboot or 'x' reset tiny):");
 	}
 	ReadChar();           // PROD - REMOVE FOR TESTING
 }
@@ -636,6 +589,69 @@ void GetInfo(void) {
 		Serial.print((ackRX[13] << 8) + ackRX[14]);
 		Serial.println(" ~~~ #");
 		// --------------------------------------------------
+		byte checkCRC = CalculateCRC(ackRX, sizeof(ackRX));
+		if (checkCRC == 0) {
+			Serial.print("   >>> CRC OK! <<<   ");
+			Serial.println(checkCRC);
+		}
+		else {
+			Serial.print("   ### CRC ERROR! ###   ");
+			Serial.println(checkCRC);
+		}
+	}
+	else {
+		Serial.print("ESP8266 - Error parsing ");
+		Serial.print(cmdTX[0]);
+		Serial.print(" command! <<< ");
+		Serial.println(ackRX[0]);
+	}
+}
+
+// Function ReadBuffer
+void ReadBuffer(uint8_t dataIX, uint8_t dataSize) {
+	byte cmdTX[3] = { READBUFF, 0, 0 };
+	//byte txSize = sizeof(cmdTX);
+	byte txSize = 3;
+	Serial.println("");
+	Serial.println("");
+	cmdTX[1] = dataIX;
+	cmdTX[2] = dataSize;
+	Serial.print("ESP8266 - Sending Opcode >>> ");
+	Serial.print(cmdTX[0]);
+	Serial.println("(READBUFF)");
+	Serial.print("ESP8266 - Sending position IX >>> ");
+	Serial.println(cmdTX[1]);
+	Serial.print("ESP8266 - Sending requested data size >>> ");
+	Serial.println(cmdTX[2]);
+	byte transmitData[1] = { 0 };
+	for (int i = 0; i < txSize; i++) {
+		transmitData[i] = cmdTX[i];
+		Wire.beginTransmission(slaveAddress);
+		Wire.write(transmitData[i]);
+		Wire.endTransmission();
+	}
+	// Receive acknowledgement
+	blockRXSize = Wire.requestFrom(slaveAddress, (dataSize * 2) + 2);
+	byte ackRX[(dataSize * 2) + 2];   // Data received from slave
+	for (int i = 0; i < blockRXSize; i++) {
+		ackRX[i] = Wire.read();
+	}
+	if (ackRX[0] == ACKRDBUF) {
+		Serial.print("ESP8266 - Command ");
+		Serial.print(cmdTX[0]);
+		Serial.print(" parsed OK <<< ");
+		Serial.println(ackRX[0]);
+		for (uint8_t i = 1; i < (dataSize * 2) + 1; i += 2) {
+			// DSP Buffer 2-Byte Word
+			Serial.print("# %%% DSP position ");
+			if (dataIX < 10) {
+				Serial.print("0");
+			}
+			Serial.print(dataIX++);
+			Serial.print(": ");
+			Serial.print((ackRX[i] << 8) + ackRX[i + 1]);
+			Serial.println(" %%% #");
+		}
 		byte checkCRC = CalculateCRC(ackRX, sizeof(ackRX));
 		if (checkCRC == 0) {
 			Serial.print("   >>> CRC OK! <<<   ");

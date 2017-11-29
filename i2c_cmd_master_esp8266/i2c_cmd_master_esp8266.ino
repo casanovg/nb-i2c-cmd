@@ -24,6 +24,7 @@
 // f - (READADC2) Read ATtiny85 ADC2 (the reply has 2 data bytes + 1 CRC byte)
 // g - (GET_INFO) Get useful information regarding various slave parameters.
 // h - (READBUFF) Read N-bytes from the DSP buffer.
+// j - (DUMPBUFF) Read all the DSP buffer.
 // z - (INITTINY) Reboot ESP-8266 and initialize ATtiny85
 // x - (RESETINY) Reset ATtiny85
 
@@ -98,7 +99,7 @@ void setup() {
 	ClrScr();
 	Serial.println("Nicebots Pluggie I2C-PWM-ADC Test (v0.4)");
 	Serial.println("========================================");
-	Serial.println("Please type a command ('a', 's', 'd', 'f', 'g', 'h', 'z' reboot or 'x' reset tiny):");
+	Serial.println("Please type a command ('a', 's', 'd', 'f', 'g', 'h', 'j', 'z' reboot or 'x' reset tiny):");
 }
 
 //
@@ -417,7 +418,6 @@ void loop() {
 			}
 			break;
 		}
-
 		// ********************
 		// * READBUFF Command *
 		// ********************
@@ -498,7 +498,13 @@ void loop() {
 			}
 			break;
 		}
-
+		// ********************
+		// * DUMPBUFF Command *
+		// ********************
+		case 'j': case 'J': {
+			DumpBuffer();
+			break;
+		}
 		// *******************
 		// * Restart ESP8266 *
 		// *******************
@@ -556,7 +562,7 @@ void loop() {
 		}
 		}
 		Serial.println("");
-		Serial.println("Please type a command ('a', 's', 'd', 'f', 'g', 'h', 'z' reboot or 'x' reset tiny):");
+		Serial.println("Please type a command ('a', 's', 'd', 'f', 'g', 'h', 'j', 'z' reboot or 'x' reset tiny):");
 	}
 	ReadChar();           // PROD - REMOVE FOR TESTING
 }
@@ -637,4 +643,71 @@ void ClrScr() {
 	Serial.print("[2J");    // clear screen command
 	Serial.write(27);       // ESC command
 	Serial.print("[H");     // cursor to home command
+}
+
+// Function DumpBuffer
+void DumpBuffer(void) {
+	byte cmdTX[3] = { READBUFF, 0, 0 };
+	byte txSize = 3;
+	byte dataIX = 0;
+	uint8_t dataSize = 5;
+	cmdTX[2] = dataSize;
+	byte transmitData[1] = { 0 };
+	Serial.print("ESP8266 - Dumping DSP Buffer ...");
+	for (uint8_t k = 1; k < 101; k += 5) {
+		//byte dataSize = 0;	// DSP buffer data size requested to ATtiny85
+		//byte dataIX = 0;	// Requested DSP buffer data start position
+		dataIX = k;
+		cmdTX[1] = k;
+		for (int i = 0; i < txSize; i++) {
+			transmitData[i] = cmdTX[i];
+			Wire.beginTransmission(slaveAddress);
+			Wire.write(transmitData[i]);
+			Wire.endTransmission();
+		}
+		// Receive acknowledgement
+		blockRXSize = Wire.requestFrom(slaveAddress, (dataSize * 2) + 2);
+		byte ackRX[(dataSize * 2) + 2];   // Data received from slave
+		for (int i = 0; i < blockRXSize; i++) {
+			ackRX[i] = Wire.read();
+		}
+		if (ackRX[0] == ACKRDBUF) {
+			//Serial.print("ESP8266 - Command ");
+			//Serial.print(cmdTX[0]);
+			//Serial.print(" parsed OK <<< ");
+			//Serial.println(ackRX[0]);
+			for (uint8_t i = 1; i < (dataSize * 2) + 1; i += 2) {
+				// DSP Buffer 2-Byte Word
+				Serial.print("| DSP ");
+				if (dataIX < 100) {
+					if (dataIX < 10) {
+						Serial.print("  ");
+					}
+					else {
+						Serial.print(" ");
+					}
+				}
+				Serial.print(dataIX++);
+				Serial.print(": ");
+				Serial.print((ackRX[i] << 8) + ackRX[i + 1]);
+				Serial.println(" |");
+			}
+			byte checkCRC = CalculateCRC(ackRX, sizeof(ackRX));
+			if (checkCRC == 0) {
+				//Serial.print("   >>> CRC OK! <<<   ");
+				//Serial.println(checkCRC);
+			}
+			else {
+				Serial.print("   ### CRC ERROR! ###   ");
+				Serial.println(checkCRC);
+			}
+		}
+		else {
+			Serial.print("ESP8266 - Error parsing ");
+			Serial.print(cmdTX[0]);
+			Serial.print(" command! <<< ");
+			Serial.println(ackRX[0]);
+		}
+		delay(250);
+	}
 }

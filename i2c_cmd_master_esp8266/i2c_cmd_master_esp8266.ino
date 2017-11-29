@@ -703,9 +703,9 @@ void DumpBuffer(void) {
 				//Serial.println(checkCRC);
 			}
 			else {
-				Serial.print("   ### CRC ERROR! ###   ");
+				Serial.print("ESP8266 - DUMPBUFF aborted due to CRC ERROR! ");
 				Serial.println(checkCRC);
-				k = DSPBUFFERSIZE + 1;
+				k = 255;
 			}
 		}
 		else {

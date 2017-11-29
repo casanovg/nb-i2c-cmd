@@ -653,7 +653,7 @@ void DumpBuffer(void) {
 	uint8_t dataSize = 5;
 	cmdTX[2] = dataSize;
 	byte transmitData[1] = { 0 };
-	Serial.print("ESP8266 - Dumping DSP Buffer ...");
+	Serial.println("ESP8266 - Dumping DSP Buffer ...");
 	for (uint8_t k = 1; k < 101; k += 5) {
 		//byte dataSize = 0;	// DSP buffer data size requested to ATtiny85
 		//byte dataIX = 0;	// Requested DSP buffer data start position

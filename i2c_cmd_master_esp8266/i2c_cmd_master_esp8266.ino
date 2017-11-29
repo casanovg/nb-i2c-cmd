@@ -472,7 +472,7 @@ void loop() {
 				for (uint8_t i = 1; i < (dataSize * 2) + 1; i += 2) {
 					// DSP Buffer 2-Byte Word
 					Serial.print("# %%% DSP position ");
-					if (i < 9) {
+					if (dataIX < 9) {
 						Serial.print("0");
 					}
 					Serial.print(dataIX++);

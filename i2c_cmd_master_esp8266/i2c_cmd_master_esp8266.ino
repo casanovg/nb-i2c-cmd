@@ -335,91 +335,7 @@ void loop() {
 		// * GET_INFO Command (16 byte reply) *
 		// ************************************
 		case 'g': case 'G': {
-			byte cmdTX[1] = { GET_INFO };
-			byte txSize = sizeof(cmdTX);
-			Serial.print("ESP8266 - Sending Opcode >>> ");
-			Serial.print(cmdTX[0]);
-			Serial.println("(GET_INFO)");
-			// Transmit command
-			byte transmitData[1] = { 0 };
-			for (int i = 0; i < txSize; i++) {
-				transmitData[i] = cmdTX[i];
-				Wire.beginTransmission(slaveAddress);
-				Wire.write(transmitData[i]);
-				Wire.endTransmission();
-			}
-			// Receive acknowledgement
-			blockRXSize = Wire.requestFrom(slaveAddress, (byte)16);
-			byte ackRX[16] = { 0 };   // Data received from slave
-			for (int i = 0; i < blockRXSize; i++) {
-				ackRX[i] = Wire.read();
-			}
-			if (ackRX[0] == ACK_GETI) {
-				Serial.print("ESP8266 - Command ");
-				Serial.print(cmdTX[0]);
-				Serial.print(" parsed OK <<< ");
-				Serial.println(ackRX[0]);
-				//for (int i = 1; i < blockRXSize - 1; i++) {   // ----->
-				for (int i = 1; i < 4 - 1; i++) {               // ----->
-					Serial.print("ESP8266 - Data Byte ");
-					if (i < 10) {
-						Serial.print("0");
-					}
-					Serial.print(i + 1);
-					Serial.print(" received OK <<< ");
-					Serial.print((char)ackRX[i]);
-					Serial.print(" (numeric: ");
-					Serial.print(ackRX[i]);
-					Serial.println(")");
-				}
-				// -----------------------------------------------------
-				// // Half-cycle Vi Average
-				Serial.print(":::* Half-cycle Vi Average: ");
-				Serial.print((ackRX[3] << 8) + ackRX[4]);
-				Serial.println(" *:::");
-				// -----------------------------------------------------
-				// Sum of squared Vi's (instantaneous voltages)
-				Serial.print("# <>* Sum of Vi's: ");
-				Serial.print((unsigned)(ackRX[5] << 24) + (ackRX[6] << 16) + (ackRX[7] << 8) + ackRX[8]);
-				Serial.print(" (");
-				Serial.print(((ackRX[5] << 24) + (ackRX[6] << 16) + (ackRX[7] << 8) + ackRX[8]), HEX);
-				Serial.println(") *<>");
-				// -----------------------------------------------------
-				// VRMS (Square root of sum of sqred VI's / ADC samples
-				uint16_t vRMS = (ackRX[9] << 8) + ackRX[10];
-				float volts = (vRMS * VCC) / ADCTOP;
-				Serial.print("# {}* Vrms (AC): ");
-				Serial.print(vRMS);
-				Serial.print(" *{} -------------> {{ ");
-				Serial.print(volts, 3);
-				Serial.println(" Volts RMS }}");
-				// -----------------------------------------------------
-				// Last analog value readout (DC)
-				Serial.print("# []* Analog Value (Last): ");
-				Serial.print((ackRX[11] << 8) + ackRX[12]);
-				Serial.println(" *[]");
-				// -----------------------------------------------------
-				// ADC conversions per AC half-cycle
-				Serial.print("# ~~~ ADC count: ");
-				Serial.print((ackRX[13] << 8) + ackRX[14]);
-				Serial.println(" ~~~ #");
-				// --------------------------------------------------
-				byte checkCRC = CalculateCRC(ackRX, sizeof(ackRX));
-				if (checkCRC == 0) {
-					Serial.print("   >>> CRC OK! <<<   ");
-					Serial.println(checkCRC);
-				}
-				else {
-					Serial.print("   ### CRC ERROR! ###   ");
-					Serial.println(checkCRC);
-				}
-			}
-			else {
-				Serial.print("ESP8266 - Error parsing ");
-				Serial.print(cmdTX[0]);
-				Serial.print(" command! <<< ");
-				Serial.println(ackRX[0]);
-			}
+			GetInfo();
 			break;
 		}
 		// ********************
@@ -648,6 +564,96 @@ void ClrScr() {
 	Serial.write(27);       // ESC command
 	Serial.print("[H");     // cursor to home command
 }
+
+// Function GetInfo
+void GetInfo(void) {
+	byte cmdTX[1] = { GET_INFO };
+	byte txSize = sizeof(cmdTX);
+	Serial.print("ESP8266 - Sending Opcode >>> ");
+	Serial.print(cmdTX[0]);
+	Serial.println("(GET_INFO)");
+	// Transmit command
+	byte transmitData[1] = { 0 };
+	for (int i = 0; i < txSize; i++) {
+		transmitData[i] = cmdTX[i];
+		Wire.beginTransmission(slaveAddress);
+		Wire.write(transmitData[i]);
+		Wire.endTransmission();
+	}
+	// Receive acknowledgement
+	blockRXSize = Wire.requestFrom(slaveAddress, (byte)16);
+	byte ackRX[16] = { 0 };   // Data received from slave
+	for (int i = 0; i < blockRXSize; i++) {
+		ackRX[i] = Wire.read();
+	}
+	if (ackRX[0] == ACK_GETI) {
+		Serial.print("ESP8266 - Command ");
+		Serial.print(cmdTX[0]);
+		Serial.print(" parsed OK <<< ");
+		Serial.println(ackRX[0]);
+		//for (int i = 1; i < blockRXSize - 1; i++) {   // ----->
+		for (int i = 1; i < 4 - 1; i++) {               // ----->
+			Serial.print("ESP8266 - Data Byte ");
+			if (i < 10) {
+				Serial.print("0");
+			}
+			Serial.print(i + 1);
+			Serial.print(" received OK <<< ");
+			Serial.print((char)ackRX[i]);
+			Serial.print(" (numeric: ");
+			Serial.print(ackRX[i]);
+			Serial.println(")");
+		}
+		// -----------------------------------------------------
+		// // Half-cycle Vi Average
+		Serial.print(":::* Half-cycle Vi Average: ");
+		Serial.print((ackRX[3] << 8) + ackRX[4]);
+		Serial.println(" *:::");
+		// -----------------------------------------------------
+		// Sum of squared Vi's (instantaneous voltages)
+		Serial.print("# <>* Sum of Vi's: ");
+		Serial.print((unsigned)(ackRX[5] << 24) + (ackRX[6] << 16) + (ackRX[7] << 8) + ackRX[8]);
+		Serial.print(" (");
+		Serial.print(((ackRX[5] << 24) + (ackRX[6] << 16) + (ackRX[7] << 8) + ackRX[8]), HEX);
+		Serial.println(") *<>");
+		// -----------------------------------------------------
+		// VRMS (Square root of sum of sqred VI's / ADC samples
+		uint16_t vRMS = (ackRX[9] << 8) + ackRX[10];
+		float volts = (vRMS * VCC) / ADCTOP;
+		Serial.print("# {}* Vrms (AC): ");
+		Serial.print(vRMS);
+		Serial.print(" *{} -------------> {{ ");
+		Serial.print(volts, 3);
+		Serial.println(" Volts RMS }}");
+		// -----------------------------------------------------
+		// Last analog value readout (DC)
+		Serial.print("# []* Analog Value (Last): ");
+		Serial.print((ackRX[11] << 8) + ackRX[12]);
+		Serial.println(" *[]");
+		// -----------------------------------------------------
+		// ADC conversions per AC half-cycle
+		Serial.print("# ~~~ ADC count: ");
+		Serial.print((ackRX[13] << 8) + ackRX[14]);
+		Serial.println(" ~~~ #");
+		// --------------------------------------------------
+		byte checkCRC = CalculateCRC(ackRX, sizeof(ackRX));
+		if (checkCRC == 0) {
+			Serial.print("   >>> CRC OK! <<<   ");
+			Serial.println(checkCRC);
+		}
+		else {
+			Serial.print("   ### CRC ERROR! ###   ");
+			Serial.println(checkCRC);
+		}
+	}
+	else {
+		Serial.print("ESP8266 - Error parsing ");
+		Serial.print(cmdTX[0]);
+		Serial.print(" command! <<< ");
+		Serial.println(ackRX[0]);
+	}
+}
+
 
 // Function DumpBuffer
 void DumpBuffer(void) {

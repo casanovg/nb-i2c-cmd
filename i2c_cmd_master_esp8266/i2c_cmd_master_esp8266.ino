@@ -352,7 +352,7 @@ void loop() {
 			}
 			newByte = false;
 			Serial.println("");
-			Serial.print("Please enter the word amount to retrieve from the DSP buffer (1 to 7): ");
+			Serial.print("Please enter the word amount to retrieve from the DSP buffer (1 to 5): ");
 			while (newByte == false) {
 				dSize = ReadByte();
 			}

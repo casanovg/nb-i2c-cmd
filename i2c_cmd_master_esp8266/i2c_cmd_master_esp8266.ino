@@ -705,19 +705,19 @@ void DumpBuffer(void) {
 			//Serial.println(ackRX[0]);
 			for (uint8_t i = 1; i < (dataSize * 2) + 1; i += 2) {
 				// DSP Buffer 2-Byte Word
-				Serial.print("| DSP ");
-				if (dataIX < 100) {
-					if (dataIX < 10) {
-						Serial.print("  ");
-					}
-					else {
-						Serial.print(" ");
-					}
-				}
-				Serial.print(dataIX++);
-				Serial.print(": ");
+				//Serial.print("| DSP ");
+				//if (dataIX < 100) {
+				//	if (dataIX < 10) {
+				//		Serial.print("  ");
+				//	}
+				//	else {
+				//		Serial.print(" ");
+				//	}
+				//}
+				//Serial.print(dataIX++);
+				//Serial.print(": ");
 				Serial.print((ackRX[i] << 8) + ackRX[i + 1]);
-				Serial.println(" |");
+				//Serial.println(" |");
 			}
 			byte checkCRC = CalculateCRC(ackRX, sizeof(ackRX));
 			if (checkCRC == 0) {

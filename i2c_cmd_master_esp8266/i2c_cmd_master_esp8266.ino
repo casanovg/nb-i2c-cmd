@@ -346,7 +346,7 @@ void loop() {
 			byte dSize = 0;	// DSP buffer data size requested to ATtiny85
 			byte dIX = 0;	// Requested DSP buffer data start position
 			//newByte = false;
-			Serial.print("Please enter the DSP buffer data start position: ");
+			Serial.print("Please enter the DSP buffer data start position (1 to 100): ");
 			while (newByte == false) {
 				dIX = ReadByte();
 			}

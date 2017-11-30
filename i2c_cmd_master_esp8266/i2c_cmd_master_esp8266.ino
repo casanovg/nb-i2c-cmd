@@ -343,21 +343,22 @@ void loop() {
 		// * READBUFF Command *
 		// ********************
 		case 'h': case 'H': {
-			byte dataSize = 0;	// DSP buffer data size requested to ATtiny85
-			byte dataIX = 0;	// Requested DSP buffer data start position
-			newByte = false;
+			byte dSize = 0;	// DSP buffer data size requested to ATtiny85
+			byte dIX = 0;	// Requested DSP buffer data start position
+			//newByte = false;
 			Serial.print("Please enter the DSP buffer data start position: ");
 			while (newByte == false) {
-				dataIX = ReadByte();
+				dIX = ReadByte();
 			}
 			newByte = false;
 			Serial.println("");
 			Serial.print("Please enter the word amount to retrieve from the DSP buffer (1 to 7): ");
 			while (newByte == false) {
-				dataSize = ReadByte();
+				dSize = ReadByte();
 			}
 			if (newByte == true) {
-				ReadBuffer(dataIX, dataSize);
+				ReadBuffer(dIX, dSize);
+				newByte = false;
 			}
 			break;
 		}

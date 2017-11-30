@@ -717,6 +717,7 @@ void DumpBuffer(void) {
 				//Serial.print(dataIX++);
 				//Serial.print(": ");
 				Serial.print((ackRX[i] << 8) + ackRX[i + 1]);
+				Serial.println("");
 				//Serial.println(" |");
 			}
 			byte checkCRC = CalculateCRC(ackRX, sizeof(ackRX));

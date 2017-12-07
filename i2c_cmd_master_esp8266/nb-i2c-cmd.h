@@ -28,8 +28,10 @@
 #define ACKRESTY		0x7F				/* Acknowledge Reset Command */
 #define INITTINY		0x81				/* Command to Initialize ATtiny85 */
 #define ACKINITY		0x7E				/* Acknowledge Initialize Command */
-#define GET_INFO		0x83				/* Command to Read Generic Info */
-#define ACK_GETI		0x7C				/* Acknowledge Read Info Command */
+#define GET_INFO		0x82				/* Command to Read Generic Info */
+#define ACK_GETI		0x7D				/* Acknowledge Read Info Command */
+#define REL_ANDT		0x83				/* Command to Release Analog Data on Hold */
+#define ACK_RELD		0x7C				/* Acknowledge Release Data Command */
 
 // Transfer & Programming Commands
 #define READBUFF		0xA1				/* Command to Read Buffer Data */

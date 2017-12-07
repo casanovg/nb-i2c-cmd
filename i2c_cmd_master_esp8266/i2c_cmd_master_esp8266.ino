@@ -750,7 +750,7 @@ void DumpBuffer(void) {
 	}
 }
 
-// Function ReleaseAnalogData
+// Function ReleaseAnalogData *
 void ReleaseAnalogData(void) {
 	byte cmdTX[1] = { REL_ANDT };
 	byte txSize = sizeof(cmdTX);

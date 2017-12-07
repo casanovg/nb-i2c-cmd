@@ -337,9 +337,6 @@ void loop() {
 		// ************************************
 		case 'g': case 'G': {
 			GetInfo();
-			delay(250);
-			Serial.println("");
-			ReleaseAnalogData();
 			break;
 		}
 		// ********************
@@ -370,9 +367,6 @@ void loop() {
 		// ********************
 		case 'j': case 'J': {
 			DumpBuffer();
-			delay(250);
-			Serial.println("");
-			ReleaseAnalogData();
 			break;
 		}
 		// ********************
@@ -383,9 +377,6 @@ void loop() {
 			delay(250);
 			Serial.println("");
 			DumpBuffer();
-			delay(250);
-			Serial.println("");
-			ReleaseAnalogData();
 			break;
 		}
 		// *******************
@@ -574,7 +565,7 @@ void GetInfo(void) {
 		Serial.println(" *:::");
 		// -----------------------------------------------------
 		// Sum of squared Vi's (instantaneous voltages)
-		Serial.print("# <>* Sum of Squared Vi's: ");
+		Serial.print("# <>* Sum of Vi's: ");
 		Serial.print((unsigned)(ackRX[5] << 24) + (ackRX[6] << 16) + (ackRX[7] << 8) + ackRX[8]);
 		Serial.print(" (");
 		Serial.print(((ackRX[5] << 24) + (ackRX[6] << 16) + (ackRX[7] << 8) + ackRX[8]), HEX);
@@ -747,40 +738,5 @@ void DumpBuffer(void) {
 			Serial.println(ackRX[0]);
 		}
 		delay(500);
-	}
-}
-
-// Function ReleaseAnalogData
-void ReleaseAnalogData(void) {
-	byte cmdTX[1] = { REL_ANDT };
-	byte txSize = sizeof(cmdTX);
-	Serial.print("ESP8266 - Sending Opcode >>> ");
-	Serial.print(cmdTX[0]);
-	Serial.println("(REL_ANDT)");
-	// Transmit command
-	byte transmitData[1] = { 0 };
-	for (int i = 0; i < txSize; i++) {
-		transmitData[i] = cmdTX[i];
-		Wire.beginTransmission(slaveAddress);
-		Wire.write(transmitData[i]);
-		Wire.endTransmission();
-	}
-	// Receive acknowledgement
-	blockRXSize = Wire.requestFrom(slaveAddress, (byte)1);
-	byte ackRX[1] = { 0 };   // Data received from slave
-	for (int i = 0; i < blockRXSize; i++) {
-		ackRX[i] = Wire.read();
-	}
-	if (ackRX[0] == ACK_RELD) {
-		Serial.print("ESP8266 - Command ");
-		Serial.print(cmdTX[0]);
-		Serial.print(" parsed OK <<< ");
-		Serial.println(ackRX[0]);
-	}
-	else {
-		Serial.print("ESP8266 - Error parsing ");
-		Serial.print(cmdTX[0]);
-		Serial.print(" command! <<< ");
-		Serial.println(ackRX[0]);
 	}
 }

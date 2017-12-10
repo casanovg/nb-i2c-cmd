@@ -5,8 +5,8 @@
 // *  ..................................................  *
 // *  Author: Gustavo Casanova                            *
 // *  ..................................................  *
-// *  Firmware Version: 0.4 | MCU: ESP8266                *
-// *  2017-11-25 gustavo.casanova@nicebots.com            *
+// *  Firmware Version: 0.5 | MCU: ESP8266                *
+// *  2017-12-10 gustavo.casanova@nicebots.com            *
 // ********************************************************
 //
 // Run this master program on a NodeMCU, ESP-01 or ESP-12 Module
@@ -102,7 +102,7 @@ void setup() {
 	blockRXSize = 0;
 
 	ClrScr();
-	Serial.println("Nicebots Pluggie I2C-PWM-ADC Test (v0.4)");
+	Serial.println("Nicebots Pluggie I2C-PWM-ADC Test (v0.5)");
 	Serial.println("========================================");
 	Serial.println("Please type a command ('a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'z' reboot or 'x' reset tiny):");
 }
@@ -554,21 +554,16 @@ void GetInfo(void) {
 		Serial.print(cmdTX[0]);
 		Serial.print(" parsed OK <<< ");
 		Serial.println(ackRX[0]);
-		//for (int i = 1; i < blockRXSize - 1; i++) {   // ----->
-		for (int i = 1; i < 4 - 1; i++) {               // ----->
-			Serial.print("ESP8266 - Data Byte ");
-			if (i < 10) {
-				Serial.print("0");
-			}
-			Serial.print(i + 1);
-			Serial.print(" received OK <<< ");
-			Serial.print((char)ackRX[i]);
-			Serial.print(" (numeric: ");
-			Serial.print(ackRX[i]);
-			Serial.println(")");
-		}
 		// -----------------------------------------------------
-		// // Half-cycle Vi Average
+		// Max & Min ADC half-cycle values
+		Serial.print("+++* Max ADC Value: ");
+		Serial.print(ackRX[1] << 2);
+		Serial.println(" *+++");
+		Serial.print("---* Min ADC Value: ");
+		Serial.print(ackRX[2] << 2);
+		Serial.println(" *---");
+		// -----------------------------------------------------
+		// Half-cycle Vi Average
 		Serial.print(":::* Half-cycle Vi Average: ");
 		Serial.print((ackRX[3] << 8) + ackRX[4]);
 		Serial.println(" *:::");

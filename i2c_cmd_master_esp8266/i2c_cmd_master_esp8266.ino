@@ -36,6 +36,7 @@
 #define ADCTOP 1023						/* ADC Top Value @ 10-bit precision = 1023 (2^10) */
 #define DSPBUFFERSIZE	100 			/* DSP buffer size (16-bit elements) */
 #define MAXBUFFERTXLN	7				/* Maximum DPS buffer TX/RX size */
+#define VOLTSADJUST		0.025			/* Measured volts adjust: 0.01 = 1% */
 
 
 // Global Variables
@@ -372,7 +373,7 @@ void loop() {
 			DumpBuffer();
 			delay(250);
 			Serial.println("");
-			ReleaseAnalogData();
+			//ReleaseAnalogData();
 			break;
 		}
 		// ********************
@@ -577,10 +578,12 @@ void GetInfo(void) {
 		// -----------------------------------------------------
 		// VRMS (Square root of sum of sqred VI's / ADC samples
 		uint16_t vRMS = (ackRX[9] << 8) + ackRX[10];
+		vRMS = vRMS;							
 		float volts = (vRMS * VCC) / ADCTOP;
+		volts = volts + (volts * VOLTSADJUST);								/* VOLTS COMPENSATION ADJUST */
 		Serial.print("# {}* Vrms (AC): ");
 		Serial.print(vRMS);
-		Serial.print(" *{} -------------> {{ ");
+		Serial.print(" *{} -----------------------> {{ ");
 		Serial.print(volts, 3);
 		Serial.println(" Volts RMS }}");
 		// -----------------------------------------------------

@@ -32,12 +32,11 @@
 #include <Wire.h>
 #include "nb-i2c-cmd.h"
 
-#define VCC 3.3							/* PSU VCC 3.3 Volts */
-#define ADCTOP 1023						/* ADC Top Value @ 10-bit precision = 1023 (2^10) */
-#define DSPBUFFERSIZE	100 			/* DSP buffer size (16-bit elements) */
+#define VCC				3.3				/* PSU VCC 3.3 Volts */
+#define ADCTOP			1023			/* ADC Top Value @ 10-bit precision = 1023 (2^10) */
+#define DSPBUFFERSIZE	100				/* DSP buffer size (16-bit elements) */
 #define MAXBUFFERTXLN	7				/* Maximum DPS buffer TX/RX size */
 #define VOLTSADJUST		0.025			/* Measured volts adjust: 0.01 = 1% */
-
 
 // Global Variables
 byte slaveAddress = 0;

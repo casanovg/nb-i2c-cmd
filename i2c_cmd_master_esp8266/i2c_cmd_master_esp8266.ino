@@ -556,27 +556,31 @@ void GetInfo(void) {
 		Serial.println(ackRX[0]);
 		// -----------------------------------------------------
 		// Max & Min ADC half-cycle values
-		Serial.print("+++* Max ADC Value: ");
+		/*Serial.print("+++* Max ADC Value: ");
 		Serial.print(ackRX[1] << 2);
 		Serial.println(" *+++");
 		Serial.print("---* Min ADC Value: ");
 		Serial.print(ackRX[2] << 2);
-		Serial.println(" *---");
+		Serial.println(" *---");*/
+		// ADC half-cycle mid point
+		Serial.print("# %%%* ADC Mid Point: ");
+		Serial.print((ackRX[2] << 8) + ackRX[3]);
+		Serial.println(" *%%%");
 		// -----------------------------------------------------
 		// Half-cycle Vi Average
 		Serial.print(":::* Half-cycle Vi Average: ");
-		Serial.print((ackRX[3] << 8) + ackRX[4]);
+		Serial.print((ackRX[4] << 8) + ackRX[5]);
 		Serial.println(" *:::");
 		// -----------------------------------------------------
 		// Sum of squared Vi's (instantaneous voltages)
 		Serial.print("# <>* Sum of Squared Vi's: ");
-		Serial.print((unsigned)(ackRX[5] << 24) + (ackRX[6] << 16) + (ackRX[7] << 8) + ackRX[8]);
+		Serial.print((unsigned)(ackRX[6] << 24) + (ackRX[7] << 16) + (ackRX[8] << 8) + ackRX[9]);
 		Serial.print(" (");
-		Serial.print(((ackRX[5] << 24) + (ackRX[6] << 16) + (ackRX[7] << 8) + ackRX[8]), HEX);
+		Serial.print(((ackRX[6] << 24) + (ackRX[7] << 16) + (ackRX[8] << 8) + ackRX[9]), HEX);
 		Serial.println(") *<>");
 		// -----------------------------------------------------
 		// VRMS (Square root of sum of sqred VI's / ADC samples
-		uint16_t vRMS = (ackRX[9] << 8) + ackRX[10];
+		uint16_t vRMS = (ackRX[10] << 8) + ackRX[11];
 		vRMS = vRMS;							
 		float volts = (vRMS * VCC) / ADCTOP;
 		volts = volts + (volts * VOLTSADJUST);								/* VOLTS COMPENSATION ADJUST */
@@ -588,12 +592,12 @@ void GetInfo(void) {
 		// -----------------------------------------------------
 		// Last analog value readout (DC)
 		Serial.print("# []* Analog Value (Last): ");
-		Serial.print((ackRX[11] << 8) + ackRX[12]);
+		Serial.print((ackRX[12] << 8) + ackRX[13]);
 		Serial.println(" *[]");
 		// -----------------------------------------------------
 		// ADC conversions per AC half-cycle
 		Serial.print("# ~~~ ADC count: ");
-		Serial.print((ackRX[13] << 8) + ackRX[14]);
+		Serial.print(ackRX[14]);
 		Serial.println(" ~~~ #");
 		// --------------------------------------------------
 		byte checkCRC = CalculateCRC(ackRX, sizeof(ackRX));

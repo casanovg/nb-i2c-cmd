@@ -5,8 +5,8 @@
 // *  ..................................................  *
 // *  Author: Gustavo Casanova                            *
 // *  ..................................................  *
-// *  Firmware Version: 0.5 | MCU: ESP8266                *
-// *  2017-12-10 gustavo.casanova@nicebots.com            *
+// *  Firmware Version: 0.6 | MCU: ESP8266                *
+// *  2017-12-13 gustavo.casanova@nicebots.com            *
 // ********************************************************
 //
 // Run this master program on a NodeMCU, ESP-01 or ESP-12 Module
@@ -102,9 +102,9 @@ void setup() {
 	blockRXSize = 0;
 
 	ClrScr();
-	Serial.println("Nicebots Pluggie I2C-PWM-ADC Test (v0.5)");
+	Serial.println("Nicebots Pluggie I2C-PWM-ADC Test (v0.6)");
 	Serial.println("========================================");
-	Serial.println("Please type a command ('a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'z' reboot or 'x' reset tiny):");
+	Serial.println("Please type a command ('a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'p', 'n', 'z' reboot or 'x' reset tiny):");
 }
 
 //
@@ -121,146 +121,28 @@ void loop() {
 		// * STDPB1_1 Command *
 		// ********************
 		case 'a': case 'A': {
-			byte cmdTX[1] = { STDPB1_1 };
-			byte txSize = sizeof(cmdTX);
-			Serial.print("ESP8266 - Sending Opcode >>> ");
-			Serial.print(cmdTX[0]);
-			Serial.println("(STDPB1_1)");
-			// Transmit command
-			byte transmitData[1] = { 0 };
-			for (int i = 0; i < txSize; i++) {
-				transmitData[i] = cmdTX[i];
-				Wire.beginTransmission(slaveAddress);
-				Wire.write(transmitData[i]);
-				Wire.endTransmission();
-			}
-			// Receive acknowledgement
-			blockRXSize = Wire.requestFrom(slaveAddress, (byte)1);
-			byte ackRX[1] = { 0 };   // Data received from slave
-			for (int i = 0; i < blockRXSize; i++) {
-				ackRX[i] = Wire.read();
-			}
-			if (ackRX[0] == AKDPB1_1) {
-				Serial.print("ESP8266 - Command ");
-				Serial.print(cmdTX[0]);
-				Serial.print(" parsed OK <<< ");
-				Serial.println(ackRX[0]);
-			}
-			else {
-				Serial.print("ESP8266 - Error parsing ");
-				Serial.print(cmdTX[0]);
-				Serial.print(" command! <<< ");
-				Serial.println(ackRX[0]);
-			}
+			SetPB1On();
 			break;
 		}
 		// ********************
 		// * STDPB1_0 Command *
 		// ********************
 		case 's': case 'S': {
-			byte cmdTX[1] = { STDPB1_0 };
-			byte txSize = sizeof(cmdTX);
-			Serial.print("ESP8266 - Sending Opcode >>> ");
-			Serial.print(cmdTX[0]);
-			Serial.println("(STDPB1_0)");
-			// Transmit command
-			byte transmitData[1] = { 0 };
-			for (int i = 0; i < txSize; i++) {
-				transmitData[i] = cmdTX[i];
-				Wire.beginTransmission(slaveAddress);
-				Wire.write(transmitData[i]);
-				Wire.endTransmission();
-			}
-			// Receive acknowledgement
-			blockRXSize = Wire.requestFrom(slaveAddress, (byte)1);
-			byte ackRX[1] = { 0 };   // Data received from slave
-			for (int i = 0; i < blockRXSize; i++) {
-				ackRX[i] = Wire.read();
-			}
-			if (ackRX[0] == AKDPB1_0) {
-				Serial.print("ESP8266 - Command ");
-				Serial.print(cmdTX[0]);
-				Serial.print(" parsed OK <<< ");
-				Serial.println(ackRX[0]);
-			}
-			else {
-				Serial.print("ESP8266 - Error parsing ");
-				Serial.print(cmdTX[0]);
-				Serial.print(" command! <<< ");
-				Serial.println(ackRX[0]);
-			}
+			SetPB1Off();
 			break;
 		}
 		// ********************
 		// * STANAPB3 Command *
 		// ********************
 		case 'd': case 'D': {
-			byte cmdTX[3] = { STANAPB3, 0, 0 };
-			//byte txSize = sizeof(cmdTX);
-			byte txSize = 3;
-			byte operandValue = 0;
+			byte triacTriggerDelay = 0;
 			Serial.print("Please enter a value between 0 and 255 for this command: ");
 			while (newByte == false) {
-				operandValue = ReadByte();
+				triacTriggerDelay = ReadByte();
 			}
 			if (newByte == true) {
-				Serial.println("");
-				Serial.println("");
-				cmdTX[1] = operandValue;
-				Serial.print("ESP8266 - Sending Opcode >>> ");
-				Serial.print(cmdTX[0]);
-				Serial.println("(STANAPB3)");
-				cmdTX[2] = CalculateCRC(cmdTX, 2);
-				// Transmit command
-				byte transmitData[1] = { 0 };
-				for (int i = 0; i < txSize; i++) {
-					if (i > 0) {
-						if (i < 2) {
-							Serial.print("ESP8266 - Sending Operand >>> ");
-							Serial.println(cmdTX[i]);
-						}
-						else {
-							Serial.print("ESP8266 - Sending CRC >>> ");
-							Serial.println(cmdTX[i]);
-						}
-					}
-					transmitData[i] = cmdTX[i];
-					Wire.beginTransmission(slaveAddress);
-					Wire.write(transmitData[i]);
-					Wire.endTransmission();
-				}
+				SetPB3Analog(triacTriggerDelay);
 				newByte = false;
-			}
-			// Receive acknowledgement
-			blockRXSize = Wire.requestFrom(slaveAddress, (byte)2);
-			byte ackRX[2] = { 0 };   // Data received from slave
-			for (int i = 0; i < blockRXSize; i++) {
-				ackRX[i] = Wire.read();
-			}
-			if (ackRX[0] == ACKANPB3) {
-				Serial.print("ESP8266 - Command ");
-				Serial.print(cmdTX[0]);
-				Serial.print(" parsed OK <<< ");
-				Serial.println(ackRX[0]);
-				if (ackRX[1] == 0) {
-					Serial.print("ESP8266 - Operand ");
-					Serial.print(cmdTX[1]);
-					Serial.print(" parsed OK by slave <<< ATtiny85 CRC Check = ");
-					Serial.println(ackRX[1]);
-				}
-				else {
-					Serial.print("ESP8266 - Operand ");
-					Serial.print(cmdTX[1]);
-					Serial.print(" parsed with {{{ERROR}}} <<< ATtiny85 CRC Check = ");
-					Serial.println(ackRX[1]);
-				}
-
-			}
-			else {
-				Serial.print("ESP8266 - Error parsing ");
-				Serial.print(cmdTX[0]);
-				Serial.print(" command! <<< ");
-				Serial.println(ackRX[0]);
 			}
 			break;
 		}
@@ -268,68 +150,7 @@ void loop() {
 		// * READADC2 Command *
 		// ********************
 		case 'f': case 'F': {
-			byte cmdTX[1] = { READADC2 };
-			byte txSize = sizeof(cmdTX);
-			Serial.print("ESP8266 - Sending Opcode >>> ");
-			Serial.print(cmdTX[0]);
-			Serial.println("(READADC2)");
-			// Transmit command
-			byte transmitData[1] = { 0 };
-			for (int i = 0; i < txSize; i++) {
-				transmitData[i] = cmdTX[i];
-				Wire.beginTransmission(slaveAddress);
-				Wire.write(transmitData[i]);
-				Wire.endTransmission();
-			}
-			// Receive acknowledgement
-			blockRXSize = Wire.requestFrom(slaveAddress, (byte)4);
-			byte ackRX[4] = { 0 };   // Data received from slave
-			for (int i = 0; i < blockRXSize; i++) {
-				ackRX[i] = Wire.read();
-			}
-			word analogValue = ((ackRX[1] << 8) + ackRX[2]);
-			if (ackRX[0] == ACKNADC2) {
-				Serial.print("ESP8266 - Command ");
-				Serial.print(cmdTX[0]);
-				Serial.print(" parsed OK <<< ");
-				Serial.println(ackRX[0]);
-				for (int i = 1; i < blockRXSize; i++) {
-					Serial.print("ESP8266 - Data Byte ");
-					Serial.print(i + 1);
-					Serial.print(" received OK <<< ");
-					Serial.println(ackRX[i]);
-				}
-				Serial.println("*************************");
-				Serial.print("* Analog Value: ");
-				Serial.print(analogValue);
-				Serial.print("(");
-				Serial.print(analogValue, HEX);
-				Serial.println(") *");
-				Serial.println("*************************");
-				Serial.print("ESP8266 - MSB = ");
-				Serial.print(ackRX[1]);
-				Serial.print(" | LSB=");
-				Serial.print(ackRX[2]);
-				Serial.print(" | CRC=");
-				Serial.println(ackRX[3]);
-				Serial.print("CRC received ---> ");
-				Serial.println(ackRX[sizeof(ackRX)]);
-				byte checkCRC = CalculateCRC(ackRX, sizeof(ackRX));
-				if (checkCRC == 0) {
-					Serial.print("   >>> CRC OK! <<<   ");
-					Serial.println(checkCRC);
-				}
-				else {
-					Serial.print("   ### CRC ERROR! ###   ");
-					Serial.println(checkCRC);
-				}
-			}
-			else {
-				Serial.print("ESP8266 - Error parsing ");
-				Serial.print(cmdTX[0]);
-				Serial.print(" command! <<< ");
-				Serial.println(ackRX[0]);
-			}
+			ReadADC2();
 			break;
 		}
 		// ************************************
@@ -346,21 +167,20 @@ void loop() {
 		// * READBUFF Command *
 		// ********************
 		case 'h': case 'H': {
-			byte dSize = 0;	// DSP buffer data size requested to ATtiny85
-			byte dIX = 0;	// Requested DSP buffer data start position
-			//newByte = false;
+			byte dataSize = 0;	// DSP buffer data size requested to ATtiny85
+			byte dataIX = 0;	// Requested DSP buffer data start position
 			Serial.print("Please enter the DSP buffer data start position (1 to 100): ");
 			while (newByte == false) {
-				dIX = ReadByte();
+				dataIX = ReadByte();
 			}
 			newByte = false;
 			Serial.println("");
 			Serial.print("Please enter the word amount to retrieve from the DSP buffer (1 to 5): ");
 			while (newByte == false) {
-				dSize = ReadByte();
+				dataSize = ReadByte();
 			}
 			if (newByte == true) {
-				ReadBuffer(dIX, dSize);
+				ReadBuffer(dataIX, dataSize);
 				newByte = false;
 			}
 			break;
@@ -386,6 +206,20 @@ void loop() {
 			delay(250);
 			Serial.println("");
 			ReleaseAnalogData();
+			break;
+		}
+		// ********************
+		// * FIXPOSIT Command *
+		// ********************
+		case 'p': case 'P': {
+			FixPositiveHC();
+			break;
+		}
+		// ********************
+		// * FIXNEGAT Command *
+		// ********************
+		case 'n': case 'N': {
+			FixNegativeHC();
 			break;
 		}
 		// *******************
@@ -445,7 +279,7 @@ void loop() {
 		}
 		}
 		Serial.println("");
-		Serial.println("Please type a command ('a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'z' reboot or 'x' reset tiny):");
+		Serial.println("Please type a command ('a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'p', 'n', 'z' reboot or 'x' reset tiny):");
 	}
 	ReadChar();           // PROD - REMOVE FOR TESTING
 }
@@ -526,6 +360,205 @@ void ClrScr() {
 	Serial.print("[2J");    // clear screen command
 	Serial.write(27);       // ESC command
 	Serial.print("[H");     // cursor to home command
+}
+
+// Function SetPB1On
+void SetPB1On(void) {
+	byte cmdTX[1] = { STDPB1_1 };
+	byte txSize = sizeof(cmdTX);
+	Serial.print("ESP8266 - Sending Opcode >>> ");
+	Serial.print(cmdTX[0]);
+	Serial.println("(STDPB1_1)");
+	// Transmit command
+	byte transmitData[1] = { 0 };
+	for (int i = 0; i < txSize; i++) {
+		transmitData[i] = cmdTX[i];
+		Wire.beginTransmission(slaveAddress);
+		Wire.write(transmitData[i]);
+		Wire.endTransmission();
+	}
+	// Receive acknowledgement
+	blockRXSize = Wire.requestFrom(slaveAddress, (byte)1);
+	byte ackRX[1] = { 0 };   // Data received from slave
+	for (int i = 0; i < blockRXSize; i++) {
+		ackRX[i] = Wire.read();
+	}
+	if (ackRX[0] == AKDPB1_1) {
+		Serial.print("ESP8266 - Command ");
+		Serial.print(cmdTX[0]);
+		Serial.print(" parsed OK <<< ");
+		Serial.println(ackRX[0]);
+	}
+	else {
+		Serial.print("ESP8266 - Error parsing ");
+		Serial.print(cmdTX[0]);
+		Serial.print(" command! <<< ");
+		Serial.println(ackRX[0]);
+	}
+}
+
+// Function SetPB1Off
+void SetPB1Off(void) {
+	byte cmdTX[1] = { STDPB1_0 };
+	byte txSize = sizeof(cmdTX);
+	Serial.print("ESP8266 - Sending Opcode >>> ");
+	Serial.print(cmdTX[0]);
+	Serial.println("(STDPB1_0)");
+	// Transmit command
+	byte transmitData[1] = { 0 };
+	for (int i = 0; i < txSize; i++) {
+		transmitData[i] = cmdTX[i];
+		Wire.beginTransmission(slaveAddress);
+		Wire.write(transmitData[i]);
+		Wire.endTransmission();
+	}
+	// Receive acknowledgement
+	blockRXSize = Wire.requestFrom(slaveAddress, (byte)1);
+	byte ackRX[1] = { 0 };   // Data received from slave
+	for (int i = 0; i < blockRXSize; i++) {
+		ackRX[i] = Wire.read();
+	}
+	if (ackRX[0] == AKDPB1_0) {
+		Serial.print("ESP8266 - Command ");
+		Serial.print(cmdTX[0]);
+		Serial.print(" parsed OK <<< ");
+		Serial.println(ackRX[0]);
+	}
+	else {
+		Serial.print("ESP8266 - Error parsing ");
+		Serial.print(cmdTX[0]);
+		Serial.print(" command! <<< ");
+		Serial.println(ackRX[0]);
+	}
+}
+
+// Function SetPB3Analog()
+void SetPB3Analog(uint8_t triacTriggerDelay) {
+	byte cmdTX[3] = { STANAPB3, 0, 0 };
+	byte txSize = 3;
+	Serial.println("");
+	Serial.println("");
+	cmdTX[1] = triacTriggerDelay;
+	Serial.print("ESP8266 - Sending Opcode >>> ");
+	Serial.print(cmdTX[0]);
+	Serial.println("(STANAPB3)");
+	cmdTX[2] = CalculateCRC(cmdTX, 2);
+	// Transmit command
+	byte transmitData[1] = { 0 };
+	for (int i = 0; i < txSize; i++) {
+		if (i > 0) {
+			if (i < 2) {
+				Serial.print("ESP8266 - Sending Operand >>> ");
+				Serial.println(cmdTX[i]);
+			}
+			else {
+				Serial.print("ESP8266 - Sending CRC >>> ");
+				Serial.println(cmdTX[i]);
+			}
+		}
+		transmitData[i] = cmdTX[i];
+		Wire.beginTransmission(slaveAddress);
+		Wire.write(transmitData[i]);
+		Wire.endTransmission();
+	}
+	// Receive acknowledgement
+	blockRXSize = Wire.requestFrom(slaveAddress, (byte)2);
+	byte ackRX[2] = { 0 };   // Data received from slave
+	for (int i = 0; i < blockRXSize; i++) {
+		ackRX[i] = Wire.read();
+	}
+	if (ackRX[0] == ACKANPB3) {
+		Serial.print("ESP8266 - Command ");
+		Serial.print(cmdTX[0]);
+		Serial.print(" parsed OK <<< ");
+		Serial.println(ackRX[0]);
+		if (ackRX[1] == 0) {
+			Serial.print("ESP8266 - Operand ");
+			Serial.print(cmdTX[1]);
+			Serial.print(" parsed OK by slave <<< ATtiny85 CRC Check = ");
+			Serial.println(ackRX[1]);
+		}
+		else {
+			Serial.print("ESP8266 - Operand ");
+			Serial.print(cmdTX[1]);
+			Serial.print(" parsed with {{{ERROR}}} <<< ATtiny85 CRC Check = ");
+			Serial.println(ackRX[1]);
+		}
+
+	}
+	else {
+		Serial.print("ESP8266 - Error parsing ");
+		Serial.print(cmdTX[0]);
+		Serial.print(" command! <<< ");
+		Serial.println(ackRX[0]);
+	}
+}
+
+
+// Function ReadADC2
+void ReadADC2(void) {
+	byte cmdTX[1] = { READADC2 };
+	byte txSize = sizeof(cmdTX);
+	Serial.print("ESP8266 - Sending Opcode >>> ");
+	Serial.print(cmdTX[0]);
+	Serial.println("(READADC2)");
+	// Transmit command
+	byte transmitData[1] = { 0 };
+	for (int i = 0; i < txSize; i++) {
+		transmitData[i] = cmdTX[i];
+		Wire.beginTransmission(slaveAddress);
+		Wire.write(transmitData[i]);
+		Wire.endTransmission();
+	}
+	// Receive acknowledgement
+	blockRXSize = Wire.requestFrom(slaveAddress, (byte)4);
+	byte ackRX[4] = { 0 };   // Data received from slave
+	for (int i = 0; i < blockRXSize; i++) {
+		ackRX[i] = Wire.read();
+	}
+	word analogValue = ((ackRX[1] << 8) + ackRX[2]);
+	if (ackRX[0] == ACKNADC2) {
+		Serial.print("ESP8266 - Command ");
+		Serial.print(cmdTX[0]);
+		Serial.print(" parsed OK <<< ");
+		Serial.println(ackRX[0]);
+		for (int i = 1; i < blockRXSize; i++) {
+			Serial.print("ESP8266 - Data Byte ");
+			Serial.print(i + 1);
+			Serial.print(" received OK <<< ");
+			Serial.println(ackRX[i]);
+		}
+		Serial.println("*************************");
+		Serial.print("* Analog Value: ");
+		Serial.print(analogValue);
+		Serial.print("(");
+		Serial.print(analogValue, HEX);
+		Serial.println(") *");
+		Serial.println("*************************");
+		Serial.print("ESP8266 - MSB = ");
+		Serial.print(ackRX[1]);
+		Serial.print(" | LSB=");
+		Serial.print(ackRX[2]);
+		Serial.print(" | CRC=");
+		Serial.println(ackRX[3]);
+		Serial.print("CRC received ---> ");
+		Serial.println(ackRX[sizeof(ackRX)]);
+		byte checkCRC = CalculateCRC(ackRX, sizeof(ackRX));
+		if (checkCRC == 0) {
+			Serial.print("   >>> CRC OK! <<<   ");
+			Serial.println(checkCRC);
+		}
+		else {
+			Serial.print("   ### CRC ERROR! ###   ");
+			Serial.println(checkCRC);
+		}
+	}
+	else {
+		Serial.print("ESP8266 - Error parsing ");
+		Serial.print(cmdTX[0]);
+		Serial.print(" command! <<< ");
+		Serial.println(ackRX[0]);
+	}
 }
 
 // Function GetInfo
@@ -621,7 +654,6 @@ void GetInfo(void) {
 // Function ReadBuffer
 void ReadBuffer(uint8_t dataIX, uint8_t dataSize) {
 	byte cmdTX[3] = { READBUFF, 0, 0 };
-	//byte txSize = sizeof(cmdTX);
 	byte txSize = 3;
 	Serial.println("");
 	Serial.println("");
@@ -773,6 +805,76 @@ void ReleaseAnalogData(void) {
 		ackRX[i] = Wire.read();
 	}
 	if (ackRX[0] == ACK_RELD) {
+		Serial.print("ESP8266 - Command ");
+		Serial.print(cmdTX[0]);
+		Serial.print(" parsed OK <<< ");
+		Serial.println(ackRX[0]);
+	}
+	else {
+		Serial.print("ESP8266 - Error parsing ");
+		Serial.print(cmdTX[0]);
+		Serial.print(" command! <<< ");
+		Serial.println(ackRX[0]);
+	}
+}
+
+// Function FixPositiveHC
+void FixPositiveHC(void) {
+	byte cmdTX[1] = { FIXPOSIT };
+	byte txSize = sizeof(cmdTX);
+	Serial.print("ESP8266 - Sending Opcode >>> ");
+	Serial.print(cmdTX[0]);
+	Serial.println("(FIXPOSIT)");
+	// Transmit command
+	byte transmitData[1] = { 0 };
+	for (int i = 0; i < txSize; i++) {
+		transmitData[i] = cmdTX[i];
+		Wire.beginTransmission(slaveAddress);
+		Wire.write(transmitData[i]);
+		Wire.endTransmission();
+	}
+	// Receive acknowledgement
+	blockRXSize = Wire.requestFrom(slaveAddress, (byte)1);
+	byte ackRX[1] = { 0 };   // Data received from slave
+	for (int i = 0; i < blockRXSize; i++) {
+		ackRX[i] = Wire.read();
+	}
+	if (ackRX[0] == ACKFXPOS) {
+		Serial.print("ESP8266 - Command ");
+		Serial.print(cmdTX[0]);
+		Serial.print(" parsed OK <<< ");
+		Serial.println(ackRX[0]);
+	}
+	else {
+		Serial.print("ESP8266 - Error parsing ");
+		Serial.print(cmdTX[0]);
+		Serial.print(" command! <<< ");
+		Serial.println(ackRX[0]);
+	}
+}
+
+// Function FixNegativeHC
+void FixNegativeHC(void) {
+	byte cmdTX[1] = { FIXNEGAT };
+	byte txSize = sizeof(cmdTX);
+	Serial.print("ESP8266 - Sending Opcode >>> ");
+	Serial.print(cmdTX[0]);
+	Serial.println("(FIXNEGAT)");
+	// Transmit command
+	byte transmitData[1] = { 0 };
+	for (int i = 0; i < txSize; i++) {
+		transmitData[i] = cmdTX[i];
+		Wire.beginTransmission(slaveAddress);
+		Wire.write(transmitData[i]);
+		Wire.endTransmission();
+	}
+	// Receive acknowledgement
+	blockRXSize = Wire.requestFrom(slaveAddress, (byte)1);
+	byte ackRX[1] = { 0 };   // Data received from slave
+	for (int i = 0; i < blockRXSize; i++) {
+		ackRX[i] = Wire.read();
+	}
+	if (ackRX[0] == ACKFXNEG) {
 		Serial.print("ESP8266 - Command ");
 		Serial.print(cmdTX[0]);
 		Serial.print(" parsed OK <<< ");

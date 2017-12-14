@@ -32,6 +32,10 @@
 #define ACK_GETI		0x7D				/* Acknowledge Read Info Command */
 #define REL_ANDT		0x83				/* Command to Release Analog Data on Hold */
 #define ACK_RELD		0x7C				/* Acknowledge Release Data Command */
+#define FIXPOSIT		0x84				/* Fix Positive half-cycles for ADC Vrms calculations */
+#define ACKFXPOS		0x7B				/* Acknowledge Fix Positive Command */
+#define FIXNEGAT		0x85				/* Fix Negative half-cycles for ADC Vrms calculations */
+#define ACKFXNEG		0x7A				/* Acknowledge Fix Negative Command */
 
 // Transfer & Programming Commands
 #define READBUFF		0xA1				/* Command to Read Buffer Data */

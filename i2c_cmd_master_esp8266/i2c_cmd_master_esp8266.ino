@@ -117,166 +117,166 @@ void loop() {
 		newKey = false;
 		Serial.println("");
 		switch (key) {
-		// ********************
-		// * STDPB1_1 Command *
-		// ********************
-		case 'a': case 'A': {
-			SetPB1On();
-			break;
-		}
-		// ********************
-		// * STDPB1_0 Command *
-		// ********************
-		case 's': case 'S': {
-			SetPB1Off();
-			break;
-		}
-		// ********************
-		// * STANAPB3 Command *
-		// ********************
-		case 'd': case 'D': {
-			byte triacTriggerDelay = 0;
-			Serial.print("Please enter a value between 0 and 255 for this command: ");
-			while (newByte == false) {
-				triacTriggerDelay = ReadByte();
+			// ********************
+			// * STDPB1_1 Command *
+			// ********************
+			case 'a': case 'A': {
+				SetPB1On();
+				break;
 			}
-			if (newByte == true) {
-				SetPB3Analog(triacTriggerDelay);
+			// ********************
+			// * STDPB1_0 Command *
+			// ********************
+			case 's': case 'S': {
+				SetPB1Off();
+				break;
+			}
+			// ********************
+			// * STANAPB3 Command *
+			// ********************
+			case 'd': case 'D': {
+				byte triacTriggerDelay = 0;
+				Serial.print("Please enter a value between 0 and 255 for this command: ");
+				while (newByte == false) {
+					triacTriggerDelay = ReadByte();
+				}
+				if (newByte == true) {
+					SetPB3Analog(triacTriggerDelay);
+					newByte = false;
+				}
+				break;
+			}
+			// ********************
+			// * READADC2 Command *
+			// ********************
+			case 'f': case 'F': {
+				ReadADC2();
+				break;
+			}
+			// ************************************
+			// * GET_INFO Command (16 byte reply) *
+			// ************************************
+			case 'g': case 'G': {
+				GetInfo();
+				delay(250);
+				Serial.println("");
+				ReleaseAnalogData();
+				break;
+			}
+			// ********************
+			// * READBUFF Command *
+			// ********************
+			case 'h': case 'H': {
+				byte dataSize = 0;	// DSP buffer data size requested to ATtiny85
+				byte dataIX = 0;	// Requested DSP buffer data start position
+				Serial.print("Please enter the DSP buffer data start position (1 to 100): ");
+				while (newByte == false) {
+					dataIX = ReadByte();
+				}
 				newByte = false;
+				Serial.println("");
+				Serial.print("Please enter the word amount to retrieve from the DSP buffer (1 to 5): ");
+				while (newByte == false) {
+					dataSize = ReadByte();
+				}
+				if (newByte == true) {
+					ReadBuffer(dataIX, dataSize);
+					newByte = false;
+				}
+				break;
 			}
-			break;
-		}
-		// ********************
-		// * READADC2 Command *
-		// ********************
-		case 'f': case 'F': {
-			ReadADC2();
-			break;
-		}
-		// ************************************
-		// * GET_INFO Command (16 byte reply) *
-		// ************************************
-		case 'g': case 'G': {
-			GetInfo();
-			delay(250);
-			Serial.println("");
-			ReleaseAnalogData();
-			break;
-		}
-		// ********************
-		// * READBUFF Command *
-		// ********************
-		case 'h': case 'H': {
-			byte dataSize = 0;	// DSP buffer data size requested to ATtiny85
-			byte dataIX = 0;	// Requested DSP buffer data start position
-			Serial.print("Please enter the DSP buffer data start position (1 to 100): ");
-			while (newByte == false) {
-				dataIX = ReadByte();
+			// ********************
+			// * DUMPBUFF Command *
+			// ********************
+			case 'j': case 'J': {
+				DumpBuffer();
+				delay(250);
+				Serial.println("");
+				//ReleaseAnalogData();
+				break;
 			}
-			newByte = false;
-			Serial.println("");
-			Serial.print("Please enter the word amount to retrieve from the DSP buffer (1 to 5): ");
-			while (newByte == false) {
-				dataSize = ReadByte();
+			// ********************
+			// * DSPDEBUG Command *
+			// ********************
+			case 'k': case 'K': {
+				GetInfo();
+				delay(250);
+				Serial.println("");
+				DumpBuffer();
+				delay(250);
+				Serial.println("");
+				ReleaseAnalogData();
+				break;
 			}
-			if (newByte == true) {
-				ReadBuffer(dataIX, dataSize);
-				newByte = false;
+			// ********************
+			// * FIXPOSIT Command *
+			// ********************
+			case 'p': case 'P': {
+				FixPositiveHC();
+				break;
 			}
-			break;
-		}
-		// ********************
-		// * DUMPBUFF Command *
-		// ********************
-		case 'j': case 'J': {
-			DumpBuffer();
-			delay(250);
-			Serial.println("");
-			//ReleaseAnalogData();
-			break;
-		}
-		// ********************
-		// * DSPDEBUG Command *
-		// ********************
-		case 'k': case 'K': {
-			GetInfo();
-			delay(250);
-			Serial.println("");
-			DumpBuffer();
-			delay(250);
-			Serial.println("");
-			ReleaseAnalogData();
-			break;
-		}
-		// ********************
-		// * FIXPOSIT Command *
-		// ********************
-		case 'p': case 'P': {
-			FixPositiveHC();
-			break;
-		}
-		// ********************
-		// * FIXNEGAT Command *
-		// ********************
-		case 'n': case 'N': {
-			FixNegativeHC();
-			break;
-		}
-		// *******************
-		// * Restart ESP8266 *
-		// *******************
-		case 'z': case 'Z': {
-			Serial.println("\nResetting ESP8266 ...");
-			ESP.restart();
-			break;
-		}
-		// ********************
-		// * RESETINY Command *
-		// ********************
-		case 'x': case 'X': {
-			Serial.println("Sending ATtiny85 Reset Command ...");
-			byte cmdTX[1] = { RESETINY };
-			byte txSize = sizeof(cmdTX);
-			Serial.print("ESP8266 - Sending Opcode >>> ");
-			Serial.print(cmdTX[0]);
-			Serial.println("(RESETINY)");
-			// Transmit command
-			byte transmitData[1] = { 0 };
-			for (int i = 0; i < txSize; i++) {
-				transmitData[i] = cmdTX[i];
-				Wire.beginTransmission(slaveAddress);
-				Wire.write(transmitData[i]);
-				Wire.endTransmission();
+			// ********************
+			// * FIXNEGAT Command *
+			// ********************
+			case 'n': case 'N': {
+				FixNegativeHC();
+				break;
 			}
-			// Receive acknowledgement
-			blockRXSize = Wire.requestFrom(slaveAddress, (byte)1);
-			byte ackRX[1] = { 0 };   // Data received from slave
-			for (int i = 0; i < blockRXSize; i++) {
-				ackRX[i] = Wire.read();
+			// *******************
+			// * Restart ESP8266 *
+			// *******************
+			case 'z': case 'Z': {
+				Serial.println("\nResetting ESP8266 ...");
+				ESP.restart();
+				break;
 			}
-			if (ackRX[0] == ACKRESTY) {
-				Serial.print("ESP8266 - Command ");
+			// ********************
+			// * RESETINY Command *
+			// ********************
+			case 'x': case 'X': {
+				Serial.println("Sending ATtiny85 Reset Command ...");
+				byte cmdTX[1] = { RESETINY };
+				byte txSize = sizeof(cmdTX);
+				Serial.print("ESP8266 - Sending Opcode >>> ");
 				Serial.print(cmdTX[0]);
-				Serial.print(" parsed OK <<< ");
-				Serial.println(ackRX[0]);
+				Serial.println("(RESETINY)");
+				// Transmit command
+				byte transmitData[1] = { 0 };
+				for (int i = 0; i < txSize; i++) {
+					transmitData[i] = cmdTX[i];
+					Wire.beginTransmission(slaveAddress);
+					Wire.write(transmitData[i]);
+					Wire.endTransmission();
+				}
+				// Receive acknowledgement
+				blockRXSize = Wire.requestFrom(slaveAddress, (byte)1);
+				byte ackRX[1] = { 0 };   // Data received from slave
+				for (int i = 0; i < blockRXSize; i++) {
+					ackRX[i] = Wire.read();
+				}
+				if (ackRX[0] == ACKRESTY) {
+					Serial.print("ESP8266 - Command ");
+					Serial.print(cmdTX[0]);
+					Serial.print(" parsed OK <<< ");
+					Serial.println(ackRX[0]);
+				}
+				else {
+					Serial.print("ESP8266 - Error parsing ");
+					Serial.print(cmdTX[0]);
+					Serial.print(" command! <<< ");
+					Serial.println(ackRX[0]);
+				}
+				break;
 			}
-			else {
-				Serial.print("ESP8266 - Error parsing ");
-				Serial.print(cmdTX[0]);
-				Serial.print(" command! <<< ");
-				Serial.println(ackRX[0]);
+			// *******************
+			// * Unknown Command *
+			// *******************
+			default: {
+				Serial.print("ESP8266 - Command '");
+				Serial.print(key);
+				Serial.println("' unknown ...");
+				break;
 			}
-			break;
-		}
-		// *******************
-		// * Unknown Command *
-		// *******************
-		default: {
-			Serial.print("ESP8266 - Command '");
-			Serial.print(key);
-			Serial.println("' unknown ...");
-			break;
-		}
 		}
 		Serial.println("");
 		Serial.println("Please type a command ('a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'p', 'n', 'z' reboot or 'x' reset tiny):");
@@ -588,15 +588,24 @@ void GetInfo(void) {
 		Serial.print(" parsed OK <<< ");
 		Serial.println(ackRX[0]);
 		// -----------------------------------------------------
-		// Max & Min ADC half-cycle values
-		/*Serial.print("+++* Max ADC Value: ");
-		Serial.print(ackRX[1] << 2);
-		Serial.println(" *+++");
-		Serial.print("---* Min ADC Value: ");
-		Serial.print(ackRX[2] << 2);
-		Serial.println(" *---");*/
+		// Fixed half-cycle for ADC calculations
+		Serial.print("+++* Fixed half-cycle: ");
+		switch (ackRX[1]) {
+			case 1: {
+				Serial.println("Positive *+++");
+				break;
+			}
+			case 0: {
+				Serial.println("Negative *+++");
+				break;
+			}
+			default: {
+				Serial.println("Unknown *+++");
+				break;
+			}
+		}
 		// ADC half-cycle mid point
-		Serial.print("# %%%* ADC Mid Point: ");
+		Serial.print("%%%* ADC Mid Point: ");
 		Serial.print((ackRX[2] << 8) + ackRX[3]);
 		Serial.println(" *%%%");
 		// -----------------------------------------------------
@@ -606,32 +615,32 @@ void GetInfo(void) {
 		Serial.println(" *:::");
 		// -----------------------------------------------------
 		// Sum of squared Vi's (instantaneous voltages)
-		Serial.print("# <>* Sum of Squared Vi's: ");
+		Serial.print(">>>* Sum of Squared Vi's: ");
 		Serial.print((unsigned)(ackRX[6] << 24) + (ackRX[7] << 16) + (ackRX[8] << 8) + ackRX[9]);
 		Serial.print(" (");
 		Serial.print(((ackRX[6] << 24) + (ackRX[7] << 16) + (ackRX[8] << 8) + ackRX[9]), HEX);
-		Serial.println(") *<>");
+		Serial.println(") *<<<");
 		// -----------------------------------------------------
 		// VRMS (Square root of sum of sqred VI's / ADC samples
 		uint16_t vRMS = (ackRX[10] << 8) + ackRX[11];
 		vRMS = vRMS;							
 		float volts = (vRMS * VCC) / ADCTOP;
 		volts = volts + (volts * VOLTSADJUST);								/* VOLTS COMPENSATION ADJUST */
-		Serial.print("# {}* Vrms (AC): ");
+		Serial.print("}}}* Vrms (AC): ");
 		Serial.print(vRMS);
-		Serial.print(" *{} -----------------------> {{ ");
+		Serial.print(" *{{{ -----------------------> {{ ");
 		Serial.print(volts, 3);
 		Serial.println(" Volts RMS }}");
 		// -----------------------------------------------------
 		// Last analog value readout (DC)
-		Serial.print("# []* Analog Value (Last): ");
+		Serial.print("[[[* Analog Value (Last): ");
 		Serial.print((ackRX[12] << 8) + ackRX[13]);
-		Serial.println(" *[]");
+		Serial.println(" *]]]");
 		// -----------------------------------------------------
 		// ADC conversions per AC half-cycle
-		Serial.print("# ~~~ ADC count: ");
+		Serial.print("~~~ ADC count: ");
 		Serial.print(ackRX[14]);
-		Serial.println(" ~~~ #");
+		Serial.println(" ~~~");
 		// --------------------------------------------------
 		byte checkCRC = CalculateCRC(ackRX, sizeof(ackRX));
 		if (checkCRC == 0) {

@@ -590,18 +590,18 @@ void GetInfo(void) {
 		Serial.println(ackRX[0]);
 		// -----------------------------------------------------
 		// Fixed half-cycle for ADC calculations
-		Serial.print("+++* Fixed half-cycle: ");
+		Serial.print("(((* Fixed half-cycle: ");
 		switch (ackRX[1]) {
 			case 1: {
-				Serial.println("Positive *+++");
+				Serial.println("Positive [+] *)))");
 				break;
 			}
 			case 0: {
-				Serial.println("Negative *+++");
+				Serial.println("Negative [-] *)))");
 				break;
 			}
 			default: {
-				Serial.println("Unknown *+++");
+				Serial.println("Unknown [?] *)))");
 				break;
 			}
 		}

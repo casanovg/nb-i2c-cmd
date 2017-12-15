@@ -104,7 +104,7 @@ void setup() {
 	ClrScr();
 	Serial.println("Nicebots Pluggie I2C-PWM-ADC Test (v0.6)");
 	Serial.println("========================================");
-	Serial.println("Please type a command ('a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'p', 'n', 'z' reboot or 'x' reset tiny):");
+	Serial.print("Pluggie command ('a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'p', 'n', 'z' reboot, 'x' reset t85):");
 }
 
 //
@@ -115,6 +115,7 @@ void setup() {
 void loop() {
 	if (newKey == true) {
 		newKey = false;
+		Serial.println("");
 		Serial.println("");
 		switch (key) {
 			// ********************
@@ -279,7 +280,7 @@ void loop() {
 			}
 		}
 		Serial.println("");
-		Serial.println("Please type a command ('a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'p', 'n', 'z' reboot or 'x' reset tiny):");
+		Serial.print("Pluggie command ('a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'p', 'n', 'z' reboot, 'x' reset t85):");
 	}
 	ReadChar();           // PROD - REMOVE FOR TESTING
 }

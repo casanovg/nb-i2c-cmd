@@ -312,7 +312,7 @@ byte CalculateCRC(byte* block, size_t blockLength) {
 	byte crc = 0, data = 0;
 	for (i = 0; i < blockLength; i++) {
 		data = (byte)(block[i] ^ crc); // XOR-in next input byte
-		crc = (byte)(crcTable[data]); // Get current CRC value = remainder 
+		crc = (byte)(crcTable[data]);  // Get current CRC value = remainder 
 	}
 	return crc;
 }

@@ -5,8 +5,8 @@
 // *  ..................................................  *
 // *  Author: Gustavo Casanova                            *
 // *  ..................................................  *
-// *  Firmware Version: 0.6 | MCU: ESP8266                *
-// *  2017-12-13 gustavo.casanova@nicebots.com            *
+// *  Firmware Version: 0.7 | MCU: ESP8266                *
+// *  2018-06-19 gustavo.casanova@nicebots.com            *
 // ********************************************************
 //
 // Run this master program on a NodeMCU, ESP-01 or ESP-12 Module
@@ -31,6 +31,7 @@
 
 #include <Wire.h>
 #include "nb-i2c-cmd.h"
+#include <pgmspace.h>
 
 #define VCC				3.3				/* PSU VCC 3.3 Volts */
 #define ADCTOP			1023			/* ADC Top Value @ 10-bit precision = 1023 (2^10) */
@@ -46,7 +47,7 @@ bool newByte = false;
 char key = '\0';
 
 // CRC Table: Polynomial=0x9C, CRC size=8-bit, HD=5, Word Length=9 bytes
-const byte crcTable[256] = {
+const byte crcTable[256] PROGMEM = {
   0x00, 0x9c, 0xa4, 0x38, 0xd4, 0x48, 0x70, 0xec, 0x34, 0xa8,
   0x90, 0x0c, 0xe0, 0x7c, 0x44, 0xd8, 0x68, 0xf4, 0xcc, 0x50,
   0xbc, 0x20, 0x18, 0x84, 0x5c, 0xc0, 0xf8, 0x64, 0x88, 0x14,

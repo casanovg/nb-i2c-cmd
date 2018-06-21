@@ -104,9 +104,9 @@ void setup() {
 	blockRXSize = 0;
 
 	ClrScr();
-	Serial.println("Nicebots Pluggie I2C-PWM-ADC Test (v0.6)");
-	Serial.println("========================================");
-	Serial.print("Pluggie command ('a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'p', 'n', 'z' reboot, 'x' reset t85):");
+	Serial.println("Nicebots Pluggie I2C-PWM-ADC Test with Timonel Bootloader (v0.7)");
+	Serial.println("================================================================");
+	ShowMenu();
 }
 
 //
@@ -282,7 +282,7 @@ void loop() {
 			}
 		}
 		Serial.println("");
-		Serial.print("Pluggie command ('a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'p', 'n', 'z' reboot, 'x' reset t85):");
+		ShowMenu();
 	}
 	ReadChar();           // PROD - REMOVE FOR TESTING
 }
@@ -898,4 +898,9 @@ void FixNegativeHC(void) {
 		Serial.print(" command! <<< ");
 		Serial.println(ackRX[0]);
 	}
+}
+
+//Function ShowMenu
+void ShowMenu() {
+	Serial.print("Pluggie command ('a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'p', 'n', 'z' reboot, 'x' reset t85):");
 }

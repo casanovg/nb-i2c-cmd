@@ -271,6 +271,22 @@ void loop() {
 				}
 				break;
 			}
+			// ********************
+			// * EXITTMNL Command *
+			// ********************
+			case 'r': case 'R': {
+				//Serial.println("\nBootloader Cmd >>> Run Application ...");
+				RunApplication();
+				break;
+			}
+			// ********************
+			// * DELFLASH Command *
+			// ********************
+			case 'e': case 'E': {
+				//Serial.println("\nBootloader Cmd >>> Run Application ...");
+				DeleteFlash();
+				break;
+			}
 			// *******************
 			// * Unknown Command *
 			// *******************
@@ -900,7 +916,80 @@ void FixNegativeHC(void) {
 	}
 }
 
+// Function RunApplication
+void RunApplication(void) {
+	byte cmdTX[1] = { EXITTMNL };
+	byte txSize = sizeof(cmdTX);
+	Serial.print("\n[Timonel] Exit bootloader & run application >>> ");
+	//Serial.print("ESP8266 - Sending Opcode >>> ");
+	Serial.print(cmdTX[0]);
+	Serial.println("(EXITTMNL)");
+	// Transmit command
+	byte transmitData[1] = { 0 };
+	for (int i = 0; i < txSize; i++) {
+		transmitData[i] = cmdTX[i];
+		Wire.beginTransmission(slaveAddress);
+		Wire.write(transmitData[i]);
+		Wire.endTransmission();
+	}
+	// Receive acknowledgement
+	blockRXSize = Wire.requestFrom(slaveAddress, (byte)1);
+	byte ackRX[1] = { 0 };   // Data received from slave
+	for (int i = 0; i < blockRXSize; i++) {
+		ackRX[i] = Wire.read();
+	}
+	if (ackRX[0] == ACKEXITT) {
+		Serial.print("ESP8266 - Command ");
+		Serial.print(cmdTX[0]);
+		Serial.print(" parsed OK <<< ");
+		Serial.println(ackRX[0]);
+	}
+	else {
+		Serial.print("ESP8266 - Error parsing ");
+		Serial.print(cmdTX[0]);
+		Serial.print(" command! <<< ");
+		Serial.println(ackRX[0]);
+	}
+}
+
+// Function DeleteFlash
+void DeleteFlash(void) {
+	byte cmdTX[1] = { DELFLASH };
+	byte txSize = sizeof(cmdTX);
+	Serial.print("\n[Timonel] Delete Flash Memory >>> ");
+	//Serial.print("ESP8266 - Sending Opcode >>> ");
+	Serial.print(cmdTX[0]);
+	Serial.println("(DELFLASH)");
+	// Transmit command
+	byte transmitData[1] = { 0 };
+	for (int i = 0; i < txSize; i++) {
+		transmitData[i] = cmdTX[i];
+		Wire.beginTransmission(slaveAddress);
+		Wire.write(transmitData[i]);
+		Wire.endTransmission();
+	}
+	// Receive acknowledgement
+	blockRXSize = Wire.requestFrom(slaveAddress, (byte)1);
+	byte ackRX[1] = { 0 };   // Data received from slave
+	for (int i = 0; i < blockRXSize; i++) {
+		ackRX[i] = Wire.read();
+	}
+	if (ackRX[0] == ACKDELFL) {
+		Serial.print("ESP8266 - Command ");
+		Serial.print(cmdTX[0]);
+		Serial.print(" parsed OK <<< ");
+		Serial.println(ackRX[0]);
+	}
+	else {
+		Serial.print("ESP8266 - Error parsing ");
+		Serial.print(cmdTX[0]);
+		Serial.print(" command! <<< ");
+		Serial.println(ackRX[0]);
+	}
+}
+
 //Function ShowMenu
 void ShowMenu() {
-	Serial.print("Pluggie command ('a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'p', 'n', 'z' reboot, 'x' reset t85):");
+	Serial.println("Pluggie command ('a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'p', 'n', 'z' reboot, 'x' reset t85)");
+	Serial.println(" Booloader cmds ('v' version, 'r' run app, 'e' erase flash, 'b' set address):");
 }

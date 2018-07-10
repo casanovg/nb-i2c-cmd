@@ -37,8 +37,16 @@
 #define FIXNEGAT		0x85				/* Fix Negative half-cycles for ADC Vrms calculations */
 #define ACKFXNEG		0x7A				/* Acknowledge Fix Negative Command */
 
-// Transfer & Programming Commands
+// Transfer & Self-Programming Commands
 #define READBUFF		0xA1				/* Command to Read Buffer Data */
 #define ACKRDBUF		0x5E				/* Acknowledge Read Data Command */
 #define WRITBUFF		0xA2				/* Command to Write Data to Buffer */
 #define ACKWTBUF		0x5D				/* Acknowledge Write Data Command */
+#define GETTMNLV		0xA3				/* Command to Get the Timonel version (bootloader) */
+#define ACKTMNLV		0x5C				/* Acknowledge Get Timonel version Command */
+#define DELFLASH		0xA4				/* Command to Delete Flash memory */
+#define ACKDELFL		0x5B				/* Acknowledge Delete Flash Command */
+#define STPGADDR		0xA5				/* Command to Set Page Base Address */
+#define AKPGADDR		0x5A				/* Acknowledge Set Page Address Command */
+#define EXITTMNL		0xA6				/* Command to Exit Timonel (run application) 	*/
+#define ACKEXITT		0x59				/* Acknowledge Exit Timonel Command */

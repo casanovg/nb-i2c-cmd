@@ -991,5 +991,5 @@ void DeleteFlash(void) {
 //Function ShowMenu
 void ShowMenu() {
 	Serial.println("Pluggie command ('a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'p', 'n', 'z' reboot, 'x' reset t85)");
-	Serial.println(" Booloader cmds ('v' version, 'r' run app, 'e' erase flash, 'b' set address):");
+	Serial.print(" Booloader cmds ('v' version, 'r' run app, 'e' erase flash, 'b' set address): ");
 }

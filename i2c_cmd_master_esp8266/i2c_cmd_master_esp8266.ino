@@ -1106,9 +1106,9 @@ void GetTimonelVersion(void) {
 		Serial.print(" parsed OK <<< ");
 		Serial.println(ackRX[0]);
 		Serial.print(">>> ");
-		Serial.print(ackRX[1]);
-		Serial.print(ackRX[2]);
-		Serial.print(ackRX[3]);
+		Serial.print((char)ackRX[1]);
+		Serial.print((char)ackRX[2]);
+		Serial.print((char)ackRX[3]);
 		Serial.print(" <<< Version: ");
 		Serial.print(ackRX[4]);
 		Serial.print(".");

@@ -1,3 +1,3 @@
-ESP8266 ATtiny85 ADC Tests
-==========================
-ADC tests on ATtiny85 ...
+ESP8266 ATtiny85 Bootloader Tests
+=================================
+Timonel I2C Bootloader development tests on ATtiny85 ...

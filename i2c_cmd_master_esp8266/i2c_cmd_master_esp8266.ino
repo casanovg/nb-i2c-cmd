@@ -5,8 +5,8 @@
 // *  ..................................................  *
 // *  Author: Gustavo Casanova                            *
 // *  ..................................................  *
-// *  Firmware Version: 0.7 | MCU: ESP8266                *
-// *  2018-06-19 gustavo.casanova@nicebots.com            *
+// *  Firmware Version: 0.8 | MCU: ESP8266                *
+// *  2018-07-25 gustavo.casanova@nicebots.com            *
 // ********************************************************
 //
 // Run this master program on a NodeMCU, ESP-01 or ESP-12 Module
@@ -260,7 +260,7 @@ void setup() {
 	blockRXSize = 0;
 
 	ClrScr();
-	Serial.println("Nicebots Pluggie I2C-PWM-ADC Test with Timonel Bootloader (v0.7)");
+	Serial.println("Nicebots Pluggie I2C-PWM-ADC Test with Timonel Bootloader (v0.8)");
 	Serial.println("================================================================");
 	ShowMenu();
 }

@@ -6,4 +6,4 @@ Timonel-Bootloader --> ATtiny85
 
 Timonel-Uploader   --> ESP8266
 
-Test Payload: "SOS" blinker for Tiny85. Initially loaded from an ESP8266 array. In the final version, it will be parsed and uploaded from a real ".HEX" file residing on SPIFFS.
+Test Payload: "SOS" blinker for Tiny85. Initially loaded from an ESP8266 array, in the final version it will be parsed from a real ".HEX" file residing on SPIFFS.

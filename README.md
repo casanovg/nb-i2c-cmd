@@ -1,5 +1,5 @@
-ATtiny85 Bootloader Tests
-=========================
+ATtiny85 I2C Bootloader Tests
+=============================
 Timonel I2C Bootloader development tests ...
 
 Timonel-Bootloader --> ATtiny85

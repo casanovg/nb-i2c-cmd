@@ -389,65 +389,34 @@ void loop() {
 				ESP.restart();
 				break;
 			}
-			// ********************
-			// * RESETINY Command *
-			// ********************
+			// ********************************
+			// * Timonel ::: RESETINY Command *
+			// ********************************
 			case 'x': case 'X': {
-				Serial.println("Sending ATtiny85 Reset Command ...");
-				byte cmdTX[1] = { RESETINY };
-				byte txSize = sizeof(cmdTX);
-				Serial.print("ESP8266 - Sending Opcode >>> ");
-				Serial.print(cmdTX[0]);
-				Serial.println("(RESETINY)");
-				// Transmit command
-				byte transmitData[1] = { 0 };
-				for (int i = 0; i < txSize; i++) {
-					transmitData[i] = cmdTX[i];
-					Wire.beginTransmission(slaveAddress);
-					Wire.write(transmitData[i]);
-					Wire.endTransmission();
-				}
-				// Receive acknowledgement
-				blockRXSize = Wire.requestFrom(slaveAddress, (byte)1);
-				byte ackRX[1] = { 0 };   // Data received from slave
-				for (int i = 0; i < blockRXSize; i++) {
-					ackRX[i] = Wire.read();
-				}
-				if (ackRX[0] == ACKRESTY) {
-					Serial.print("ESP8266 - Command ");
-					Serial.print(cmdTX[0]);
-					Serial.print(" parsed OK <<< ");
-					Serial.println(ackRX[0]);
-				}
-				else {
-					Serial.print("ESP8266 - Error parsing ");
-					Serial.print(cmdTX[0]);
-					Serial.print(" command! <<< ");
-					Serial.println(ackRX[0]);
-				}
+				ResetTiny();
 				break;
 			}
-			// ********************
-			// * GETTMNLV Command *
-			// ********************
+			// ********************************
+			// * Timonel ::: GETTMNLV Command *
+			// ********************************
 			case 'v': case 'V': {
-				//Serial.println("\nBootloader Cmd >>> Run Application ...");
+				//Serial.println("\nBootloader Cmd >>> Get bootloader version ...");
 				GetTimonelVersion();
 				break;
 			}
-			// ********************
-			// * EXITTMNL Command *
-			// ********************
+			// ********************************
+			// * Timonel ::: EXITTMNL Command *
+			// ********************************
 			case 'r': case 'R': {
 				//Serial.println("\nBootloader Cmd >>> Run Application ...");
 				RunApplication();
 				break;
 			}
-			// ********************
-			// * DELFLASH Command *
-			// ********************
+			// ********************************
+			// * Timonel ::: DELFLASH Command *
+			// ********************************
 			case 'e': case 'E': {
-				//Serial.println("\nBootloader Cmd >>> Run Application ...");
+				//Serial.println("\nBootloader Cmd >>> Delete apllication from flash memory ...");
 				DeleteFlash();
 				break;
 			}
@@ -1066,6 +1035,42 @@ void FixNegativeHC(void) {
 		ackRX[i] = Wire.read();
 	}
 	if (ackRX[0] == ACKFXNEG) {
+		Serial.print("ESP8266 - Command ");
+		Serial.print(cmdTX[0]);
+		Serial.print(" parsed OK <<< ");
+		Serial.println(ackRX[0]);
+	}
+	else {
+		Serial.print("ESP8266 - Error parsing ");
+		Serial.print(cmdTX[0]);
+		Serial.print(" command! <<< ");
+		Serial.println(ackRX[0]);
+	}
+}
+
+//Function ResetTiny
+void ResetTiny(void) {
+	Serial.println("Sending ATtiny85 Reset Command ...");
+	byte cmdTX[1] = { RESETINY };
+	byte txSize = sizeof(cmdTX);
+	Serial.print("ESP8266 - Sending Opcode >>> ");
+	Serial.print(cmdTX[0]);
+	Serial.println("(RESETINY)");
+	// Transmit command
+	byte transmitData[1] = { 0 };
+	for (int i = 0; i < txSize; i++) {
+		transmitData[i] = cmdTX[i];
+		Wire.beginTransmission(slaveAddress);
+		Wire.write(transmitData[i]);
+		Wire.endTransmission();
+	}
+	// Receive acknowledgement
+	blockRXSize = Wire.requestFrom(slaveAddress, (byte)1);
+	byte ackRX[1] = { 0 };   // Data received from slave
+	for (int i = 0; i < blockRXSize; i++) {
+		ackRX[i] = Wire.read();
+	}
+	if (ackRX[0] == ACKRESTY) {
 		Serial.print("ESP8266 - Command ");
 		Serial.print(cmdTX[0]);
 		Serial.print(" parsed OK <<< ");

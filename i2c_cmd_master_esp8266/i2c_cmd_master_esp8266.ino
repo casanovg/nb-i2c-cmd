@@ -420,6 +420,25 @@ void loop() {
 				DeleteFlash();
 				break;
 			}
+			// ********************************
+			// * Timonel ::: STPGADDR Command *
+			// ********************************
+			case 'b': case 'B': {
+				word flashPageAddr = 0;	// DSP buffer data size requested to ATtiny85
+				Serial.print("Please enter the flash memory page base address: ");
+				while (newByte == false) {
+					flashPageAddr = ReadByte();
+				}
+				if (newByte == true) {
+					//ReadBuffer(dataIX, dataSize);
+					Serial.println("");
+					Serial.print("Flash memory page base address: ");
+					Serial.print(flashPageAddr);
+					Serial.println("");
+					newByte = false;
+				}
+				break;
+			}
 			// *******************
 			// * Unknown Command *
 			// *******************
@@ -477,7 +496,7 @@ void ReadChar() {
 }
 
 // Function ReadByte
-byte ReadByte() {
+byte ReadByte(void) {
 	const byte dataLength = 16;
 	char serialData[dataLength];	// an array to store the received data  
 	static byte ix = 0;
@@ -504,6 +523,11 @@ byte ReadByte() {
 		Serial.println((byte)atoi(serialData));
 	}
 	return((byte)atoi(serialData));
+}
+
+// Function ReadWord
+word ReadWord(void) {
+	// -----
 }
 
 // Function Clear Screen

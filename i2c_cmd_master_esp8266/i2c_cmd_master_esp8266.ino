@@ -26,7 +26,7 @@
 // h - (READBUFF) Read N-bytes from the DSP buffer.
 // j - (DUMPBUFF) Read all the DSP buffer.
 // k - (DSPDEBUG) Digital Signal Processing debug data.
-// z - (INITTINY) Reboot ESP-8266 and initialize ATtiny85
+// z - (INITTINY) Reboot ESP-8266 and initialize ATtiny85newByte
 // x - (RESETINY) Reset ATtiny85
 
 #include <Wire.h>
@@ -44,6 +44,7 @@ byte slaveAddress = 0;
 byte blockRXSize = 0;
 bool newKey = false;
 bool newByte = false;
+bool newWord = false;
 char key = '\0';
 
 // CRC Table: Polynomial=0x9C, CRC size=8-bit, HD=5, Word Length=9 bytes
@@ -426,8 +427,8 @@ void loop() {
 			case 'b': case 'B': {
 				word flashPageAddr = 0;	// DSP buffer data size requested to ATtiny85
 				Serial.print("Please enter the flash memory page base address: ");
-				while (newByte == false) {
-					flashPageAddr = ReadByte();
+				while (newWord == false) {
+					flashPageAddr = ReadWord();
 				}
 				if (newByte == true) {
 					//ReadBuffer(dataIX, dataSize);
@@ -435,7 +436,7 @@ void loop() {
 					Serial.print("Flash memory page base address: ");
 					Serial.print(flashPageAddr);
 					Serial.println("");
-					newByte = false;
+					newWord = false;
 				}
 				break;
 			}
@@ -527,7 +528,32 @@ byte ReadByte(void) {
 
 // Function ReadWord
 word ReadWord(void) {
-	// -----
+	const byte dataLength = 16;
+	char serialData[dataLength];	// an array to store the received data  
+	static byte ix = 0;
+	char rc, endMarker = 0xD;		//standard is: char endMarker = '\n'
+	while (Serial.available() > 0 && newWord == false) {
+		rc = Serial.read();
+		if (rc != endMarker) {
+			serialData[ix] = rc;
+			Serial.print(serialData[ix]);
+			ix++;
+			if (ix >= dataLength) {
+				ix = dataLength - 1;
+			}
+		}
+		else {
+			serialData[ix] = '\0';	// terminate the string
+			ix = 0;
+			newWord = true;
+		}
+	}
+	if ((atoi(serialData) < 0 || atoi(serialData) > 255) && newWord == true) {
+		Serial.println("");
+		Serial.print("WARNING! Byte values must be 0 to 255 -> Truncating to ");
+		Serial.println((byte)atoi(serialData));
+	}
+	return((byte)atoi(serialData));
 }
 
 // Function Clear Screen

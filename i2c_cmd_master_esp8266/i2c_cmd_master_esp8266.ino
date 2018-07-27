@@ -527,7 +527,7 @@ byte ReadByte(void) {
 }
 
 // Function ReadWord
-word ReadWord(void) {
+byte ReadWord(void) {
 	const byte dataLength = 16;
 	char serialData[dataLength];	// an array to store the received data  
 	static byte ix = 0;
@@ -548,11 +548,15 @@ word ReadWord(void) {
 			newWord = true;
 		}
 	}
-	if ((atoi(serialData) < 0 || atoi(serialData) > 255) && newWord == true) {
+	if ((atoi(serialData) < 0 || atoi(serialData) > 65535) && newWord == true) {
 		Serial.println("");
-		Serial.print("WARNING! Byte values must be 0 to 255 -> Truncating to ");
+		Serial.print("WARNING! Word values must be 0 to 65535 -> Truncating to ");
 		Serial.println((byte)atoi(serialData));
 	}
+	//if (newWord == true) {
+	//	Serial.print("===>> Word: ");
+	//}
+	Serial.println((byte)atoi(serialData));
 	return((byte)atoi(serialData));
 }
 

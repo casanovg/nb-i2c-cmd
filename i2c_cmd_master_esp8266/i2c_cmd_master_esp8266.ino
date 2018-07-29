@@ -425,12 +425,13 @@ void loop() {
 			// * Timonel ::: STPGADDR Command *
 			// ********************************
 			case 'b': case 'B': {
-				word flashPageAddr = 0;	// DSP buffer data size requested to ATtiny85
+				word flashPageAddr = 99;	// DSP buffer data size requested to ATtiny85
 				Serial.print("Please enter the flash memory page base address: ");
 				while (newWord == false) {
-					flashPageAddr = ReadWord();
+					//flashPageAddr = ReadWord();
+					newWord = true;
 				}
-				if (newByte == true) {
+				if (newWord == true) {
 					//ReadBuffer(dataIX, dataSize);
 					Serial.println("");
 					Serial.print("Flash memory page base address: ");
@@ -527,7 +528,7 @@ byte ReadByte(void) {
 }
 
 // Function ReadWord
-byte ReadWord(void) {
+word ReadWord(void) {
 	const byte dataLength = 16;
 	char serialData[dataLength];	// an array to store the received data  
 	static byte ix = 0;
@@ -556,8 +557,8 @@ byte ReadWord(void) {
 	//if (newWord == true) {
 	//	Serial.print("===>> Word: ");
 	//}
-	Serial.println((byte)atoi(serialData));
-	return((byte)atoi(serialData));
+	Serial.println((word)atoi(serialData));
+	return((word)atoi(serialData));
 }
 
 // Function Clear Screen

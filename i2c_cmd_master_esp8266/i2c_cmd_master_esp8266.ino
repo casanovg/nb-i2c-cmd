@@ -549,7 +549,9 @@ word ReadWord(void) {
 		}
 	}
 	if ((atoi(serialData) < 0 || atoi(serialData) > MCUTOTALMEM) && newWord == true) {
-		serialData[0] = 0;
+		for (int i = 0; i < dataLength; i++) {
+			serialData[i] = 0;
+		}
 		Serial.println("");
 		Serial.print("WARNING! Word memory positions must be between 0 and ");
 		Serial.print(MCUTOTALMEM);

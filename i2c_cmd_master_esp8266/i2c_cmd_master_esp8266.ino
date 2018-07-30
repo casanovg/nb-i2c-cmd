@@ -548,8 +548,9 @@ word ReadWord(void) {
 		}
 	}
 	if ((atoi(serialData) < 0 || atoi(serialData) > 8192) && newWord == true) {
+		serialData[0] = 0;
 		Serial.println("");
-		Serial.print("WARNING! Word memory positions must be between 0 and 8192 -> Truncating to ");
+		Serial.print("WARNING! Word memory positions must be between 0 and 8192 -> Changing to ");
 		Serial.println((word)atoi(serialData));
 	}
 	return((word)atoi(serialData));

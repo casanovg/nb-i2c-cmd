@@ -425,14 +425,12 @@ void loop() {
 			// * Timonel ::: STPGADDR Command *
 			// ********************************
 			case 'b': case 'B': {
-				word flashPageAddr = 99;	// DSP buffer data size requested to ATtiny85
+				word flashPageAddr = 0;	// DSP buffer data size requested to ATtiny85
 				Serial.print("Please enter the flash memory page base address: ");
 				while (newWord == false) {
-					//flashPageAddr = ReadWord();
-					newWord = true;
+					flashPageAddr = ReadWord();
 				}
 				if (newWord == true) {
-					//ReadBuffer(dataIX, dataSize);
 					Serial.println("");
 					Serial.print("Flash memory page base address: ");
 					Serial.print(flashPageAddr);
@@ -549,15 +547,11 @@ word ReadWord(void) {
 			newWord = true;
 		}
 	}
-	if ((atoi(serialData) < 0 || atoi(serialData) > 65535) && newWord == true) {
+	if ((atoi(serialData) < 0 || atoi(serialData) > 8192) && newWord == true) {
 		Serial.println("");
-		Serial.print("WARNING! Word values must be 0 to 65535 -> Truncating to ");
-		Serial.println((byte)atoi(serialData));
+		Serial.print("WARNING! Word memory positions must be between 0 and 8192 -> Truncating to ");
+		Serial.println((word)atoi(serialData));
 	}
-	//if (newWord == true) {
-	//	Serial.print("===>> Word: ");
-	//}
-	Serial.println((word)atoi(serialData));
 	return((word)atoi(serialData));
 }
 

@@ -38,6 +38,7 @@
 #define DSPBUFFERSIZE	100				/* DSP buffer size (16-bit elements) */
 #define MAXBUFFERTXLN	7				/* Maximum DPS buffer TX/RX size */
 #define VOLTSADJUST		0.025			/* Measured volts adjust: 0.01 = 1% */
+#define MCUTOTALMEM		8192			/* Slave MCU total flash memory*/
 
 // Global Variables
 byte slaveAddress = 0;
@@ -547,10 +548,12 @@ word ReadWord(void) {
 			newWord = true;
 		}
 	}
-	if ((atoi(serialData) < 0 || atoi(serialData) > 8192) && newWord == true) {
+	if ((atoi(serialData) < 0 || atoi(serialData) > MCUTOTALMEM) && newWord == true) {
 		serialData[0] = 0;
 		Serial.println("");
-		Serial.print("WARNING! Word memory positions must be between 0 and 8192 -> Changing to ");
+		Serial.print("WARNING! Word memory positions must be between 0 and ");
+		Serial.print(MCUTOTALMEM);
+		Serial.print(" -> Changing to ");
 		Serial.println((word)atoi(serialData));
 	}
 	return((word)atoi(serialData));

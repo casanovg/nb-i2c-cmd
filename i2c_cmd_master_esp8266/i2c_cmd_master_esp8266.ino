@@ -439,7 +439,7 @@ void loop() {
 					Serial.print((flashPageAddr & 0xFF00) >> 8);
 					Serial.print(" (<< 8) + Address low byte: ");
 					Serial.println(flashPageAddr & 0xFF);
-					SetTmlPageAddr(word flashPageAddr);
+					SetTmlPageAddr(flashPageAddr);
 					newWord = false;
 				}
 				break;
@@ -1159,8 +1159,8 @@ void GetTimonelVersion(void) {
 		Wire.endTransmission();
 	}
 	// Receive acknowledgement
-	blockRXSize = Wire.requestFrom(slaveAddress, (byte)6);
-	byte ackRX[6] = { 0 };   // Data received from slave
+	blockRXSize = Wire.requestFrom(slaveAddress, (byte)8);
+	byte ackRX[8] = { 0 };   // Data received from slave
 	for (int i = 0; i < blockRXSize; i++) {
 		ackRX[i] = Wire.read();
 	}
@@ -1176,7 +1176,10 @@ void GetTimonelVersion(void) {
 		Serial.print(" <<< Version: ");
 		Serial.print(ackRX[4]);
 		Serial.print(".");
-		Serial.println(ackRX[5]);
+		Serial.print(ackRX[5]);
+		Serial.print(" >>> Base address: 0x");
+		Serial.print((ackRX[6] << 8) + ackRX[7], HEX);
+		Serial.println(" <<<");
 	}
 	else {
 		Serial.print("[Timonel] - Error parsing ");
@@ -1260,7 +1263,7 @@ void DeleteFlash(void) {
 
 // Function SetTmlPageAddr
 void SetTmlPageAddr(word pageAddr) {
-	byte cmdTX[3] = { STPGADDR, 0, 0, 0 };
+	byte cmdTX[4] = { STPGADDR, 0, 0, 0 };
 	byte txSize = 4;
 	Serial.println("");
 	cmdTX[1] = ((pageAddr & 0xFF00) >> 8);		/* Flash page address high byte */
@@ -1270,7 +1273,7 @@ void SetTmlPageAddr(word pageAddr) {
 	Serial.println("(STPGADDR)");
 	cmdTX[3] = CalculateCRC(cmdTX, 2);
 	// Transmit command
-	byte transmitData[1] = { 0 };
+	byte transmitData[4] = { 0 };
 	for (int i = 0; i < txSize; i++) {
 		if (i > 0) {
 			if (i < txSize - 1) {
@@ -1293,19 +1296,19 @@ void SetTmlPageAddr(word pageAddr) {
 	for (int i = 0; i < blockRXSize; i++) {
 		ackRX[i] = Wire.read();
 	}
-	if (ackRX[0] == ACKANPB3) {
-		Serial.print("ESP8266 - Command ");
+	if (ackRX[0] == AKPGADDR) {
+		Serial.print("[Timonel] - Command ");
 		Serial.print(cmdTX[0]);
 		Serial.print(" parsed OK <<< ");
 		Serial.println(ackRX[0]);
 		if (ackRX[1] == 0) {
-			Serial.print("ESP8266 - Operand ");
+			Serial.print("[Timonel] - Operand ");
 			Serial.print(cmdTX[1]);
 			Serial.print(" parsed OK by slave <<< ATtiny85 CRC Check = ");
 			Serial.println(ackRX[1]);
 		}
 		else {
-			Serial.print("ESP8266 - Operand ");
+			Serial.print("[Timonel] - Operand ");
 			Serial.print(cmdTX[1]);
 			Serial.print(" parsed with {{{ERROR}}} <<< ATtiny85 CRC Check = ");
 			Serial.println(ackRX[1]);
@@ -1313,7 +1316,7 @@ void SetTmlPageAddr(word pageAddr) {
 
 	}
 	else {
-		Serial.print("ESP8266 - Error parsing ");
+		Serial.print("[Timonel] - Error parsing ");
 		Serial.print(cmdTX[0]);
 		Serial.print(" command! <<< ");
 		Serial.println(ackRX[0]);
@@ -1323,5 +1326,5 @@ void SetTmlPageAddr(word pageAddr) {
 //Function ShowMenu
 void ShowMenu() {
 	Serial.println("Pluggie command ('a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'p', 'n', 'z' reboot, 'x' reset t85)");
-	Serial.print(" Booloader cmds ('v' version, 'r' run app, 'e' erase flash, 'b' set address): ");
+	Serial.print  ("Booloader cmmnd ('v' version, 'r' run app, 'e' erase flash, 'b' set address): ");
 }

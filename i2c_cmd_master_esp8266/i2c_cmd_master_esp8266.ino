@@ -1301,16 +1301,16 @@ void SetTmlPageAddr(word pageAddr) {
 		Serial.print(cmdTX[0]);
 		Serial.print(" parsed OK <<< ");
 		Serial.println(ackRX[0]);
-		if (ackRX[1] == 0) {
+		if (ackRX[1] == (byte)(cmdTX[1] + cmdTX[2])) {
 			Serial.print("[Timonel] - Operand ");
 			Serial.print(cmdTX[1]);
-			Serial.print(" parsed OK by slave <<< ATtiny85 CRC Check = ");
+			Serial.print(" parsed OK by slave <<< ATtiny85 Flash Page Address Check = ");
 			Serial.println(ackRX[1]);
 		}
 		else {
 			Serial.print("[Timonel] - Operand ");
 			Serial.print(cmdTX[1]);
-			Serial.print(" parsed with {{{ERROR}}} <<< ATtiny85 CRC Check = ");
+			Serial.print(" parsed with {{{ERROR}}} <<< ATtiny85 Flash Page Address Check = ");
 			Serial.println(ackRX[1]);
 		}
 

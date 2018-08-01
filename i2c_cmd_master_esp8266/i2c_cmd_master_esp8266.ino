@@ -438,7 +438,7 @@ void loop() {
 					Serial.print("Address high byte: ");
 					Serial.print((flashPageAddr & 0xFF00) >> 8);
 					Serial.print(" (<< 8) + Address low byte: ");
-					Serial.println(flashPageAddr & 0xFF);
+					Serial.print(flashPageAddr & 0xFF);
 					SetTmlPageAddr(flashPageAddr);
 					newWord = false;
 				}
@@ -1302,8 +1302,10 @@ void SetTmlPageAddr(word pageAddr) {
 		Serial.print(" parsed OK <<< ");
 		Serial.println(ackRX[0]);
 		if (ackRX[1] == (byte)(cmdTX[1] + cmdTX[2])) {
-			Serial.print("[Timonel] - Operand ");
+			Serial.print("[Timonel] - Operands ");
 			Serial.print(cmdTX[1]);
+			Serial.print(" and ");
+			Serial.print(cmdTX[2]);
 			Serial.print(" parsed OK by slave <<< ATtiny85 Flash Page Address Check = ");
 			Serial.println(ackRX[1]);
 		}

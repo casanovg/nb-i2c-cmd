@@ -389,6 +389,8 @@ void loop() {
 			// *******************
 			case 'z': case 'Z': {
 				Serial.println("\nResetting ESP8266 ...");
+				Serial.println("\n.\n.\n.\n");
+				ESP.restart();
 				break;
 			}
 			// ********************

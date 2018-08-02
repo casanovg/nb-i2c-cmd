@@ -46,6 +46,7 @@ byte blockRXSize = 0;
 bool newKey = false;
 bool newByte = false;
 bool newWord = false;
+bool appMode = true;
 char key = '\0';
 
 // CRC Table: Polynomial=0x9C, CRC size=8-bit, HD=5, Word Length=9 bytes
@@ -388,14 +389,16 @@ void loop() {
 			// *******************
 			case 'z': case 'Z': {
 				Serial.println("\nResetting ESP8266 ...");
-				ESP.restart();
 				break;
 			}
-			// ********************************
-			// * Timonel ::: RESETINY Command *
-			// ********************************
+			// ********************
+			// * RESETINY Command *
+			// ********************
 			case 'x': case 'X': {
 				ResetTiny();
+				Serial.println("\n.\n.\n.\n");
+				delay(2000);
+				ESP.restart();
 				break;
 			}
 			// ********************************
@@ -412,6 +415,9 @@ void loop() {
 			case 'r': case 'R': {
 				//Serial.println("\nBootloader Cmd >>> Run Application ...");
 				RunApplication();
+				Serial.println("\n.\n.\n.\n");
+				delay(2000);
+				ESP.restart();
 				break;
 			}
 			// ********************************
@@ -468,7 +474,14 @@ byte ScanI2C() {
 	while (scanAddr < 120) {
 		Wire.beginTransmission(scanAddr);
 		if (Wire.endTransmission() == 0) {
-			Serial.print("Found ATtiny85 at address: ");
+			if (scanAddr < 21) {
+				Serial.print("T85 Timonel Bootloader found at address: ");
+				appMode = false;
+			}
+			else {
+				Serial.print("T85 Pluggie App Firmware found at address: ");
+				appMode = true;
+			}
 			Serial.print(scanAddr, DEC);
 			Serial.print(" (0x");
 			Serial.print(scanAddr, HEX);
@@ -1327,6 +1340,10 @@ void SetTmlPageAddr(word pageAddr) {
 
 //Function ShowMenu
 void ShowMenu() {
-	Serial.println("Pluggie command ('a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'p', 'n', 'z' reboot, 'x' reset t85)");
-	Serial.print  ("Booloader cmmnd ('v' version, 'r' run app, 'e' erase flash, 'b' set address): ");
+	if (appMode == true) {
+		Serial.print("Pluggie command ('a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'p', 'n', 'z' reboot, 'x' reset T85): ");
+	}
+	else {
+		Serial.print("Timonel booloader ('v' version, 'r' run app, 'e' erase flash, 'b' set address): ");
+	}
 }

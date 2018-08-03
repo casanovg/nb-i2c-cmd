@@ -399,7 +399,7 @@ void loop() {
 			// ********************
 			case 'x': case 'X': {
 				ResetTiny();
-				Serial.println("\n. . .\n\r . .\n\r  .\n");
+				Serial.println("\n  .\n\r . .\n\r. . .\n");
 				delay(2000);
 				ESP.restart();
 				break;
@@ -418,7 +418,7 @@ void loop() {
 			case 'r': case 'R': {
 				//Serial.println("\nBootloader Cmd >>> Run Application ...");
 				RunApplication();
-				Serial.println("\n  .\n\r . .\n\r. . .\n");
+				Serial.println("\n. . .\n\r . .\n\r  .\n");
 				delay(2000);
 				ESP.restart();
 				break;
@@ -1361,7 +1361,7 @@ void WriteFlash(void) {
 		padding = ((((uint)(payloadSize / PGSIZE) + 1) * PGSIZE) - payloadSize);
 		payloadSize += padding;
 	}
-	Serial.println("\n1-Deleting flash ...\n\n\r");
+	Serial.println("\n1-Deleting flash ...\n\r");
 	Serial.println("\n2-Writing payload to flash ...\n\n\r");
 	for (int i = 0; i < payloadSize; i++) {
 		if (i < (payloadSize - padding)) {

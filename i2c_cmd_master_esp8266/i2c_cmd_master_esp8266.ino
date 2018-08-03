@@ -1355,6 +1355,7 @@ void WriteFlash(void) {
 	#define PGSIZE 64
 	int l = 0;
 	int padding = 0;
+	int pageEnd = 0;
 	uint8_t wrtBuff[TXSIZE] = { 0xFF };
 	int payloadSize = sizeof(payload);
 	if ((payloadSize / PGSIZE) != 0) {
@@ -1378,6 +1379,10 @@ void WriteFlash(void) {
 			Serial.println("");
 			l = 0;
 			delay(5);
+		}
+		if (pageEnd++ == (PGSIZE - 1)) {
+			Serial.println("\n============================\n");
+			pageEnd = 0;
 		}
 	}
 }

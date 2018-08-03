@@ -52,7 +52,8 @@ char key = '\0';
 // CRC Table: Polynomial=0x9C, CRC size=8-bit, HD=5, Word Length=9 bytes
 const byte crcTable[256] = {
 //const byte crcTable[256] PROGMEM = {
-	0x00, 0x9c, 0xa4, 0x38, 0xd4, 0x48, 0x70, 0xec, 0x34, 0xa8,
+	//0x00, 0x9c, 0xa4, 0x38, 0xd4, 0x48, 0x70, 0xec, 0x34, 0xa8,   /* SOS Original */
+	0x3f, 0xcd, 0xa4, 0x38, 0xd4, 0x48, 0x70, 0xec, 0x34, 0xa8,
 	0x90, 0x0c, 0xe0, 0x7c, 0x44, 0xd8, 0x68, 0xf4, 0xcc, 0x50,
 	0xbc, 0x20, 0x18, 0x84, 0x5c, 0xc0, 0xf8, 0x64, 0x88, 0x14,
 	0x2c, 0xb0, 0xd0, 0x4c, 0x74, 0xe8, 0x04, 0x98, 0xa0, 0x3c,
@@ -398,7 +399,7 @@ void loop() {
 			// ********************
 			case 'x': case 'X': {
 				ResetTiny();
-				Serial.println("\n.\n.\n.\n");
+				Serial.println("\n. . .\n\r . .\n\r  .\n");
 				delay(2000);
 				ESP.restart();
 				break;
@@ -417,7 +418,7 @@ void loop() {
 			case 'r': case 'R': {
 				//Serial.println("\nBootloader Cmd >>> Run Application ...");
 				RunApplication();
-				Serial.println("\n.\n.\n.\n");
+				Serial.println("\n. . .\n\r . .\n\r  .\n");
 				delay(2000);
 				ESP.restart();
 				break;
@@ -426,7 +427,7 @@ void loop() {
 			// * Timonel ::: DELFLASH Command *
 			// ********************************
 			case 'e': case 'E': {
-				//Serial.println("\nBootloader Cmd >>> Delete apllication from flash memory ...");
+				//Serial.println("\nBootloader Cmd >>> Delete app firmware from T85 flash memory ...");
 				DeleteFlash();
 				break;
 			}
@@ -450,6 +451,14 @@ void loop() {
 					SetTmlPageAddr(flashPageAddr);
 					newWord = false;
 				}
+				break;
+			}
+			// ********************************
+			// * Timonel ::: WRTFLASH Command *
+			// ********************************
+			case 'w': case 'W': {
+				//Serial.println("\nBootloader Cmd >>> Write new app firmware to T85 flash memory ...");
+				WriteFlash();
 				break;
 			}
 			// *******************
@@ -1340,12 +1349,35 @@ void SetTmlPageAddr(word pageAddr) {
 	}
 }
 
+// Function WriteFlash
+void WriteFlash(void) {
+	#define TXSIZE 8
+	int l = 0;
+	//int payloadSize = sizeof(payload);
+	int payloadSize = 1213;
+	Serial.println("\n1-Deleting flash ...\n\n\r");
+	Serial.println("\n2-Writing payload to flash ...\n\n\r");
+	for (int i = 0; i < payloadSize; i++) {
+		Serial.print("0x");
+		Serial.print(payload[i], HEX);
+		if (i < (payloadSize - 1)) {
+			Serial.print(", ");
+		}
+		if (l++ == (TXSIZE - 1)) {
+			Serial.print("\n\r");
+			l = 0;
+			delay(10);
+		}
+	}
+	Serial.println("");
+}
+
 //Function ShowMenu
-void ShowMenu() {
+void ShowMenu(void) {
 	if (appMode == true) {
 		Serial.print("Pluggie command ('a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'p', 'n', 'z' reboot, 'x' reset T85): ");
 	}
 	else {
-		Serial.print("Timonel booloader ('v' version, 'r' run app, 'e' erase flash, 'b' set address): ");
+		Serial.print("Timonel booloader ('v' version, 'r' run app, 'e' erase flash, 'b' set address, 'w' write flash): ");
 	}
 }

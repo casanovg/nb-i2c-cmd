@@ -418,7 +418,7 @@ void loop() {
 			case 'r': case 'R': {
 				//Serial.println("\nBootloader Cmd >>> Run Application ...");
 				RunApplication();
-				Serial.println("\n. . .\n\r . .\n\r  .\n");
+				Serial.println("\n  .\n\r . .\n\r. . .\n");
 				delay(2000);
 				ESP.restart();
 				break;
@@ -1352,24 +1352,34 @@ void SetTmlPageAddr(word pageAddr) {
 // Function WriteFlash
 void WriteFlash(void) {
 	#define TXSIZE 8
+	#define PGSIZE 64
 	int l = 0;
-	//int payloadSize = sizeof(payload);
-	int payloadSize = 1213;
+	int padding = 0;
+	uint8_t wrtBuff[TXSIZE] = { 0xFF };
+	int payloadSize = sizeof(payload);
+	if ((payloadSize / PGSIZE) != 0) {
+		padding = ((((uint)(payloadSize / PGSIZE) + 1) * PGSIZE) - payloadSize);
+		payloadSize += padding;
+	}
 	Serial.println("\n1-Deleting flash ...\n\n\r");
 	Serial.println("\n2-Writing payload to flash ...\n\n\r");
 	for (int i = 0; i < payloadSize; i++) {
-		Serial.print("0x");
-		Serial.print(payload[i], HEX);
-		if (i < (payloadSize - 1)) {
-			Serial.print(", ");
+		if (i < (payloadSize - padding)) {
+			wrtBuff[l] = payload[i];
+		}
+		else {
+			wrtBuff[l] = 0xff;
 		}
 		if (l++ == (TXSIZE - 1)) {
-			Serial.print("\n\r");
+			for (int b = 0; b < TXSIZE; b++) {
+				Serial.print(wrtBuff[b], HEX);
+				Serial.print(" ");
+			}
+			Serial.println("");
 			l = 0;
-			delay(10);
+			delay(5);
 		}
 	}
-	Serial.println("");
 }
 
 //Function ShowMenu

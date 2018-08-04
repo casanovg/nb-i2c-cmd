@@ -1462,7 +1462,7 @@ void WriteFlash(void) {
 				Serial.print(" ");
 			}
 			//Serial.println("");
-			wrtErrors = WriteBuffer(wrtBuff);
+			wrtErrors += WriteBuffer(wrtBuff);
 			//WriteBuffer(wrtBuff);
 			packet = 0;
 			delay(5);

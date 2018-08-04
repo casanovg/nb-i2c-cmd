@@ -1473,7 +1473,7 @@ void WriteFlash(void) {
 		}
 	}
 	if (wrtErrors == 0) {
-		Serial.println("\n\r==== Firmware payload tranfered OK to T85, please select run app command to start it ...");
+		Serial.println("\n\r==== Firmware was successfully transferred to T85, please select 'run app' command to start it ...");
 	}
 	else {
 		Serial.print("\n\r==== Communication errors detected during firmware transfer, please retry !!! ErrCnt: ");

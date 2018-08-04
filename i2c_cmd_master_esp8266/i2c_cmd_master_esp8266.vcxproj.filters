@@ -24,5 +24,8 @@
     <ClInclude Include="nb-i2c-cmd.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="i2c_cmd_master_esp8266.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

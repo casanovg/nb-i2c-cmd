@@ -958,10 +958,11 @@ void ReadBuffer(uint8_t dataIX, uint8_t dataSize) {
 }
 
 // Function WriteBuffer
-void WriteBuffer(uint8_t dataArray[]) {
+int WriteBuffer(uint8_t dataArray[]) {
 	#define MAXTXSIZE 9
 	const byte txSize = MAXTXSIZE;
 	byte cmdTX[txSize] = { 0 };
+	int commErrors = 0;					/* I2C communication error counter */
 	Serial.println("");
 	cmdTX[0] = WRITBUFF;
 	cmdTX[1] = dataArray[0];
@@ -1016,6 +1017,7 @@ void WriteBuffer(uint8_t dataArray[]) {
 			Serial.print("[Timonel] - Data parsed with {{{ERROR}}} <<< Checksum = 0x");
 			Serial.println(ackRX[1], HEX);
 			//Serial.println("");
+			commErrors++;					/* Checksum error detected ... */
 		}
 
 	}
@@ -1025,7 +1027,9 @@ void WriteBuffer(uint8_t dataArray[]) {
 		Serial.print(" command! <<< ");
 		Serial.println(ackRX[0]);
 		Serial.println("");
+		commErrors++;						/* Opcode error detected ... */
 	}
+	//exit(commErrors);
 }
 
 // Function DumpBuffer
@@ -1432,6 +1436,7 @@ void WriteFlash(void) {
 	int packet = 0;							/* Byte counter to be sent in a single I2C data packet */
 	int padding = 0;						/* Amount of padding bytes to match the page size */
 	int pageEnd = 0;						/* Byte counter to detect the end of flash mem page */
+	int wrtErrors = 0;
 	uint8_t wrtBuff[TXSIZE] = { 0xFF };
 	int payloadSize = sizeof(payload);
 	if ((payloadSize / PGSIZE) != 0) {		/* If the payload to be sent is smaller than flash page size, resize it to match */
@@ -1456,8 +1461,9 @@ void WriteFlash(void) {
 				Serial.print(wrtBuff[b], HEX);
 				Serial.print(" ");
 			}
-			Serial.println("");
-			WriteBuffer(wrtBuff);
+			//Serial.println("");
+			wrtErrors = WriteBuffer(wrtBuff);
+			//WriteBuffer(wrtBuff);
 			packet = 0;
 			delay(5);
 		}
@@ -1465,6 +1471,14 @@ void WriteFlash(void) {
 			Serial.println(":::::::::::::::::::::::::::::::::::::::");
 			pageEnd = 0;
 		}
+	}
+	if (wrtErrors == 0) {
+		Serial.println("\n\r==== Firmware payload tranfered OK to T85, please select run app command to start it ...");
+	}
+	else {
+		Serial.print("\n\r==== Communication errors detected during firmware transfer, please retry !!! ErrCnt: ");
+		Serial.print(wrtErrors);
+		Serial.println(" ===");
 	}
 }
 

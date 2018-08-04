@@ -959,7 +959,7 @@ void ReadBuffer(uint8_t dataIX, uint8_t dataSize) {
 
 // Function WriteBuffer
 int WriteBuffer(uint8_t dataArray[]) {
-	#define MAXTXSIZE 9
+	#define MAXTXSIZE 5
 	const byte txSize = MAXTXSIZE;
 	byte cmdTX[txSize] = { 0 };
 	int commErrors = 0;					/* I2C communication error counter */
@@ -969,10 +969,10 @@ int WriteBuffer(uint8_t dataArray[]) {
 	cmdTX[2] = dataArray[1];
 	cmdTX[3] = dataArray[2];
 	cmdTX[4] = dataArray[3];
-	cmdTX[5] = dataArray[4];
-	cmdTX[6] = dataArray[5];
-	cmdTX[7] = dataArray[6];
-	cmdTX[8] = dataArray[7];
+	//cmdTX[5] = dataArray[4];
+	//cmdTX[6] = dataArray[5];
+	//cmdTX[7] = dataArray[6];
+	//cmdTX[8] = dataArray[7];
 	//cmdTX[9] = CalculateCRC(cmdTX, 8);
 	//Serial.print("[Timonel] Writting data to Attiny85 memory page buffer >>> ");
 	//Serial.print(cmdTX[0]);
@@ -1431,7 +1431,7 @@ void SetTmlPageAddr(word pageAddr) {
 
 // Function WriteFlash
 void WriteFlash(void) {
-	#define TXSIZE 8						/* Data size to send in a single I2C data packet */
+	#define TXSIZE 4						/* Data size to send in a single I2C data packet */
 	#define PGSIZE 64						/* Tiny85 flash page size */
 	int packet = 0;							/* Byte counter to be sent in a single I2C data packet */
 	int padding = 0;						/* Amount of padding bytes to match the page size */
@@ -1462,7 +1462,7 @@ void WriteFlash(void) {
 				Serial.print(" ");
 			}
 			//Serial.println("");
-			wrtErrors += WriteBuffer(wrtBuff);
+			wrtErrors += WriteBuffer(wrtBuff);	/* Send data to T85 through I2C */
 			//WriteBuffer(wrtBuff);
 			packet = 0;
 			delay(5);

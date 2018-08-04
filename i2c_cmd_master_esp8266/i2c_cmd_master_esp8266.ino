@@ -1378,6 +1378,10 @@ void WriteFlash(void) {
 		}
 		if (l++ == (TXSIZE - 1)) {
 			for (int b = 0; b < TXSIZE; b++) {
+				Serial.print("0x");
+				if (wrtBuff[b] < 0x10) {
+					Serial.print("0");
+				}
 				Serial.print(wrtBuff[b], HEX);
 				Serial.print(" ");
 			}
@@ -1386,7 +1390,7 @@ void WriteFlash(void) {
 			delay(5);
 		}
 		if (pageEnd++ == (PGSIZE - 1)) {
-			Serial.println(":::::::::::::::::::::::");
+			Serial.println(":::::::::::::::::::::::::::::::::::::::");
 			pageEnd = 0;
 		}
 	}

@@ -39,7 +39,7 @@
 #define MAXBUFFERTXLN	7				/* Maximum DPS buffer TX/RX size */
 #define VOLTSADJUST		0.025			/* Measured volts adjust: 0.01 = 1% */
 #define MCUTOTALMEM		8192			/* Slave MCU total flash memory*/
-#define MAXCRCERRORS	100				/* Max number of tolerated CRC errors */
+#define MAXCRCERRORS	100				/* Max number of CRC errors allowed */
 
 // Global Variables
 byte slaveAddress = 0;

@@ -959,7 +959,7 @@ void ReadBuffer(uint8_t dataIX, uint8_t dataSize) {
 
 // Function WriteBuffer
 void WriteBuffer(uint8_t dataArray[]) {
-	#define MAXTXSIZE 10
+	#define MAXTXSIZE 9
 	const byte txSize = MAXTXSIZE;
 	byte cmdTX[txSize] = { 0 };
 	Serial.println("");
@@ -972,7 +972,7 @@ void WriteBuffer(uint8_t dataArray[]) {
 	cmdTX[6] = dataArray[5];
 	cmdTX[7] = dataArray[6];
 	cmdTX[8] = dataArray[7];
-	cmdTX[9] = CalculateCRC(cmdTX, 8);
+	//cmdTX[9] = CalculateCRC(cmdTX, 8);
 	//Serial.print("[Timonel] Writting data to Attiny85 memory page buffer >>> ");
 	//Serial.print(cmdTX[0]);
 	//Serial.println("(WRITBUFF)");
@@ -1008,14 +1008,14 @@ void WriteBuffer(uint8_t dataArray[]) {
 		//Serial.print(" parsed OK <<< ");
 		//Serial.println(ackRX[0]);
 		if (ackRX[1] == (byte)(cmdTX[1] + cmdTX[2] + cmdTX[3] + cmdTX[4] + cmdTX[5] + cmdTX[6] + cmdTX[7] + cmdTX[8])) {
-			Serial.print("[Timonel] - Data parsed OK by slave <<< Checksum = 0x");
-			Serial.println(ackRX[1], HEX);
-			Serial.println("");
+			//Serial.print("[Timonel] - Data parsed OK by slave <<< Checksum = 0x");
+			//Serial.println(ackRX[1], HEX);
+			//Serial.println("");
 		}
 		else {
 			Serial.print("[Timonel] - Data parsed with {{{ERROR}}} <<< Checksum = 0x");
 			Serial.println(ackRX[1], HEX);
-			Serial.println("");
+			//Serial.println("");
 		}
 
 	}

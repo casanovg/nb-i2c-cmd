@@ -1029,7 +1029,7 @@ int WriteBuffer(uint8_t dataArray[]) {
 		Serial.println("");
 		commErrors++;						/* Opcode error detected ... */
 	}
-	//exit(commErrors);
+	return(commErrors);
 }
 
 // Function DumpBuffer

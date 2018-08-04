@@ -957,6 +957,77 @@ void ReadBuffer(uint8_t dataIX, uint8_t dataSize) {
 	}
 }
 
+// Function WriteBuffer
+void WriteBuffer(uint8_t dataArray[]) {
+	#define MAXTXSIZE 10
+	const byte txSize = MAXTXSIZE;
+	byte cmdTX[txSize] = { 0 };
+	Serial.println("");
+	cmdTX[0] = WRITBUFF;
+	cmdTX[1] = dataArray[0];
+	cmdTX[2] = dataArray[1];
+	cmdTX[3] = dataArray[2];
+	cmdTX[4] = dataArray[3];
+	cmdTX[5] = dataArray[4];
+	cmdTX[6] = dataArray[5];
+	cmdTX[7] = dataArray[6];
+	cmdTX[8] = dataArray[7];
+	cmdTX[9] = CalculateCRC(cmdTX, 8);
+	//Serial.print("[Timonel] Writting data to Attiny85 memory page buffer >>> ");
+	//Serial.print(cmdTX[0]);
+	//Serial.println("(WRITBUFF)");
+	// Transmit command
+	byte transmitData[txSize] = { 0 };
+	//Serial.print("[Timonel] - Sending data >>> ");
+	for (int i = 0; i < txSize; i++) {
+		//if (i > 0) {
+		//	if (i < txSize - 1) {
+		//		Serial.print("0x");
+		//		Serial.print(cmdTX[i], HEX);
+		//		Serial.print(" ");
+		//	}
+		//	else {
+		//		Serial.print("\n\r[Timonel] - Sending CRC >>> ");
+		//		Serial.println(cmdTX[i]);
+		//	}
+		//}
+		transmitData[i] = cmdTX[i];
+		Wire.beginTransmission(slaveAddress);
+		Wire.write(transmitData[i]);
+		Wire.endTransmission();
+	}
+	// Receive acknowledgement
+	blockRXSize = Wire.requestFrom(slaveAddress, (byte)2);
+	byte ackRX[2] = { 0 };   // Data received from slave
+	for (int i = 0; i < blockRXSize; i++) {
+		ackRX[i] = Wire.read();
+	}
+	if (ackRX[0] == ACKWTBUF) {
+		//Serial.print("[Timonel] - Command ");
+		//Serial.print(cmdTX[0]);
+		//Serial.print(" parsed OK <<< ");
+		//Serial.println(ackRX[0]);
+		if (ackRX[1] == (byte)(cmdTX[1] + cmdTX[2] + cmdTX[3] + cmdTX[4] + cmdTX[5] + cmdTX[6] + cmdTX[7] + cmdTX[8])) {
+			Serial.print("[Timonel] - Data parsed OK by slave <<< Checksum = 0x");
+			Serial.println(ackRX[1], HEX);
+			Serial.println("");
+		}
+		else {
+			Serial.print("[Timonel] - Data parsed with {{{ERROR}}} <<< Checksum = 0x");
+			Serial.println(ackRX[1], HEX);
+			Serial.println("");
+		}
+
+	}
+	else {
+		Serial.print("[Timonel] - Error parsing ");
+		Serial.print(cmdTX[0]);
+		Serial.print(" command! <<< ");
+		Serial.println(ackRX[0]);
+		Serial.println("");
+	}
+}
+
 // Function DumpBuffer
 void DumpBuffer(void) {
 	byte cmdTX[3] = { READBUFF, 0, 0 };
@@ -1356,14 +1427,14 @@ void SetTmlPageAddr(word pageAddr) {
 
 // Function WriteFlash
 void WriteFlash(void) {
-	#define TXSIZE 8
-	#define PGSIZE 64
-	int l = 0;
-	int padding = 0;
-	int pageEnd = 0;
+	#define TXSIZE 8						/* Data size to send in a single I2C data packet */
+	#define PGSIZE 64						/* Tiny85 flash page size */
+	int packet = 0;							/* Byte counter to be sent in a single I2C data packet */
+	int padding = 0;						/* Amount of padding bytes to match the page size */
+	int pageEnd = 0;						/* Byte counter to detect the end of flash mem page */
 	uint8_t wrtBuff[TXSIZE] = { 0xFF };
 	int payloadSize = sizeof(payload);
-	if ((payloadSize / PGSIZE) != 0) {
+	if ((payloadSize / PGSIZE) != 0) {		/* If the payload to be sent is smaller than flash page size, resize it to match */
 		padding = ((((uint)(payloadSize / PGSIZE) + 1) * PGSIZE) - payloadSize);
 		payloadSize += padding;
 	}
@@ -1371,12 +1442,12 @@ void WriteFlash(void) {
 	Serial.println("\n2-Writing payload to flash ...\n\n\r");
 	for (int i = 0; i < payloadSize; i++) {
 		if (i < (payloadSize - padding)) {
-			wrtBuff[l] = payload[i];
+			wrtBuff[packet] = payload[i];	/* If there are data to fill the page, use it ... */
 		}
 		else {
-			wrtBuff[l] = 0xff;
+			wrtBuff[packet] = 0xff;			/* If there are no more data, complete the page with padding (0xff) */
 		}
-		if (l++ == (TXSIZE - 1)) {
+		if (packet++ == (TXSIZE - 1)) {		/* When a data packet is completed to be sent ... */
 			for (int b = 0; b < TXSIZE; b++) {
 				Serial.print("0x");
 				if (wrtBuff[b] < 0x10) {
@@ -1386,10 +1457,11 @@ void WriteFlash(void) {
 				Serial.print(" ");
 			}
 			Serial.println("");
-			l = 0;
+			WriteBuffer(wrtBuff);
+			packet = 0;
 			delay(5);
 		}
-		if (pageEnd++ == (PGSIZE - 1)) {
+		if (pageEnd++ == (PGSIZE - 1)) {	/* When a page end is detected ... */
 			Serial.println(":::::::::::::::::::::::::::::::::::::::");
 			pageEnd = 0;
 		}

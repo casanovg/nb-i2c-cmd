@@ -114,6 +114,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="i2c_cmd_master_esp8266.h" />
     <ClInclude Include="nb-i2c-cmd.h" />
     <ClInclude Include="__vm\.i2c_cmd_master_esp8266.vsarduino.h" />
   </ItemGroup>

@@ -1470,7 +1470,7 @@ void WriteFlash(void) {
 			wrtErrors += WriteBuffer(wrtBuff);	/* Send data to T85 through I2C */
 			//WriteBuffer(wrtBuff);
 			packet = 0;
-			delay(5);
+			delay(10);
 		}
 		if (pageEnd++ == (PGSIZE - 1)) {	/* When a page end is detected ... */
 			//Serial.println(":::::::::::::::::::::::::::::::::::::::");

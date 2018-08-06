@@ -40,7 +40,7 @@
 #define VOLTSADJUST		0.025			/* Measured volts adjust: 0.01 = 1% */
 #define MCUTOTALMEM		8192			/* Slave MCU total flash memory*/
 #define MAXCRCERRORS	100				/* Max number of CRC errors allowed */
-#define TXDATASIZE	4					/* TX data size for WRITBUFF command */
+#define TXDATASIZE		4				/* TX data size for WRITBUFF command */
 
 // Global Variables
 byte slaveAddress = 0;

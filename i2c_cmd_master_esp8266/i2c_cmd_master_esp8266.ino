@@ -33,14 +33,17 @@
 #include "nb-i2c-cmd.h"
 #include <pgmspace.h>
 
-#define VCC				3.3				/* PSU VCC 3.3 Volts */
-#define ADCTOP			1023			/* ADC Top Value @ 10-bit precision = 1023 (2^10) */
-#define DSPBUFFERSIZE	100				/* DSP buffer size (16-bit elements) */
-#define MAXBUFFERTXLN	7				/* Maximum DPS buffer TX/RX size */
-#define VOLTSADJUST		0.025			/* Measured volts adjust: 0.01 = 1% */
-#define MCUTOTALMEM		8192			/* Slave MCU total flash memory*/
-#define MAXCRCERRORS	100				/* Max number of CRC errors allowed */
-#define TXDATASIZE		4				/* TX data size for WRITBUFF command */
+// Pluggie application
+#define VCC				3.3		/* PSU VCC 3.3 Volts */
+#define ADCTOP			1023	/* ADC Top Value @ 10-bit precision = 1023 (2^10) */
+#define DSPBUFFERSIZE	100		/* DSP buffer size (16-bit elements) */
+#define MAXBUFFERTXLN	7		/* Maximum DPS buffer TX/RX size */
+#define VOLTSADJUST		0.025	/* Measured volts adjust: 0.01 = 1% */
+// Timonel bootloader
+#define MCUTOTALMEM		8192	/* Slave MCU total flash memory*/
+#define MAXCKSUMERRORS	100		/* Max number of checksum errors allowed in bootloader comms */
+#define TXDATASIZE		4		/* TX data size for WRITBUFF command */
+#define FLASHPGSIZE		64		/* Tiny85 flash page size */
 
 // Global Variables
 byte slaveAddress = 0;
@@ -50,6 +53,8 @@ bool newByte = false;
 bool newWord = false;
 bool appMode = true;
 char key = '\0';
+word flashPageAddr = 0xFFFF;	/* Current flash  page address to be written. Tiny85 allowed values are 0 to 0x2000, so 0xFFFF means 'not set' */
+word timonelStart = 0xFFFF;		/* Timonel start address, 0xFFFF means 'not set'. Use Timonel 'version' command to get it */
 
 // CRC Table: Polynomial=0x9C, CRC size=8-bit, HD=5, Word Length=9 bytes
 const byte crcTable[256] = {
@@ -437,10 +442,19 @@ void loop() {
 				  // * Timonel ::: STPGADDR Command *
 				  // ********************************
 		case 'b': case 'B': {
-			word flashPageAddr = 0;	// DSP buffer data size requested to ATtiny85
 			Serial.print("Please enter the flash memory page base address: ");
 			while (newWord == false) {
 				flashPageAddr = ReadWord();
+			}
+			if (timonelStart > MCUTOTALMEM) {
+				Serial.println("\n\n\rTimonel bootloader start address unknown, please run 'version' command to find it !");
+				break;
+			}
+			if ((flashPageAddr > (MCUTOTALMEM - timonelStart - 64)) & (flashPageAddr != 0xFFFF)) {
+				Serial.print("\n\rThe highest flash page addreess available is ");
+				Serial.print(MCUTOTALMEM - timonelStart - 64);
+				Serial.println(", please correct it !!!\n");
+				break;
 			}
 			if (newWord == true) {
 				Serial.println("");
@@ -1088,9 +1102,9 @@ void DumpBuffer(void) {
 				//Serial.println(checkCRC);
 			}
 			else {
-				Serial.print("ESP8266 - DUMPBUFF aborted due to CRC ERROR! ");
+				Serial.print("ESP8266 - DUMPBUFF aborted due to Checksum ERROR! ");
 				Serial.println(checkCRC);
-				if (crcErrors++ == MAXCRCERRORS) {
+				if (crcErrors++ == MAXCKSUMERRORS) {
 					delay(1000);
 					exit(1);
 				}
@@ -1284,6 +1298,7 @@ void GetTimonelVersion(void) {
 		Serial.print(" >>> Base address: 0x");
 		Serial.print((ackRX[6] << 8) + ackRX[7], HEX);
 		Serial.println(" <<<");
+		timonelStart = (ackRX[6] << 8) + ackRX[7];
 	}
 	else {
 		Serial.print("[Timonel] - Error parsing ");
@@ -1431,16 +1446,14 @@ void SetTmlPageAddr(word pageAddr) {
 
 // Function WriteFlash
 void WriteFlash(void) {
-#define TXSIZE 4						/* Data size to send in a single I2C data packet */
-#define PGSIZE 64						/* Tiny85 flash page size */
 	int packet = 0;							/* Byte counter to be sent in a single I2C data packet */
 	int padding = 0;						/* Amount of padding bytes to match the page size */
 	int pageEnd = 0;						/* Byte counter to detect the end of flash mem page */
 	int wrtErrors = 0;
 	uint8_t wrtBuff[TXDATASIZE] = { 0xFF };
 	int payloadSize = sizeof(payload);
-	if ((payloadSize / PGSIZE) != 0) {		/* If the payload to be sent is smaller than flash page size, resize it to match */
-		padding = ((((uint)(payloadSize / PGSIZE) + 1) * PGSIZE) - payloadSize);
+	if ((payloadSize / FLASHPGSIZE) != 0) {		/* If the payload to be sent is smaller than flash page size, resize it to match */
+		padding = ((((uint)(payloadSize / FLASHPGSIZE) + 1) * FLASHPGSIZE) - payloadSize);
 		payloadSize += padding;
 	}
 	Serial.println("\n1-Deleting flash ...\n\r");
@@ -1467,7 +1480,7 @@ void WriteFlash(void) {
 			packet = 0;
 			delay(10);
 		}
-		if (pageEnd++ == (PGSIZE - 1)) {	/* When a page end is detected ... */
+		if (pageEnd++ == (FLASHPGSIZE - 1)) {	/* When a page end is detected ... */
 											//Serial.println(":::::::::::::::::::::::::::::::::::::::");
 			Serial.println(":::::::::::::::::::");
 			pageEnd = 0;

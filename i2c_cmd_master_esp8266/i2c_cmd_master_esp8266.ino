@@ -448,12 +448,14 @@ void loop() {
 			}
 			if (timonelStart > MCUTOTALMEM) {
 				Serial.println("\n\n\rTimonel bootloader start address unknown, please run 'version' command to find it !");
+				//newWord = false;
 				break;
 			}
-			if ((flashPageAddr > (MCUTOTALMEM - timonelStart - 64)) & (flashPageAddr != 0xFFFF)) {
-				Serial.print("\n\rThe highest flash page addreess available is ");
+			if ((flashPageAddr > (MCUTOTALMEM - timonelStart - 64)) | (flashPageAddr == 0xFFFF)) {
+				Serial.print("\n\rThe highest flash page addreess available is 0x");
 				Serial.print(MCUTOTALMEM - timonelStart - 64);
-				Serial.println(", please correct it !!!\n");
+				Serial.println(", please correct it !!!");
+				newWord = false;
 				break;
 			}
 			if (newWord == true) {

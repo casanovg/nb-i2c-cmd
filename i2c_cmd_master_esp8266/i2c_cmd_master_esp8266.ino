@@ -40,6 +40,7 @@
 #define VOLTSADJUST		0.025			/* Measured volts adjust: 0.01 = 1% */
 #define MCUTOTALMEM		8192			/* Slave MCU total flash memory*/
 #define MAXCRCERRORS	100				/* Max number of CRC errors allowed */
+#define TXDATASIZE	4					/* TX data size for WRITBUFF command */
 
 // Global Variables
 byte slaveAddress = 0;
@@ -959,10 +960,10 @@ void ReadBuffer(uint8_t dataIX, uint8_t dataSize) {
 
 // Function WriteBuffer
 int WriteBuffer(uint8_t dataArray[]) {
-	#define MAXTXSIZE 5
-	const byte txSize = MAXTXSIZE;
+	const byte txSize = TXDATASIZE + 1;
 	byte cmdTX[txSize] = { 0 };
 	int commErrors = 0;					/* I2C communication error counter */
+	uint8_t checksum = 0;
 	Serial.println("");
 	cmdTX[0] = WRITBUFF;
 	cmdTX[1] = dataArray[0];
@@ -1008,7 +1009,11 @@ int WriteBuffer(uint8_t dataArray[]) {
 		//Serial.print(cmdTX[0]);
 		//Serial.print(" parsed OK <<< ");
 		//Serial.println(ackRX[0]);
-		if (ackRX[1] == (byte)(cmdTX[1] + cmdTX[2] + cmdTX[3] + cmdTX[4] + cmdTX[5] + cmdTX[6] + cmdTX[7] + cmdTX[8])) {
+		for (int c = 1; c < (txSize); c++) {
+			checksum += cmdTX[c];
+		}
+		//if (ackRX[1] == (byte)(cmdTX[1] + cmdTX[2] + cmdTX[3] + cmdTX[4] /*+ cmdTX[5] + cmdTX[6] + cmdTX[7] + cmdTX[8]*/)) {
+		if (ackRX[1] == checksum) { 
 			//Serial.print("[Timonel] - Data parsed OK by slave <<< Checksum = 0x");
 			//Serial.println(ackRX[1], HEX);
 			//Serial.println("");
@@ -1437,7 +1442,7 @@ void WriteFlash(void) {
 	int padding = 0;						/* Amount of padding bytes to match the page size */
 	int pageEnd = 0;						/* Byte counter to detect the end of flash mem page */
 	int wrtErrors = 0;
-	uint8_t wrtBuff[TXSIZE] = { 0xFF };
+	uint8_t wrtBuff[TXDATASIZE] = { 0xFF };
 	int payloadSize = sizeof(payload);
 	if ((payloadSize / PGSIZE) != 0) {		/* If the payload to be sent is smaller than flash page size, resize it to match */
 		padding = ((((uint)(payloadSize / PGSIZE) + 1) * PGSIZE) - payloadSize);
@@ -1452,8 +1457,8 @@ void WriteFlash(void) {
 		else {
 			wrtBuff[packet] = 0xff;			/* If there are no more data, complete the page with padding (0xff) */
 		}
-		if (packet++ == (TXSIZE - 1)) {		/* When a data packet is completed to be sent ... */
-			for (int b = 0; b < TXSIZE; b++) {
+		if (packet++ == (TXDATASIZE - 1)) {		/* When a data packet is completed to be sent ... */
+			for (int b = 0; b < TXDATASIZE; b++) {
 				Serial.print("0x");
 				if (wrtBuff[b] < 0x10) {
 					Serial.print("0");
@@ -1468,7 +1473,8 @@ void WriteFlash(void) {
 			delay(5);
 		}
 		if (pageEnd++ == (PGSIZE - 1)) {	/* When a page end is detected ... */
-			Serial.println(":::::::::::::::::::::::::::::::::::::::");
+			//Serial.println(":::::::::::::::::::::::::::::::::::::::");
+			Serial.println(":::::::::::::::::::");
 			pageEnd = 0;
 		}
 	}

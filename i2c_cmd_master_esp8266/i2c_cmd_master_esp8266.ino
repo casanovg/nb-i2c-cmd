@@ -978,7 +978,7 @@ void ReadBuffer(uint8_t dataIX, uint8_t dataSize) {
 
 // Function WriteBuffer
 int WriteBuffer(uint8_t dataArray[]) {
-	const byte txSize = TXDATASIZE + 1;
+	const byte txSize = TXDATASIZE + 2;
 	byte cmdTX[txSize] = { 0 };
 	int commErrors = 0;					/* I2C communication error counter */
 	uint8_t checksum = 0;
@@ -986,7 +986,9 @@ int WriteBuffer(uint8_t dataArray[]) {
 	cmdTX[0] = WRITBUFF;
 	for (int b = 1; b < TXDATASIZE; b++) {
 		cmdTX[b] = dataArray[b - 1];
+		checksum += dataArray[b - 1];
 	}
+	cmdTX[TXDATASIZE + 1] = checksum;
 	//cmdTX[9] = CalculateCRC(cmdTX, 8);
 	//Serial.print("[Timonel] Writting data to Attiny85 memory page buffer >>> ");
 	//Serial.print(cmdTX[0]);
@@ -1449,10 +1451,11 @@ void SetTmlPageAddr(word pageAddr) {
 }
 
 // Function WriteFlash
-void WriteFlash(void) {
-	int packet = 0;							/* Byte counter to be sent in a single I2C data packet */
-	int padding = 0;						/* Amount of padding bytes to match the page size */
-	int pageEnd = 0;						/* Byte counter to detect the end of flash mem page */
+int WriteFlash(void) {
+	int packet = 0;								/* Byte counter to be sent in a single I2C data packet */
+	int padding = 0;							/* Amount of padding bytes to match the page size */
+	int pageEnd = 0;							/* Byte counter to detect the end of flash mem page */
+	int pageCount = 1;
 	int wrtErrors = 0;
 	uint8_t wrtBuff[TXDATASIZE] = { 0xFF };
 	int payloadSize = sizeof(payload);
@@ -1462,12 +1465,20 @@ void WriteFlash(void) {
 	}
 	Serial.println("\n1-Deleting flash ...\n\r");
 	Serial.println("\n2-Writing payload to flash ...\n\n\r");
+	if (flashPageAddr == 0xFFFF) {
+		Serial.println("Warning: Flash page start address no set, please use 'b' command to set it ...\n\n\r");
+		return(1);
+	}
+	Serial.print("::::::::::::::::::: Page ");
+	Serial.print(pageCount);
+	Serial.print(" - Address ");
+	Serial.println(flashPageAddr);
 	for (int i = 0; i < payloadSize; i++) {
 		if (i < (payloadSize - padding)) {
-			wrtBuff[packet] = payload[i];	/* If there are data to fill the page, use it ... */
+			wrtBuff[packet] = payload[i];		/* If there are data to fill the page, use it ... */
 		}
 		else {
-			wrtBuff[packet] = 0xff;			/* If there are no more data, complete the page with padding (0xff) */
+			wrtBuff[packet] = 0xff;				/* If there are no more data, complete the page with padding (0xff) */
 		}
 		if (packet++ == (TXDATASIZE - 1)) {		/* When a data packet is completed to be sent ... */
 			for (int b = 0; b < TXDATASIZE; b++) {
@@ -1478,16 +1489,18 @@ void WriteFlash(void) {
 				Serial.print(wrtBuff[b], HEX);
 				Serial.print(" ");
 			}
-			//Serial.println("");
 			wrtErrors += WriteBuffer(wrtBuff);	/* Send data to T85 through I2C */
-												//WriteBuffer(wrtBuff);
 			packet = 0;
 			delay(10);
 		}
 		if (pageEnd++ == (FLASHPGSIZE - 1)) {	/* When a page end is detected ... */
-											//Serial.println(":::::::::::::::::::::::::::::::::::::::");
-			Serial.println(":::::::::::::::::::");
-			pageEnd = 0;
+			if (i < (payloadSize - 1)) {
+				Serial.print("::::::::::::::::::: Page ");
+				Serial.print(++pageCount);
+				Serial.print(" - Address ");
+				Serial.println(flashPageAddr + 1 + i);
+				pageEnd = 0;
+			}
 		}
 	}
 	if (wrtErrors == 0) {

@@ -447,14 +447,16 @@ void loop() {
 				flashPageAddr = ReadWord();
 			}
 			if (timonelStart > MCUTOTALMEM) {
-				Serial.println("\n\n\rTimonel bootloader start address unknown, please run 'version' command to find it !");
+				Serial.println("\n\n\rWarning: Timonel bootloader start address unknown, please run 'version' command to find it !");
 				//newWord = false;
 				break;
 			}
-			if ((flashPageAddr > (MCUTOTALMEM - timonelStart - 64)) | (flashPageAddr == 0xFFFF)) {
-				Serial.print("\n\rThe highest flash page addreess available is 0x");
-				Serial.print(MCUTOTALMEM - timonelStart - 64);
-				Serial.println(", please correct it !!!");
+			if ((flashPageAddr > (timonelStart - 64)) | (flashPageAddr == 0xFFFF)) {
+				Serial.print("\n\n\rWarning: The highest flash page addreess available is 0x");
+				Serial.print(timonelStart - 64);
+				Serial.print(" (");
+				Serial.print(timonelStart - 64, HEX);
+				Serial.println("), please correct it !!!");
 				newWord = false;
 				break;
 			}

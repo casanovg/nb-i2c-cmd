@@ -1491,7 +1491,7 @@ int WriteFlash(void) {
 			}
 			wrtErrors += WriteBuffer(wrtBuff);	/* Send data to T85 through I2C */
 			packet = 0;
-			delay(10);
+			delay(50);
 		}
 		if (pageEnd++ == (FLASHPGSIZE - 1)) {	/* When a page end is detected ... */
 			if (i < (payloadSize - 1)) {

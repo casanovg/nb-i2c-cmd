@@ -452,9 +452,9 @@ void loop() {
 				break;
 			}
 			if ((flashPageAddr > (timonelStart - 64)) | (flashPageAddr == 0xFFFF)) {
-				Serial.print("\n\n\rWarning: The highest flash page addreess available is 0x");
+				Serial.print("\n\n\rWarning: The highest flash page addreess available is ");
 				Serial.print(timonelStart - 64);
-				Serial.print(" (");
+				Serial.print(" (0x");
 				Serial.print(timonelStart - 64, HEX);
 				Serial.println("), please correct it !!!");
 				newWord = false;

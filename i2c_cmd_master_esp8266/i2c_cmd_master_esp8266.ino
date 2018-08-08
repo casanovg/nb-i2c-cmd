@@ -478,7 +478,8 @@ void loop() {
 				  // ********************************
 		case 'w': case 'W': {
 			//Serial.println("\nBootloader Cmd >>> Write new app firmware to T85 flash memory ...");
-			WriteFlash();
+			//WriteFlash();
+			WriteFlashTest();
 			break;
 		}
 				  // *******************
@@ -1505,6 +1506,63 @@ int WriteFlash(void) {
 	}
 	if (wrtErrors == 0) {
 		Serial.println("\n\r==== Firmware was successfully transferred to T85, please select 'run app' command to start it ...");
+	}
+	else {
+		Serial.print("\n\r==== Communication errors detected during firmware transfer, please retry !!! ErrCnt: ");
+		Serial.print(wrtErrors);
+		Serial.println(" ===");
+	}
+}
+
+// Function WriteFlashTest
+int WriteFlashTest(void) {
+	int packet = 0;								/* Byte counter to be sent in a single I2C data packet */
+	int padding = 0;							/* Amount of padding bytes to match the page size */
+	int pageEnd = 0;							/* Byte counter to detect the end of flash mem page */
+	int pageCount = 1;
+	int wrtErrors = 0;
+	uint8_t wrtBuff[TXDATASIZE] = { 0xFF };
+
+
+	Serial.println("\n1-Deleting flash ...\n\r");
+	Serial.println("\n2-Writing payload to flash ...\n\n\r");
+	if (flashPageAddr == 0xFFFF) {
+		Serial.println("Warning: Flash page start address no set, please use 'b' command to set it ...\n\n\r");
+		return(1);
+	}
+	Serial.print("::::::::::::::::::: Page ");
+	Serial.print(pageCount);
+	Serial.print(" - Address ");
+	Serial.println(flashPageAddr);
+	for (int i = 0; i < FLASHPGSIZE; i++) {
+		// ---	>>>
+		wrtBuff[packet] = i;				/* Store consecutive numbers in flash memory ... */
+		// --- >>>
+		if (packet++ == (TXDATASIZE - 1)) {		/* When a data packet is completed to be sent ... */
+			for (int b = 0; b < TXDATASIZE; b++) {
+				Serial.print("0x");
+				if (wrtBuff[b] < 0x10) {
+					Serial.print("0");
+				}
+				Serial.print(wrtBuff[b], HEX);
+				Serial.print(" ");
+			}
+			wrtErrors += WriteBuffer(wrtBuff);	/* Send data to T85 through I2C */
+			packet = 0;
+			delay(50);
+		}
+		if (pageEnd++ == (FLASHPGSIZE - 1)) {	/* When a page end is detected ... */
+			if (i < (FLASHPGSIZE - 1)) {
+				Serial.print("::::::::::::::::::: Page ");
+				Serial.print(++pageCount);
+				Serial.print(" - Address ");
+				Serial.println(flashPageAddr + 1 + i);
+				pageEnd = 0;
+			}
+		}
+	}
+	if (wrtErrors == 0) {
+		Serial.println("\n\r==== Test data was successfully transferred to T85, use make readflash to check it ...");
 	}
 	else {
 		Serial.print("\n\r==== Communication errors detected during firmware transfer, please retry !!! ErrCnt: ");

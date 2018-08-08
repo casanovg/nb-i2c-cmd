@@ -985,11 +985,11 @@ int WriteBuffer(uint8_t dataArray[]) {
 	uint8_t checksum = 0;
 	Serial.println("");
 	cmdTX[0] = WRITBUFF;
-	for (int b = 1; b < TXDATASIZE; b++) {
+	for (int b = 1; b < txSize - 1; b++) {
 		cmdTX[b] = dataArray[b - 1];
 		checksum += dataArray[b - 1];
 	}
-	cmdTX[TXDATASIZE + 1] = checksum;
+	cmdTX[txSize - 1] = checksum;
 	//cmdTX[9] = CalculateCRC(cmdTX, 8);
 	//Serial.print("[Timonel] Writting data to Attiny85 memory page buffer >>> ");
 	//Serial.print(cmdTX[0]);
@@ -1025,7 +1025,7 @@ int WriteBuffer(uint8_t dataArray[]) {
 		//Serial.print(cmdTX[0]);
 		//Serial.print(" parsed OK <<< ");
 		//Serial.println(ackRX[0]);
-		for (int c = 1; c < (txSize); c++) {
+		for (int c = 1; c < (txSize - 1); c++) {
 			checksum += cmdTX[c];
 		}
 		//if (ackRX[1] == (byte)(cmdTX[1] + cmdTX[2] + cmdTX[3] + cmdTX[4] /*+ cmdTX[5] + cmdTX[6] + cmdTX[7] + cmdTX[8]*/)) {

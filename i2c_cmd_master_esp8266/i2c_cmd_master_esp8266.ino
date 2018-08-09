@@ -483,8 +483,8 @@ void loop() {
 				  // ********************************
 		case 'w': case 'W': {
 			//Serial.println("\nBootloader Cmd >>> Write new app firmware to T85 flash memory ...");
-			WriteFlash();
-			//WriteFlashTest();
+			//WriteFlash();
+			WriteFlashTest();
 			break;
 		}
 				  // *******************
@@ -1573,12 +1573,16 @@ int WriteFlashTest(void) {
 				pageEnd = 0;
 			}
 		}
+		if (wrtErrors > 10) {
+			Serial.println("\n\r==== WriteFlashTest: too many errors, aborting ...");
+			i = FLASHPGSIZE;
+		}
 	}
 	if (wrtErrors == 0) {
-		Serial.println("\n\r==== Test data was successfully transferred to T85, use 'make readflash' to check it ...");
+		Serial.println("\n\r==== WriteFlashTest: Firmware was successfully transferred to T85, please select 'run app' command to start it ...");
 	}
 	else {
-		Serial.print("\n\r==== Communication errors detected during firmware transfer, please retry !!! ErrCnt: ");
+		Serial.print("\n\r==== WriteFlashTest: Communication errors detected during firmware transfer, please retry !!! ErrCnt: ");
 		Serial.print(wrtErrors);
 		Serial.println(" ===");
 	}

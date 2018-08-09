@@ -478,8 +478,8 @@ void loop() {
 				  // ********************************
 		case 'w': case 'W': {
 			//Serial.println("\nBootloader Cmd >>> Write new app firmware to T85 flash memory ...");
-			//WriteFlash();
-			WriteFlashTest();
+			WriteFlash();
+			//WriteFlashTest();
 			break;
 		}
 				  // *******************

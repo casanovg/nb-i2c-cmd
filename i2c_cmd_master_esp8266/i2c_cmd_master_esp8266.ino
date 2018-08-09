@@ -244,6 +244,11 @@ const byte payload[1213] = {
 	0x6f, 0x00, 0x20, 0x00, 0xff
 };
 
+//byte payload[384];
+//for (int i = 0; i < 384; i++) {
+//	payload[i] = (byte)i;
+//}
+
 //
 // ***************************
 // * Setup Block (Runs once) *
@@ -1462,7 +1467,7 @@ int WriteFlash(void) {
 	Serial.println("\n1-Deleting flash ...\n\r");
 	Serial.println("\n2-Writing payload to flash ...\n\n\r");
 	if (flashPageAddr == 0xFFFF) {
-		Serial.println("Warning: Flash page start address no set, please use 'b' command to set it ...\n\n\r");
+		Serial.println("Warning: Flash page start address no set, please use 'b' command to set it ...\n\r");
 		return(1);
 	}
 	Serial.print("::::::::::::::::::: Page ");
@@ -1496,6 +1501,9 @@ int WriteFlash(void) {
 				Serial.print(" - Address ");
 				Serial.println(flashPageAddr + 1 + i);
 				pageEnd = 0;
+
+				//delay(500);
+
 			}
 		}
 	}
@@ -1522,7 +1530,7 @@ int WriteFlashTest(void) {
 	Serial.println("\n1-Deleting flash ...\n\r");
 	Serial.println("\n2-Writing payload to flash ...\n\n\r");
 	if (flashPageAddr == 0xFFFF) {
-		Serial.println("Warning: Flash page start address no set, please use 'b' command to set it ...\n\n\r");
+		Serial.println("Warning: Flash page start address no set, please use 'b' command to set it ...\n\r");
 		return(1);
 	}
 	Serial.print("::::::::::::::::::: Page ");
@@ -1531,7 +1539,7 @@ int WriteFlashTest(void) {
 	Serial.println(flashPageAddr);
 	for (int i = 0; i < FLASHPGSIZE; i++) {
 		// ---	>>>
-		wrtBuff[packet] = i;				/* Store consecutive numbers in flash memory ... */
+		wrtBuff[packet] = i;					/* Store consecutive numbers in flash memory ... */
 		// --- >>>
 		if (packet++ == (TXDATASIZE - 1)) {		/* When a data packet is completed to be sent ... */
 			for (int b = 0; b < TXDATASIZE; b++) {

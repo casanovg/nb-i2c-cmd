@@ -943,7 +943,7 @@ void ReadBuffer(uint8_t dataIX, uint8_t dataSize) {
 		Wire.endTransmission();
 	}
 	// Receive acknowledgement
-	blockRXSize = Wire.requestFrom(slaveAddress, (dataSize * 2) + 2);
+	blockRXSize = Wire.requestFrom(slaveAddress, (byte)((dataSize * 2) + 2));
 	byte ackRX[(dataSize * 2) + 2];   // Data received from slave
 	for (int i = 0; i < blockRXSize; i++) {
 		ackRX[i] = Wire.read();
@@ -1038,7 +1038,10 @@ int WriteBuffer(uint8_t dataArray[]) {
 			Serial.print("[Timonel] - Data parsed with {{{ERROR}}} <<< Checksum = 0x");
 			Serial.println(ackRX[1], HEX);
 			//Serial.println("");
-			commErrors++;					/* Checksum error detected ... */
+			if (commErrors++ > 0) {					/* Checksum error detected ... */
+				Serial.println("\n\r[Timonel] - WriteBuff Checksum Errors, Aborting ...");
+				exit(commErrors);
+			}
 		}
 
 	}
@@ -1048,7 +1051,10 @@ int WriteBuffer(uint8_t dataArray[]) {
 		Serial.print(" command! <<< ");
 		Serial.println(ackRX[0]);
 		Serial.println("");
-		commErrors++;						/* Opcode error detected ... */
+		if (commErrors++ > 0) {					/* Opcode error detected ... */
+			Serial.println("\n\r[Timonel] - WriteBuff Opcode Reply Errors, Aborting ...");
+			exit(commErrors);
+		}
 	}
 	return(commErrors);
 }
@@ -1076,7 +1082,7 @@ void DumpBuffer(void) {
 			Wire.endTransmission();
 		}
 		// Receive acknowledgement
-		blockRXSize = Wire.requestFrom(slaveAddress, (dataSize * 2) + 2);
+		blockRXSize = Wire.requestFrom(slaveAddress, (byte)((dataSize * 2) + 2));
 		byte ackRX[(dataSize * 2) + 2];   // Data received from slave
 		for (int i = 0; i < blockRXSize; i++) {
 			ackRX[i] = Wire.read();
@@ -1506,12 +1512,16 @@ int WriteFlash(void) {
 
 			}
 		}
+		if (wrtErrors > 10) {
+			Serial.println("\n\r==== WriteFlash: too many errors, aborting ...");
+			i = payloadSize;
+		}
 	}
 	if (wrtErrors == 0) {
-		Serial.println("\n\r==== Firmware was successfully transferred to T85, please select 'run app' command to start it ...");
+		Serial.println("\n\r==== WriteFlash: Firmware was successfully transferred to T85, please select 'run app' command to start it ...");
 	}
 	else {
-		Serial.print("\n\r==== Communication errors detected during firmware transfer, please retry !!! ErrCnt: ");
+		Serial.print("\n\r==== WriteFlash: Communication errors detected during firmware transfer, please retry !!! ErrCnt: ");
 		Serial.print(wrtErrors);
 		Serial.println(" ===");
 	}

@@ -298,209 +298,209 @@ void loop() {
 			// ********************
 			// * STDPB1_1 Command *
 			// ********************
-		case 'a': case 'A': {
-			SetPB1On();
-			break;
-		}
-				  // ********************
-				  // * STDPB1_0 Command *
-				  // ********************
-		case 's': case 'S': {
-			SetPB1Off();
-			break;
-		}
-				  // ********************
-				  // * STANAPB3 Command *
-				  // ********************
-		case 'd': case 'D': {
-			byte triacTriggerDelay = 0;
-			Serial.print("Please enter a value between 0 and 255 for this command: ");
-			while (newByte == false) {
-				triacTriggerDelay = ReadByte();
-			}
-			if (newByte == true) {
-				SetPB3Analog(triacTriggerDelay);
-				newByte = false;
-			}
-			break;
-		}
-				  // ********************
-				  // * READADC2 Command *
-				  // ********************
-		case 'f': case 'F': {
-			ReadADC2();
-			break;
-		}
-				  // ************************************
-				  // * GET_INFO Command (16 byte reply) *
-				  // ************************************
-		case 'g': case 'G': {
-			GetInfo();
-			delay(250);
-			Serial.println("");
-			ReleaseAnalogData();
-			break;
-		}
-				  // ********************
-				  // * READBUFF Command *
-				  // ********************
-		case 'h': case 'H': {
-			byte dataSize = 0;	// DSP buffer data size requested to ATtiny85
-			byte dataIX = 0;	// Requested DSP buffer data start position
-			Serial.print("Please enter the DSP buffer data start position (1 to 100): ");
-			while (newByte == false) {
-				dataIX = ReadByte();
-			}
-			newByte = false;
-			Serial.println("");
-			Serial.print("Please enter the word amount to retrieve from the DSP buffer (1 to 5): ");
-			while (newByte == false) {
-				dataSize = ReadByte();
-			}
-			if (newByte == true) {
-				ReadBuffer(dataIX, dataSize);
-				newByte = false;
-			}
-			break;
-		}
-				  // ********************
-				  // * DUMPBUFF Command *
-				  // ********************
-		case 'j': case 'J': {
-			//void DumpBuffer(byte bufferSize, byte dataSize, byte dataType, byte valuesPerLine)
-			DumpBuffer(DSPBUFFERSIZE, 5, DATATYPEWORD, 4, 1);
-			delay(250);
-			Serial.println("");
-			//ReleaseAnalogData();
-			break;
-		}
-				  // ********************
-				  // * DSPDEBUG Command *
-				  // ********************
-		case 'k': case 'K': {
-			GetInfo();
-			delay(250);
-			Serial.println("");
-			//void DumpBuffer(byte bufferSize, byte dataSize, byte dataType, byte valuesPerLine)
-			DumpBuffer(DSPBUFFERSIZE, 5, DATATYPEWORD, 10, 1);
-			delay(250);
-			Serial.println("");
-			ReleaseAnalogData();
-			break;
-		}
-				  // ********************
-				  // * FIXPOSIT Command *
-				  // ********************
-		case 'p': case 'P': {
-			FixPositiveHC();
-			break;
-		}
-				  // ********************
-				  // * FIXNEGAT Command *
-				  // ********************
-		case 'n': case 'N': {
-			FixNegativeHC();
-			break;
-		}
-				  // *******************
-				  // * Restart ESP8266 *
-				  // *******************
-		case 'z': case 'Z': {
-			Serial.println("\nResetting ESP8266 ...");
-			Serial.println("\n.\n.\n.\n");
-			ESP.restart();
-			break;
-		}
-				  // ********************
-				  // * RESETINY Command *
-				  // ********************
-		case 'x': case 'X': {
-			ResetTiny();
-			Serial.println("\n  .\n\r . .\n\r. . .\n");
-			delay(2000);
-			ESP.restart();
-			break;
-		}
-				  // ********************************
-				  // * Timonel ::: GETTMNLV Command *
-				  // ********************************
-		case 'v': case 'V': {
-			//Serial.println("\nBootloader Cmd >>> Get bootloader version ...");
-			GetTimonelVersion();
-			break;
-		}
-				  // ********************************
-				  // * Timonel ::: EXITTMNL Command *
-				  // ********************************
-		case 'r': case 'R': {
-			//Serial.println("\nBootloader Cmd >>> Run Application ...");
-			RunApplication();
-			Serial.println("\n. . .\n\r . .\n\r  .\n");
-			delay(2000);
-			ESP.restart();
-			break;
-		}
-				  // ********************************
-				  // * Timonel ::: DELFLASH Command *
-				  // ********************************
-		case 'e': case 'E': {
-			//Serial.println("\nBootloader Cmd >>> Delete app firmware from T85 flash memory ...");
-			DeleteFlash();
-			break;
-		}
-				  // ********************************
-				  // * Timonel ::: STPGADDR Command *
-				  // ********************************
-		case 'b': case 'B': {
-			Serial.print("Please enter the flash memory page base address: ");
-			while (newWord == false) {
-				flashPageAddr = ReadWord();
-			}
-			if (timonelStart > MCUTOTALMEM) {
-				Serial.println("\n\n\rWarning: Timonel bootloader start address unknown, please run 'version' command to find it !");
-				//newWord = false;
+			case 'a': case 'A': {
+				SetPB1On();
 				break;
 			}
-			if ((flashPageAddr > (timonelStart - 64)) | (flashPageAddr == 0xFFFF)) {
-				Serial.print("\n\n\rWarning: The highest flash page addreess available is ");
-				Serial.print(timonelStart - 64);
-				Serial.print(" (0x");
-				Serial.print(timonelStart - 64, HEX);
-				Serial.println("), please correct it !!!");
-				newWord = false;
+			// ********************
+			// * STDPB1_0 Command *
+			// ********************
+			case 's': case 'S': {
+				SetPB1Off();
 				break;
 			}
-			if (newWord == true) {
+			// ********************
+			// * STANAPB3 Command *
+			// ********************
+			case 'd': case 'D': {
+				byte triacTriggerDelay = 0;
+				Serial.print("Please enter a value between 0 and 255 for this command: ");
+				while (newByte == false) {
+					triacTriggerDelay = ReadByte();
+				}
+				if (newByte == true) {
+					SetPB3Analog(triacTriggerDelay);
+					newByte = false;
+				}
+				break;
+			}
+			// ********************
+			// * READADC2 Command *
+			// ********************
+			case 'f': case 'F': {
+				ReadADC2();
+				break;
+			}
+			// ************************************
+			// * GET_INFO Command (16 byte reply) *
+			// ************************************
+			case 'g': case 'G': {
+				GetInfo();
+				delay(250);
 				Serial.println("");
-				Serial.print("Flash memory page base address: ");
-				Serial.println(flashPageAddr);
-				Serial.print("Address high byte: ");
-				Serial.print((flashPageAddr & 0xFF00) >> 8);
-				Serial.print(" (<< 8) + Address low byte: ");
-				Serial.print(flashPageAddr & 0xFF);
-				SetTmlPageAddr(flashPageAddr);
-				newWord = false;
+				ReleaseAnalogData();
+				break;
 			}
-			break;
-		}
-				  // ********************************
-				  // * Timonel ::: WRTFLASH Command *
-				  // ********************************
-		case 'w': case 'W': {
-			//Serial.println("\nBootloader Cmd >>> Write new app firmware to T85 flash memory ...");
-			//WriteFlash();
-			WriteFlashTest();
-			break;
-		}
-				  // *******************
-				  // * Unknown Command *
-				  // *******************
-		default: {
-			Serial.print("ESP8266 - Command '");
-			Serial.print(key);
-			Serial.println("' unknown ...");
-			break;
-		}
+			// ********************
+			// * READBUFF Command *
+			// ********************
+			case 'h': case 'H': {
+				byte dataSize = 0;	// DSP buffer data size requested to ATtiny85
+				byte dataIX = 0;	// Requested DSP buffer data start position
+				Serial.print("Please enter the DSP buffer data start position (1 to 100): ");
+				while (newByte == false) {
+					dataIX = ReadByte();
+				}
+				newByte = false;
+				Serial.println("");
+				Serial.print("Please enter the word amount to retrieve from the DSP buffer (1 to 5): ");
+				while (newByte == false) {
+					dataSize = ReadByte();
+				}
+				if (newByte == true) {
+					ReadBuffer(dataIX, dataSize);
+					newByte = false;
+				}
+				break;
+			}
+			// ********************
+			// * DUMPBUFF Command *
+			// ********************
+			case 'j': case 'J': {
+				//void DumpBuffer(byte bufferSize, byte dataSize, byte dataType, byte valuesPerLine)
+				DumpBuffer(DSPBUFFERSIZE, 5, DATATYPEWORD, 4, 1);
+				delay(250);
+				Serial.println("");
+				//ReleaseAnalogData();
+				break;
+			}
+			// ********************
+			// * DSPDEBUG Command *
+			// ********************
+			case 'k': case 'K': {
+				GetInfo();
+				delay(250);
+				Serial.println("");
+				//void DumpBuffer(byte bufferSize, byte dataSize, byte dataType, byte valuesPerLine)
+				DumpBuffer(DSPBUFFERSIZE, 5, DATATYPEWORD, 10, 1);
+				delay(250);
+				Serial.println("");
+				ReleaseAnalogData();
+				break;
+			}
+			// ********************
+			// * FIXPOSIT Command *
+			// ********************
+			case 'p': case 'P': {
+				FixPositiveHC();
+				break;
+			}
+			// ********************
+			// * FIXNEGAT Command *
+			// ********************
+			case 'n': case 'N': {
+				FixNegativeHC();
+				break;
+			}
+			// *******************
+			// * Restart ESP8266 *
+			// *******************
+			case 'z': case 'Z': {
+				Serial.println("\nResetting ESP8266 ...");
+				Serial.println("\n.\n.\n.\n");
+				ESP.restart();
+				break;
+			}
+			// ********************
+			// * RESETINY Command *
+			// ********************
+			case 'x': case 'X': {
+				ResetTiny();
+				Serial.println("\n  .\n\r . .\n\r. . .\n");
+				delay(2000);
+				ESP.restart();
+				break;
+			}
+			// ********************************
+			// * Timonel ::: GETTMNLV Command *
+			// ********************************
+			case 'v': case 'V': {
+				//Serial.println("\nBootloader Cmd >>> Get bootloader version ...");
+				GetTimonelVersion();
+				break;
+			}
+			// ********************************
+			// * Timonel ::: EXITTMNL Command *
+			// ********************************
+			case 'r': case 'R': {
+				//Serial.println("\nBootloader Cmd >>> Run Application ...");
+				RunApplication();
+				Serial.println("\n. . .\n\r . .\n\r  .\n");
+				delay(2000);
+				ESP.restart();
+				break;
+			}
+			// ********************************
+			// * Timonel ::: DELFLASH Command *
+			// ********************************
+			case 'e': case 'E': {
+				//Serial.println("\nBootloader Cmd >>> Delete app firmware from T85 flash memory ...");
+				DeleteFlash();
+				break;
+			}
+			// ********************************
+			// * Timonel ::: STPGADDR Command *
+			// ********************************
+			case 'b': case 'B': {
+				Serial.print("Please enter the flash memory page base address: ");
+				while (newWord == false) {
+					flashPageAddr = ReadWord();
+				}
+				if (timonelStart > MCUTOTALMEM) {
+					Serial.println("\n\n\rWarning: Timonel bootloader start address unknown, please run 'version' command to find it !");
+					//newWord = false;
+					break;
+				}
+				if ((flashPageAddr > (timonelStart - 64)) | (flashPageAddr == 0xFFFF)) {
+					Serial.print("\n\n\rWarning: The highest flash page addreess available is ");
+					Serial.print(timonelStart - 64);
+					Serial.print(" (0x");
+					Serial.print(timonelStart - 64, HEX);
+					Serial.println("), please correct it !!!");
+					newWord = false;
+					break;
+				}
+				if (newWord == true) {
+					Serial.println("");
+					Serial.print("Flash memory page base address: ");
+					Serial.println(flashPageAddr);
+					Serial.print("Address high byte: ");
+					Serial.print((flashPageAddr & 0xFF00) >> 8);
+					Serial.print(" (<< 8) + Address low byte: ");
+					Serial.print(flashPageAddr & 0xFF);
+					SetTmlPageAddr(flashPageAddr);
+					newWord = false;
+				}
+				break;
+			}
+			// ********************************
+			// * Timonel ::: WRTFLASH Command *
+			// ********************************
+			case 'w': case 'W': {
+				//Serial.println("\nBootloader Cmd >>> Write new app firmware to T85 flash memory ...");
+				//WriteFlash();
+				WriteFlashTest();
+				break;
+			}
+			// *******************
+			// * Unknown Command *
+			// *******************
+			default: {
+				Serial.print("ESP8266 - Command '");
+				Serial.print(key);
+				Serial.println("' unknown ...");
+				break;
+			}
 		}
 		Serial.println("");
 		ShowMenu();

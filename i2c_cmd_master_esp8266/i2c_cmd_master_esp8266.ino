@@ -1629,10 +1629,10 @@ int WriteFlashTest(void) {
 
 //Function ShowMenu
 void ShowMenu(void) {
-	if (appMode == true) {
-		Serial.print("Application command ('a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'p', 'n', 'z' reboot, 'x' reset T85): ");
-	}
-	else {
+	//if (appMode == true) {
+		Serial.println("Application command ('a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'p', 'n', 'z' reboot, 'x' reset T85): ");
+	//}
+	//else {
 		Serial.print("Timonel booloader ('v' version, 'r' run app, 'e' erase flash, 'b' set address, 'w' write flash): ");
-	}
+	//}
 }

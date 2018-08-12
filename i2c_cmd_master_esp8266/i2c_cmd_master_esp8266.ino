@@ -5,8 +5,8 @@
 // *  ..................................................  *
 // *  Author: Gustavo Casanova                            *
 // *  ..................................................  *
-// *  Firmware Version: 0.8 | MCU: ESP8266                *
-// *  2018-07-25 gustavo.casanova@nicebots.com            *
+// *  Firmware Version: 0.9 | MCU: ESP8266                *
+// *  2018-08-07 gustavo.casanova@nicebots.com            *
 // ********************************************************
 //
 // Run this master program on a NodeMCU, ESP-01 or ESP-12 Module
@@ -33,13 +33,20 @@
 #include "nb-i2c-cmd.h"
 #include <pgmspace.h>
 
-#define VCC				3.3				/* PSU VCC 3.3 Volts */
-#define ADCTOP			1023			/* ADC Top Value @ 10-bit precision = 1023 (2^10) */
-#define DSPBUFFERSIZE	100				/* DSP buffer size (16-bit elements) */
-#define MAXBUFFERTXLN	7				/* Maximum DPS buffer TX/RX size */
-#define VOLTSADJUST		0.025			/* Measured volts adjust: 0.01 = 1% */
-#define MCUTOTALMEM		8192			/* Slave MCU total flash memory*/
-#define MAXCRCERRORS	100				/* Max number of CRC errors allowed */
+// Pluggie application
+#define VCC				3.3		/* PSU VCC 3.3 Volts */
+#define ADCTOP			1023	/* ADC Top Value @ 10-bit precision = 1023 (2^10) */
+#define DSPBUFFERSIZE	100		/* DSP buffer size (16-bit elements) */
+#define MAXBUFFERTXLN	7		/* Maximum buffer TX/RX size */
+#define RXDATASIZE		4		/* RX data size for WRITBUFF command */
+#define VOLTSADJUST		0.025	/* Measured volts adjust: 0.01 = 1% */
+#define DATATYPEWORD	2		/* Buffer data type "Word" */
+// Timonel bootloader
+#define MCUTOTALMEM		8192	/* Slave MCU total flash memory*/
+#define MAXCKSUMERRORS	100		/* Max number of checksum errors allowed in bootloader comms */
+#define TXDATASIZE		4		/* TX data size for WRITBUFF command */
+#define FLASHPGSIZE		64		/* Tiny85 flash page buffer size */
+#define DATATYPEBYTE	1		/* Buffer data type "Byte" */
 
 // Global Variables
 byte slaveAddress = 0;
@@ -49,10 +56,12 @@ bool newByte = false;
 bool newWord = false;
 bool appMode = true;
 char key = '\0';
+word flashPageAddr = 0xFFFF;	/* Current flash  page address to be written. Tiny85 allowed values are 0 to 0x2000, so 0xFFFF means 'not set' */
+word timonelStart = 0xFFFF;		/* Timonel start address, 0xFFFF means 'not set'. Use Timonel 'version' command to get it */
 
 // CRC Table: Polynomial=0x9C, CRC size=8-bit, HD=5, Word Length=9 bytes
 const byte crcTable[256] = {
-//const byte crcTable[256] PROGMEM = {
+	//const byte crcTable[256] PROGMEM = {
 	0x00, 0x9c, 0xa4, 0x38, 0xd4, 0x48, 0x70, 0xec, 0x34, 0xa8,
 	0x90, 0x0c, 0xe0, 0x7c, 0x44, 0xd8, 0x68, 0xf4, 0xcc, 0x50,
 	0xbc, 0x20, 0x18, 0x84, 0x5c, 0xc0, 0xf8, 0x64, 0x88, 0x14,
@@ -238,6 +247,11 @@ const byte payload[1213] = {
 	0x6f, 0x00, 0x20, 0x00, 0xff
 };
 
+//byte payload[384];
+//for (int i = 0; i < 384; i++) {
+//	payload[i] = (byte)i;
+//}
+
 //
 // ***************************
 // * Setup Block (Runs once) *
@@ -247,10 +261,10 @@ void setup() {
 	Serial.begin(9600); // Init the serial port
 						// Init the Wire object for I2C
 	Wire.begin(0, 2);   // GPIO0 - GPIO2 (ESP-01) // D3 - D4 (NodeMCU)
-	//Wire.begin(); // Standard pins SDA on D2 and SCL on D1 (NodeMCU)
-	//Wire.begin(D3, D4); // Set SDA on D3 and SCL on D4 (NodeMCU)
+						//Wire.begin(); // Standard pins SDA on D2 and SCL on D1 (NodeMCU)
+						//Wire.begin(D3, D4); // Set SDA on D3 and SCL on D4 (NodeMCU)
 	delay(500);        // Wait 1/2 second for slave init sequence
-	// Search continuouly for slave addresses
+					   // Search continuouly for slave addresses
 	while (slaveAddress == 0) {
 		slaveAddress = ScanI2C();
 		delay(3000);
@@ -281,196 +295,212 @@ void loop() {
 		Serial.println("");
 		Serial.println("");
 		switch (key) {
-			// ********************
-			// * STDPB1_1 Command *
-			// ********************
-			case 'a': case 'A': {
-				SetPB1On();
-				break;
+		// ********************
+		// * STDPB1_1 Command *
+		// ********************
+		case 'a': case 'A': {
+			SetPB1On();
+			break;
+		}
+		// ********************
+		// * STDPB1_0 Command *
+		// ********************
+		case 's': case 'S': {
+			SetPB1Off();
+			break;
+		}
+		// ********************
+		// * STANAPB3 Command *
+		// ********************
+		case 'd': case 'D': {
+			byte triacTriggerDelay = 0;
+			Serial.print("Please enter a value between 0 and 255 for this command: ");
+			while (newByte == false) {
+				triacTriggerDelay = ReadByte();
 			}
-			// ********************
-			// * STDPB1_0 Command *
-			// ********************
-			case 's': case 'S': {
-				SetPB1Off();
-				break;
-			}
-			// ********************
-			// * STANAPB3 Command *
-			// ********************
-			case 'd': case 'D': {
-				byte triacTriggerDelay = 0;
-				Serial.print("Please enter a value between 0 and 255 for this command: ");
-				while (newByte == false) {
-					triacTriggerDelay = ReadByte();
-				}
-				if (newByte == true) {
-					SetPB3Analog(triacTriggerDelay);
-					newByte = false;
-				}
-				break;
-			}
-			// ********************
-			// * READADC2 Command *
-			// ********************
-			case 'f': case 'F': {
-				ReadADC2();
-				break;
-			}
-			// ************************************
-			// * GET_INFO Command (16 byte reply) *
-			// ************************************
-			case 'g': case 'G': {
-				GetInfo();
-				delay(250);
-				Serial.println("");
-				ReleaseAnalogData();
-				break;
-			}
-			// ********************
-			// * READBUFF Command *
-			// ********************
-			case 'h': case 'H': {
-				byte dataSize = 0;	// DSP buffer data size requested to ATtiny85
-				byte dataIX = 0;	// Requested DSP buffer data start position
-				Serial.print("Please enter the DSP buffer data start position (1 to 100): ");
-				while (newByte == false) {
-					dataIX = ReadByte();
-				}
+			if (newByte == true) {
+				SetPB3Analog(triacTriggerDelay);
 				newByte = false;
+			}
+			break;
+		}
+		// ********************
+		// * READADC2 Command *
+		// ********************
+		case 'f': case 'F': {
+			ReadADC2();
+			break;
+		}
+		// ************************************
+		// * GET_INFO Command (16 byte reply) *
+		// ************************************
+		case 'g': case 'G': {
+			GetInfo();
+			delay(250);
+			Serial.println("");
+			ReleaseAnalogData();
+			break;
+		}
+		// ********************
+		// * READBUFF Command *
+		// ********************
+		case 'h': case 'H': {
+			byte dataSize = 0;	// DSP buffer data size requested to ATtiny85
+			byte dataIX = 0;	// Requested DSP buffer data start position
+			Serial.print("Please enter the DSP buffer data start position (1 to 100): ");
+			while (newByte == false) {
+				dataIX = ReadByte();
+			}
+			newByte = false;
+			Serial.println("");
+			Serial.print("Please enter the word amount to retrieve from the DSP buffer (1 to 5): ");
+			while (newByte == false) {
+				dataSize = ReadByte();
+			}
+			if (newByte == true) {
+				ReadBuffer(dataIX, dataSize);
+				newByte = false;
+			}
+			break;
+		}
+		// ********************
+		// * DUMPBUFF Command *
+		// ********************
+		case 'j': case 'J': {
+			//void DumpBuffer(byte bufferSize, byte dataSize, byte dataType, byte valuesPerLine)
+			DumpBuffer(DSPBUFFERSIZE, 5, DATATYPEWORD, 4, 1);
+			delay(250);
+			Serial.println("");
+			//ReleaseAnalogData();
+			break;
+		}
+		// ********************
+		// * DSPDEBUG Command *
+		// ********************
+		case 'k': case 'K': {
+			GetInfo();
+			delay(250);
+			Serial.println("");
+			//void DumpBuffer(byte bufferSize, byte dataSize, byte dataType, byte valuesPerLine)
+			DumpBuffer(DSPBUFFERSIZE, 5, DATATYPEWORD, 10, 1);
+			delay(250);
+			Serial.println("");
+			ReleaseAnalogData();
+			break;
+		}
+		// ********************
+		 // * FIXPOSIT Command *
+		 // ********************
+		case 'p': case 'P': {
+			FixPositiveHC();
+			break;
+		}
+		// ********************
+		 // * FIXNEGAT Command *
+		 // ********************
+		case 'n': case 'N': {
+			FixNegativeHC();
+			break;
+		}
+		// *******************
+		// * Restart ESP8266 *
+		// *******************
+		case 'z': case 'Z': {
+			Serial.println("\nResetting ESP8266 ...");
+			Serial.println("\n.\n.\n.\n");
+			ESP.restart();
+			break;
+		}
+		// ********************
+		// * RESETINY Command *
+		// ********************
+		case 'x': case 'X': {
+			ResetTiny();
+			Serial.println("\n  .\n\r . .\n\r. . .\n");
+			delay(2000);
+			ESP.restart();
+			break;
+		}
+		// ********************************
+		// * Timonel ::: GETTMNLV Command *
+		// ********************************
+		case 'v': case 'V': {
+			//Serial.println("\nBootloader Cmd >>> Get bootloader version ...");
+			GetTimonelVersion();
+			break;
+		}
+		// ********************************
+		// * Timonel ::: EXITTMNL Command *
+		// ********************************
+		case 'r': case 'R': {
+			//Serial.println("\nBootloader Cmd >>> Run Application ...");
+			RunApplication();
+			Serial.println("\n. . .\n\r . .\n\r  .\n");
+			delay(2000);
+			ESP.restart();
+			break;
+		}
+		// ********************************
+		// * Timonel ::: DELFLASH Command *
+		// ********************************
+		case 'e': case 'E': {
+			//Serial.println("\nBootloader Cmd >>> Delete app firmware from T85 flash memory ...");
+			DeleteFlash();
+			break;
+		}
+		// ********************************
+		// * Timonel ::: STPGADDR Command *
+		// ********************************
+		case 'b': case 'B': {
+			Serial.print("Please enter the flash memory page base address: ");
+			while (newWord == false) {
+				flashPageAddr = ReadWord();
+			}
+			if (timonelStart > MCUTOTALMEM) {
+				Serial.println("\n\n\rWarning: Timonel bootloader start address unknown, please run 'version' command to find it !");
+				//newWord = false;
+				break;
+			}
+			if ((flashPageAddr > (timonelStart - 64)) | (flashPageAddr == 0xFFFF)) {
+				Serial.print("\n\n\rWarning: The highest flash page addreess available is ");
+				Serial.print(timonelStart - 64);
+				Serial.print(" (0x");
+				Serial.print(timonelStart - 64, HEX);
+				Serial.println("), please correct it !!!");
+				newWord = false;
+				break;
+			}
+			if (newWord == true) {
 				Serial.println("");
-				Serial.print("Please enter the word amount to retrieve from the DSP buffer (1 to 5): ");
-				while (newByte == false) {
-					dataSize = ReadByte();
-				}
-				if (newByte == true) {
-					ReadBuffer(dataIX, dataSize);
-					newByte = false;
-				}
-				break;
+				Serial.print("Flash memory page base address: ");
+				Serial.println(flashPageAddr);
+				Serial.print("Address high byte: ");
+				Serial.print((flashPageAddr & 0xFF00) >> 8);
+				Serial.print(" (<< 8) + Address low byte: ");
+				Serial.print(flashPageAddr & 0xFF);
+				SetTmlPageAddr(flashPageAddr);
+				newWord = false;
 			}
-			// ********************
-			// * DUMPBUFF Command *
-			// ********************
-			case 'j': case 'J': {
-				DumpBuffer();
-				delay(250);
-				Serial.println("");
-				//ReleaseAnalogData();
-				break;
-			}
-			// ********************
-			// * DSPDEBUG Command *
-			// ********************
-			case 'k': case 'K': {
-				GetInfo();
-				delay(250);
-				Serial.println("");
-				DumpBuffer();
-				delay(250);
-				Serial.println("");
-				ReleaseAnalogData();
-				break;
-			}
-			// ********************
-			// * FIXPOSIT Command *
-			// ********************
-			case 'p': case 'P': {
-				FixPositiveHC();
-				break;
-			}
-			// ********************
-			// * FIXNEGAT Command *
-			// ********************
-			case 'n': case 'N': {
-				FixNegativeHC();
-				break;
-			}
-			// *******************
-			// * Restart ESP8266 *
-			// *******************
-			case 'z': case 'Z': {
-				Serial.println("\nResetting ESP8266 ...");
-				Serial.println("\n.\n.\n.\n");
-				ESP.restart();
-				break;
-			}
-			// ********************
-			// * RESETINY Command *
-			// ********************
-			case 'x': case 'X': {
-				ResetTiny();
-				Serial.println("\n  .\n\r . .\n\r. . .\n");
-				delay(2000);
-				ESP.restart();
-				break;
-			}
-			// ********************************
-			// * Timonel ::: GETTMNLV Command *
-			// ********************************
-			case 'v': case 'V': {
-				//Serial.println("\nBootloader Cmd >>> Get bootloader version ...");
-				GetTimonelVersion();
-				break;
-			}
-			// ********************************
-			// * Timonel ::: EXITTMNL Command *
-			// ********************************
-			case 'r': case 'R': {
-				//Serial.println("\nBootloader Cmd >>> Run Application ...");
-				RunApplication();
-				Serial.println("\n. . .\n\r . .\n\r  .\n");
-				delay(2000);
-				ESP.restart();
-				break;
-			}
-			// ********************************
-			// * Timonel ::: DELFLASH Command *
-			// ********************************
-			case 'e': case 'E': {
-				//Serial.println("\nBootloader Cmd >>> Delete app firmware from T85 flash memory ...");
-				DeleteFlash();
-				break;
-			}
-			// ********************************
-			// * Timonel ::: STPGADDR Command *
-			// ********************************
-			case 'b': case 'B': {
-				word flashPageAddr = 0;	// DSP buffer data size requested to ATtiny85
-				Serial.print("Please enter the flash memory page base address: ");
-				while (newWord == false) {
-					flashPageAddr = ReadWord();
-				}
-				if (newWord == true) {
-					Serial.println("");
-					Serial.print("Flash memory page base address: ");
-					Serial.println(flashPageAddr);
-					Serial.print("Address high byte: ");
-					Serial.print((flashPageAddr & 0xFF00) >> 8);
-					Serial.print(" (<< 8) + Address low byte: ");
-					Serial.print(flashPageAddr & 0xFF);
-					SetTmlPageAddr(flashPageAddr);
-					newWord = false;
-				}
-				break;
-			}
-			// ********************************
-			// * Timonel ::: WRTFLASH Command *
-			// ********************************
-			case 'w': case 'W': {
-				//Serial.println("\nBootloader Cmd >>> Write new app firmware to T85 flash memory ...");
-				WriteFlash();
-				break;
-			}
-			// *******************
-			// * Unknown Command *
-			// *******************
-			default: {
-				Serial.print("ESP8266 - Command '");
-				Serial.print(key);
-				Serial.println("' unknown ...");
-				break;
-			}
+			break;
+		}
+		// ********************************
+		// * Timonel ::: WRTFLASH Command *
+		// ********************************
+		case 'w': case 'W': {
+			//Serial.println("\nBootloader Cmd >>> Write new app firmware to T85 flash memory ...");
+			//WriteFlash();
+			WriteFlashTest();
+			break;
+		}
+		// *******************
+		// * Unknown Command *
+		// *******************
+		default: {
+			Serial.print("ESP8266 - Command '");
+			Serial.print(key);
+			Serial.println("' unknown ...");
+			break;
+		}
 		}
 		Serial.println("");
 		ShowMenu();
@@ -826,18 +856,18 @@ void GetInfo(void) {
 		// Fixed half-cycle for ADC calculations
 		Serial.print("(((* Fixed half-cycle: ");
 		switch (ackRX[1]) {
-			case 1: {
-				Serial.println("Positive [+] *)))");
-				break;
-			}
-			case 0: {
-				Serial.println("Negative [-] *)))");
-				break;
-			}
-			default: {
-				Serial.println("Unknown [?] *)))");
-				break;
-			}
+		case 1: {
+			Serial.println("Positive [+] *)))");
+			break;
+		}
+		case 0: {
+			Serial.println("Negative [-] *)))");
+			break;
+		}
+		default: {
+			Serial.println("Unknown [?] *)))");
+			break;
+		}
 		}
 		// ADC half-cycle mid point
 		Serial.print("%%%* ADC Mid Point: ");
@@ -858,7 +888,7 @@ void GetInfo(void) {
 		// -----------------------------------------------------
 		// VRMS (Square root of sum of sqred VI's / ADC samples
 		uint16_t vRMS = (ackRX[10] << 8) + ackRX[11];
-		vRMS = vRMS;							
+		vRMS = vRMS;
 		float volts = (vRMS * VCC) / ADCTOP;
 		volts = volts + (volts * VOLTSADJUST);								/* VOLTS COMPENSATION ADJUST */
 		Serial.print("}}}* Vrms (AC): ");
@@ -918,7 +948,7 @@ void ReadBuffer(uint8_t dataIX, uint8_t dataSize) {
 		Wire.endTransmission();
 	}
 	// Receive acknowledgement
-	blockRXSize = Wire.requestFrom(slaveAddress, (dataSize * 2) + 2);
+	blockRXSize = Wire.requestFrom(slaveAddress, (byte)((dataSize * 2) + 2));
 	byte ackRX[(dataSize * 2) + 2];   // Data received from slave
 	for (int i = 0; i < blockRXSize; i++) {
 		ackRX[i] = Wire.read();
@@ -930,7 +960,7 @@ void ReadBuffer(uint8_t dataIX, uint8_t dataSize) {
 		Serial.println(ackRX[0]);
 		for (uint8_t i = 1; i < (dataSize * 2) + 1; i += 2) {
 			// DSP Buffer 2-Byte Word
-			Serial.print("# %%% DSP position ");
+			Serial.print("# %%% Buffer position ");
 			if (dataIX < 10) {
 				Serial.print("0");
 			}
@@ -959,21 +989,17 @@ void ReadBuffer(uint8_t dataIX, uint8_t dataSize) {
 
 // Function WriteBuffer
 int WriteBuffer(uint8_t dataArray[]) {
-	#define MAXTXSIZE 5
-	const byte txSize = MAXTXSIZE;
+	const byte txSize = TXDATASIZE + 2;
 	byte cmdTX[txSize] = { 0 };
 	int commErrors = 0;					/* I2C communication error counter */
+	uint8_t checksum = 0;
 	Serial.println("");
 	cmdTX[0] = WRITBUFF;
-	cmdTX[1] = dataArray[0];
-	cmdTX[2] = dataArray[1];
-	cmdTX[3] = dataArray[2];
-	cmdTX[4] = dataArray[3];
-	//cmdTX[5] = dataArray[4];
-	//cmdTX[6] = dataArray[5];
-	//cmdTX[7] = dataArray[6];
-	//cmdTX[8] = dataArray[7];
-	//cmdTX[9] = CalculateCRC(cmdTX, 8);
+	for (int b = 1; b < txSize - 1; b++) {
+		cmdTX[b] = dataArray[b - 1];
+		checksum += (byte)dataArray[b - 1];
+	}
+	cmdTX[txSize - 1] = checksum;
 	//Serial.print("[Timonel] Writting data to Attiny85 memory page buffer >>> ");
 	//Serial.print(cmdTX[0]);
 	//Serial.println("(WRITBUFF)");
@@ -1008,7 +1034,7 @@ int WriteBuffer(uint8_t dataArray[]) {
 		//Serial.print(cmdTX[0]);
 		//Serial.print(" parsed OK <<< ");
 		//Serial.println(ackRX[0]);
-		if (ackRX[1] == (byte)(cmdTX[1] + cmdTX[2] + cmdTX[3] + cmdTX[4] + cmdTX[5] + cmdTX[6] + cmdTX[7] + cmdTX[8])) {
+		if (ackRX[1] == checksum) {
 			//Serial.print("[Timonel] - Data parsed OK by slave <<< Checksum = 0x");
 			//Serial.println(ackRX[1], HEX);
 			//Serial.println("");
@@ -1017,7 +1043,10 @@ int WriteBuffer(uint8_t dataArray[]) {
 			Serial.print("[Timonel] - Data parsed with {{{ERROR}}} <<< Checksum = 0x");
 			Serial.println(ackRX[1], HEX);
 			//Serial.println("");
-			commErrors++;					/* Checksum error detected ... */
+			if (commErrors++ > 0) {					/* Checksum error detected ... */
+				Serial.println("\n\r[Timonel] - WriteBuff Checksum Errors, Aborting ...");
+				exit(commErrors);
+			}
 		}
 
 	}
@@ -1027,25 +1056,37 @@ int WriteBuffer(uint8_t dataArray[]) {
 		Serial.print(" command! <<< ");
 		Serial.println(ackRX[0]);
 		Serial.println("");
-		commErrors++;						/* Opcode error detected ... */
+		if (commErrors++ > 0) {					/* Opcode error detected ... */
+			Serial.println("\n\r[Timonel] - WriteBuff Opcode Reply Errors, Aborting ...");
+			exit(commErrors);
+		}
 	}
 	return(commErrors);
 }
 
 // Function DumpBuffer
-void DumpBuffer(void) {
+void DumpBuffer(byte bufferSize, byte dataSize, byte dataType, byte valuesPerLine, byte checkType) {
+	// dataType:
+	// ---------
+	// 1 = byte
+	// 2 = word
+	// checkType:
+	//-----------
+	// 1 = CRC-8
+	// 2 = (byte)checksum
 	byte cmdTX[3] = { READBUFF, 0, 0 };
 	byte txSize = 3;
 	byte dataIX = 0;
-	uint8_t dataSize = 5;
+	//uint8_t dataSize = 5;
 	uint8_t crcErrors = 0;
+	int v = 1;
 	cmdTX[2] = dataSize;
 	byte transmitData[1] = { 0 };
-	Serial.println("ESP8266 - Dumping DSP Buffer ...");
+	Serial.println("ESP8266 - Dumping Tiny85 Buffer ...");
 	Serial.println("");
-	for (uint8_t k = 1; k < DSPBUFFERSIZE + 1; k += 5) {
-		//byte dataSize = 0;	// DSP buffer data size requested to ATtiny85
-		//byte dataIX = 0;	// Requested DSP buffer data start position
+	for (uint8_t k = 1; k < bufferSize + 1; k += dataSize) {
+		//byte dataSize = 0;	// Requested T85 buffer data size
+		//byte dataIX = 0;		// Requested T85 buffer data start position
 		dataIX = k;
 		cmdTX[1] = k;
 		for (int i = 0; i < txSize; i++) {
@@ -1055,7 +1096,7 @@ void DumpBuffer(void) {
 			Wire.endTransmission();
 		}
 		// Receive acknowledgement
-		blockRXSize = Wire.requestFrom(slaveAddress, (dataSize * 2) + 2);
+		blockRXSize = Wire.requestFrom(slaveAddress, (byte)((dataSize * 2) + 2));
 		byte ackRX[(dataSize * 2) + 2];   // Data received from slave
 		for (int i = 0; i < blockRXSize; i++) {
 			ackRX[i] = Wire.read();
@@ -1078,22 +1119,47 @@ void DumpBuffer(void) {
 				//}
 				//Serial.print(dataIX++);
 				//Serial.print(": ");
-				Serial.print((ackRX[i] << 8) + ackRX[i + 1]);
-				Serial.println("");
+				if (dataType = 2) {
+					Serial.print((ackRX[i] << 8) + ackRX[i + 1]);	/* 2 = dataType word */
+				}
+				else {
+					Serial.print(ackRX[i]);							/* 1 = dataType byte */
+				}
+				if (v == valuesPerLine) {
+					Serial.println("");
+					v = 0;
+				}
+				else {
+					Serial.print(" ");
+				}
+				v++;
 				//Serial.println(" |");
 			}
-			byte checkCRC = CalculateCRC(ackRX, sizeof(ackRX));
-			if (checkCRC == 0) {
-				//Serial.print("   >>> CRC OK! <<<   ");
-				//Serial.println(checkCRC);
-			}
-			else {
-				Serial.print("ESP8266 - DUMPBUFF aborted due to CRC ERROR! ");
-				Serial.println(checkCRC);
-				if (crcErrors++ == MAXCRCERRORS) {
-					delay(1000);
-					exit(1);
+			switch (checkType) {
+			case 1: {	/* CRC-8 */
+				byte checkCRC = CalculateCRC(ackRX, sizeof(ackRX));
+				if (checkCRC == 0) {
+					//Serial.print("   >>> CRC OK! <<<   ");
+					//Serial.println(checkCRC);
 				}
+				else {
+					Serial.print("ESP8266 - DUMPBUFF aborted due to Checksum ERROR! ");
+					Serial.println(checkCRC);
+					if (crcErrors++ == MAXCKSUMERRORS) {
+						delay(1000);
+						exit(1);
+					}
+				}
+				break;
+			}
+			case 2: {	/* Checksum */
+				// Checksum
+				break;
+			}
+			default: {
+				// Default ...
+				break;
+			}
 			}
 		}
 		else {
@@ -1284,6 +1350,7 @@ void GetTimonelVersion(void) {
 		Serial.print(" >>> Base address: 0x");
 		Serial.print((ackRX[6] << 8) + ackRX[7], HEX);
 		Serial.println(" <<<");
+		timonelStart = (ackRX[6] << 8) + ackRX[7];
 	}
 	else {
 		Serial.print("[Timonel] - Error parsing ");
@@ -1430,30 +1497,37 @@ void SetTmlPageAddr(word pageAddr) {
 }
 
 // Function WriteFlash
-void WriteFlash(void) {
-	#define TXSIZE 4						/* Data size to send in a single I2C data packet */
-	#define PGSIZE 64						/* Tiny85 flash page size */
-	int packet = 0;							/* Byte counter to be sent in a single I2C data packet */
-	int padding = 0;						/* Amount of padding bytes to match the page size */
-	int pageEnd = 0;						/* Byte counter to detect the end of flash mem page */
+int WriteFlash(void) {
+	int packet = 0;								/* Byte counter to be sent in a single I2C data packet */
+	int padding = 0;							/* Amount of padding bytes to match the page size */
+	int pageEnd = 0;							/* Byte counter to detect the end of flash mem page */
+	int pageCount = 1;
 	int wrtErrors = 0;
-	uint8_t wrtBuff[TXSIZE] = { 0xFF };
+	uint8_t wrtBuff[TXDATASIZE] = { 0xFF };
 	int payloadSize = sizeof(payload);
-	if ((payloadSize / PGSIZE) != 0) {		/* If the payload to be sent is smaller than flash page size, resize it to match */
-		padding = ((((uint)(payloadSize / PGSIZE) + 1) * PGSIZE) - payloadSize);
+	if ((payloadSize / FLASHPGSIZE) != 0) {		/* If the payload to be sent is smaller than flash page size, resize it to match */
+		padding = ((((uint)(payloadSize / FLASHPGSIZE) + 1) * FLASHPGSIZE) - payloadSize);
 		payloadSize += padding;
 	}
 	Serial.println("\n1-Deleting flash ...\n\r");
 	Serial.println("\n2-Writing payload to flash ...\n\n\r");
+	if (flashPageAddr == 0xFFFF) {
+		Serial.println("Warning: Flash page start address no set, please use 'b' command to set it ...\n\r");
+		return(1);
+	}
+	Serial.print("::::::::::::::::::: Page ");
+	Serial.print(pageCount);
+	Serial.print(" - Address ");
+	Serial.println(flashPageAddr);
 	for (int i = 0; i < payloadSize; i++) {
 		if (i < (payloadSize - padding)) {
-			wrtBuff[packet] = payload[i];	/* If there are data to fill the page, use it ... */
+			wrtBuff[packet] = payload[i];		/* If there are data to fill the page, use it ... */
 		}
 		else {
-			wrtBuff[packet] = 0xff;			/* If there are no more data, complete the page with padding (0xff) */
+			wrtBuff[packet] = 0xff;				/* If there are no more data, complete the page with padding (0xff) */
 		}
-		if (packet++ == (TXSIZE - 1)) {		/* When a data packet is completed to be sent ... */
-			for (int b = 0; b < TXSIZE; b++) {
+		if (packet++ == (TXDATASIZE - 1)) {		/* When a data packet is completed to be sent ... */
+			for (int b = 0; b < TXDATASIZE; b++) {
 				Serial.print("0x");
 				if (wrtBuff[b] < 0x10) {
 					Serial.print("0");
@@ -1461,22 +1535,93 @@ void WriteFlash(void) {
 				Serial.print(wrtBuff[b], HEX);
 				Serial.print(" ");
 			}
-			//Serial.println("");
 			wrtErrors += WriteBuffer(wrtBuff);	/* Send data to T85 through I2C */
-			//WriteBuffer(wrtBuff);
 			packet = 0;
-			delay(5);
+			delay(50);
 		}
-		if (pageEnd++ == (PGSIZE - 1)) {	/* When a page end is detected ... */
-			Serial.println(":::::::::::::::::::::::::::::::::::::::");
-			pageEnd = 0;
+		if (pageEnd++ == (FLASHPGSIZE - 1)) {	/* When a page end is detected ... */
+			if (i < (payloadSize - 1)) {
+				Serial.print("::::::::::::::::::: Page ");
+				Serial.print(++pageCount);
+				Serial.print(" - Address ");
+				Serial.println(flashPageAddr + 1 + i);
+				pageEnd = 0;
+
+				//delay(500);
+
+			}
+		}
+		if (wrtErrors > 10) {
+			Serial.println("\n\r==== WriteFlash: too many errors, aborting ...");
+			i = payloadSize;
 		}
 	}
 	if (wrtErrors == 0) {
-		Serial.println("\n\r==== Firmware was successfully transferred to T85, please select 'run app' command to start it ...");
+		Serial.println("\n\r==== WriteFlash: Firmware was successfully transferred to T85, please select 'run app' command to start it ...");
 	}
 	else {
-		Serial.print("\n\r==== Communication errors detected during firmware transfer, please retry !!! ErrCnt: ");
+		Serial.print("\n\r==== WriteFlash: Communication errors detected during firmware transfer, please retry !!! ErrCnt: ");
+		Serial.print(wrtErrors);
+		Serial.println(" ===");
+	}
+}
+
+// Function WriteFlashTest
+int WriteFlashTest(void) {
+	int packet = 0;								/* Byte counter to be sent in a single I2C data packet */
+	int padding = 0;							/* Amount of padding bytes to match the page size */
+	int pageEnd = 0;							/* Byte counter to detect the end of flash mem page */
+	int pageCount = 1;
+	int wrtErrors = 0;
+	uint8_t wrtBuff[TXDATASIZE] = { 0xFF };
+
+
+	Serial.println("\n1-Deleting flash ...\n\r");
+	Serial.println("\n2-Writing payload to flash ...\n\n\r");
+	if (flashPageAddr == 0xFFFF) {
+		Serial.println("Warning: Flash page start address no set, please use 'b' command to set it ...\n\r");
+		return(1);
+	}
+	Serial.print("::::::::::::::::::: Page ");
+	Serial.print(pageCount);
+	Serial.print(" - Address ");
+	Serial.println(flashPageAddr);
+	for (int i = 0; i < FLASHPGSIZE; i++) {
+		// ---	>>>
+		wrtBuff[packet] = i;					/* Store consecutive numbers in flash memory ... */
+		// --- >>>
+		if (packet++ == (TXDATASIZE - 1)) {		/* When a data packet is completed to be sent ... */
+			for (int b = 0; b < TXDATASIZE; b++) {
+				Serial.print("0x");
+				if (wrtBuff[b] < 0x10) {
+					Serial.print("0");
+				}
+				Serial.print(wrtBuff[b], HEX);
+				Serial.print(" ");
+			}
+			wrtErrors += WriteBuffer(wrtBuff);	/* Send data to T85 through I2C */
+			packet = 0;
+			delay(50);
+		}
+		if (pageEnd++ == (FLASHPGSIZE - 1)) {	/* When a page end is detected ... */
+			if (i < (FLASHPGSIZE - 1)) {
+				Serial.print("::::::::::::::::::: Page ");
+				Serial.print(++pageCount);
+				Serial.print(" - Address ");
+				Serial.println(flashPageAddr + 1 + i);
+				pageEnd = 0;
+			}
+		}
+		if (wrtErrors > 10) {
+			Serial.println("\n\r==== WriteFlashTest: too many errors, aborting ...");
+			i = FLASHPGSIZE;
+		}
+	}
+	if (wrtErrors == 0) {
+		Serial.println("\n\r==== WriteFlashTest: Firmware was successfully transferred to T85, please select 'run app' command to start it ...");
+	}
+	else {
+		Serial.print("\n\r==== WriteFlashTest: Communication errors detected during firmware transfer, please retry !!! ErrCnt: ");
 		Serial.print(wrtErrors);
 		Serial.println(" ===");
 	}

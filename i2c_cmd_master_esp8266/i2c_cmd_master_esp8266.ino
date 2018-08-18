@@ -58,6 +58,7 @@ bool appMode = true;
 char key = '\0';
 word flashPageAddr = 0xFFFF;	/* Current flash  page address to be written. Tiny85 allowed values are 0 to 0x2000, so 0xFFFF means 'not set' */
 word timonelStart = 0xFFFF;		/* Timonel start address, 0xFFFF means 'not set'. Use Timonel 'version' command to get it */
+word bufferValue = 0;			/* Application 10-bit value to write into buffer */
 
 								// CRC Table: Polynomial=0x9C, CRC size=8-bit, HD=5, Word Length=9 bytes
 const byte crcTable[256] = {
@@ -345,21 +346,56 @@ void loop() {
 			// * READBUFF Command *
 			// ********************
 			case 'h': case 'H': {
-				byte dataSize = 0;	// DSP buffer data size requested to ATtiny85
-				byte dataIX = 0;	// Requested DSP buffer data start position
-				Serial.print("Please enter the DSP buffer data start position (1 to 100): ");
+				byte dataSize = 0;	// 10-bit buffer data size requested to ATtiny85
+				byte dataIX = 0;	// Requested 10-bit buffer data start position
+				Serial.print("Please enter the 10-bit buffer data start position (1 to 100): ");
 				while (newByte == false) {
 					dataIX = ReadByte();
 				}
 				newByte = false;
 				Serial.println("");
-				Serial.print("Please enter the word amount to retrieve from the DSP buffer (1 to 5): ");
+				Serial.print("Please enter the word amount to retrieve from the 10-bit buffer (1 to 5): ");
 				while (newByte == false) {
 					dataSize = ReadByte();
 				}
 				if (newByte == true) {
 					ReadBuffer(dataIX, dataSize);
 					newByte = false;
+				}
+				break;
+			}
+			// ********************
+			// * WRITBUFF Command *
+			// ********************
+			case 'u': case 'U': {
+				byte dataIX = 0;	// Requested DSP buffer data start position
+				Serial.print("Please enter the 10-bit buffer position to write (1 to 100): ");
+				while (newByte == false) {
+					dataIX = ReadByte();
+				}
+				if (dataIX > 100) {
+					Serial.print("\n\n\rError: The buffer position must be between 0 and 100 ");
+					newByte = false;
+				}
+				Serial.print("\n\n\rPlease enter the 10-bit buffer value to write: ");
+				while (newWord == false) {
+					bufferValue = ReadWord();
+				}
+				if (bufferValue > 1023) {
+					Serial.print("\n\n\rError: The buffer only accepts values between 0 and 1023 ");
+					newWord = false;
+					//break;
+				}
+				if (newWord == true) {
+					Serial.println("");
+					Serial.print("10 bit-buffer value to write: ");
+					Serial.println(bufferValue);
+					Serial.print("10 bit-buffer high byte: ");
+					Serial.print((bufferValue & 0xFF00) >> 8);
+					Serial.print(" (<< 8) + 10 bit-buffer low byte: ");
+					Serial.print(bufferValue & 0xFF);
+					//SetTmlPageAddr(bufferValue);
+					newWord = false;
 				}
 				break;
 			}
@@ -484,12 +520,30 @@ void loop() {
 				break;
 			}
 			// ********************************
-			// * Timonel ::: WRTFLASH Command *
+			// * Timonel ::: WRITPAGE Command *
 			// ********************************
 			case 'w': case 'W': {
 				//Serial.println("\nBootloader Cmd >>> Write new app firmware to T85 flash memory ...");
 				//WriteFlash();
 				WriteFlashTest();
+				break;
+			}
+			// ********************************
+			// * Timonel ::: READPAGE Command *
+			// ********************************
+			case 'q': case 'Q': {
+				//Serial.println("\nBootloader Cmd >>> Write new app firmware to T85 flash memory ...");
+				//ReadFlash();
+				//ReadFlashTest();
+				break;
+			}
+			// ******************
+			// * ? Help Command *
+			// ******************
+			case '?': case '¿': {
+				Serial.println("\n\rNicebots Pluggie Help");
+				Serial.println("=====================");
+				//ShowHelp();
 				break;
 			}
 			// *******************
@@ -1630,9 +1684,9 @@ int WriteFlashTest(void) {
 //Function ShowMenu
 void ShowMenu(void) {
 	//if (appMode == true) {
-		Serial.println("Application command ('a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'p', 'n', 'z' reboot, 'x' reset T85): ");
+		Serial.println("Application command ('a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'p', 'n', 'u', 'z' reboot, 'x' reset T85, '?' help): ");
 	//}
 	//else {
-		Serial.print("Timonel booloader ('v' version, 'r' run app, 'e' erase flash, 'b' set address, 'w' write flash): ");
+		Serial.print("Timonel booloader ('v' version, 'r' run app, 'e' erase flash, 'b' set address, 'w' write flash, 'q' read flash): ");
 	//}
 }

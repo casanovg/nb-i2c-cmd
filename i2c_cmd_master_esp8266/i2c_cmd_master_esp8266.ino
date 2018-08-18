@@ -279,8 +279,8 @@ void setup() {
 	blockRXSize = 0;
 
 	ClrScr();
-	Serial.println("Nicebots Pluggie I2C-PWM-ADC Test with Timonel Bootloader (v0.8)");
-	Serial.println("================================================================");
+	Serial.println("Nicebots Pluggie Commander for Application and Timonel Bootloader (v0.2)");
+	Serial.println("========================================================================");
 	ShowMenu();
 }
 

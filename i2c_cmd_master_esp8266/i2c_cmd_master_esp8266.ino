@@ -36,7 +36,8 @@
 // Pluggie application
 #define VCC				3.3		/* PSU VCC 3.3 Volts */
 #define ADCTOP			1023	/* ADC Top Value @ 10-bit precision = 1023 (2^10) */
-#define DSPBUFFERSIZE	100		/* DSP buffer size (16-bit elements) */
+#define DSPBUFFERSIZE	100		/* 10-bit buffer size (16-bit elements) */
+#define DSPBUFFTXSIZE	5		/* 10-bit buffer size transmit chunk size */
 #define MAXBUFFERTXLN	7		/* Maximum buffer TX/RX size */
 #define RXDATASIZE		4		/* RX data size for WRITBUFF command */
 #define VOLTSADJUST		0.025	/* Measured volts adjust: 0.01 = 1% */
@@ -368,33 +369,38 @@ void loop() {
 			// * WRITBUFF Command *
 			// ********************
 			case 'u': case 'U': {
+				newByte = false;
+				newWord = false;
 				byte dataIX = 0;	// Requested DSP buffer data start position
 				Serial.print("Please enter the 10-bit buffer position to write (1 to 100): ");
 				while (newByte == false) {
 					dataIX = ReadByte();
 				}
 				if (dataIX > 100) {
-					Serial.print("\n\n\rError: The buffer position must be between 0 and 100 ");
+					Serial.println("\n\rError: The buffer position must be between 0 and 100 ");
 					newByte = false;
+					break;
 				}
-				Serial.print("\n\n\rPlease enter the 10-bit buffer value to write: ");
+				Serial.print("\n\rPlease enter the 10-bit buffer value to write: ");
 				while (newWord == false) {
 					bufferValue = ReadWord();
 				}
 				if (bufferValue > 1023) {
-					Serial.print("\n\n\rError: The buffer only accepts values between 0 and 1023 ");
+					Serial.println("\n\n\rError: The buffer only accepts values between 0 and 1023 ");
 					newWord = false;
-					//break;
+					break;
 				}
-				if (newWord == true) {
+				if ((newByte == true) & (newWord == true)) {
 					Serial.println("");
-					Serial.print("10 bit-buffer value to write: ");
-					Serial.println(bufferValue);
+					Serial.print("\n\r10 bit-buffer value to write: ");
+					Serial.print(bufferValue);
+					Serial.print(" into position: ");
+					Serial.println(dataIX);
 					Serial.print("10 bit-buffer high byte: ");
 					Serial.print((bufferValue & 0xFF00) >> 8);
 					Serial.print(" (<< 8) + 10 bit-buffer low byte: ");
-					Serial.print(bufferValue & 0xFF);
-					//SetTmlPageAddr(bufferValue);
+					Serial.println(bufferValue & 0xFF);
+					Write10bitBuff(dataIX, bufferValue);
 					newWord = false;
 				}
 				break;
@@ -404,7 +410,7 @@ void loop() {
 			// ********************
 			case 'j': case 'J': {
 				//void DumpBuffer(byte bufferSize, byte dataSize, byte dataType, byte valuesPerLine)
-				DumpBuffer(DSPBUFFERSIZE, 5, DATATYPEWORD, 4, 1);
+				Dump10bitBuffer(DSPBUFFERSIZE, DSPBUFFTXSIZE, 4);
 				delay(250);
 				Serial.println("");
 				//ReleaseAnalogData();
@@ -418,7 +424,7 @@ void loop() {
 				delay(250);
 				Serial.println("");
 				//void DumpBuffer(byte bufferSize, byte dataSize, byte dataType, byte valuesPerLine)
-				DumpBuffer(DSPBUFFERSIZE, 5, DATATYPEWORD, 10, 1);
+				Dump10bitBuffer(DSPBUFFERSIZE, DSPBUFFTXSIZE, 10);
 				delay(250);
 				Serial.println("");
 				ReleaseAnalogData();
@@ -1041,14 +1047,14 @@ void ReadBuffer(uint8_t dataIX, uint8_t dataSize) {
 	}
 }
 
-// Function WriteBuffer
-int WriteBuffer(uint8_t dataArray[]) {
+// Function WritePageBuff
+int WritePageBuff(uint8_t dataArray[]) {
 	const byte txSize = TXDATASIZE + 2;
 	byte cmdTX[txSize] = { 0 };
 	int commErrors = 0;					/* I2C communication error counter */
 	uint8_t checksum = 0;
 	Serial.println("");
-	cmdTX[0] = WRITBUFF;
+	cmdTX[0] = WRITPAGE;
 	for (int b = 1; b < txSize - 1; b++) {
 		cmdTX[b] = dataArray[b - 1];
 		checksum += (byte)dataArray[b - 1];
@@ -1083,7 +1089,7 @@ int WriteBuffer(uint8_t dataArray[]) {
 	for (int i = 0; i < blockRXSize; i++) {
 		ackRX[i] = Wire.read();
 	}
-	if (ackRX[0] == ACKWTBUF) {
+	if (ackRX[0] == ACKWTPAG) {
 		//Serial.print("[Timonel] - Command ");
 		//Serial.print(cmdTX[0]);
 		//Serial.print(" parsed OK <<< ");
@@ -1098,7 +1104,7 @@ int WriteBuffer(uint8_t dataArray[]) {
 			Serial.println(ackRX[1], HEX);
 			//Serial.println("");
 			if (commErrors++ > 0) {					/* Checksum error detected ... */
-				Serial.println("\n\r[Timonel] - WriteBuff Checksum Errors, Aborting ...");
+				Serial.println("\n\r[Timonel] - WritePageBuff Checksum Errors, Aborting ...");
 				exit(commErrors);
 			}
 		}
@@ -1111,23 +1117,15 @@ int WriteBuffer(uint8_t dataArray[]) {
 		Serial.println(ackRX[0]);
 		Serial.println("");
 		if (commErrors++ > 0) {					/* Opcode error detected ... */
-			Serial.println("\n\r[Timonel] - WriteBuff Opcode Reply Errors, Aborting ...");
+			Serial.println("\n\r[Timonel] - WritePageBuff Opcode Reply Errors, Aborting ...");
 			exit(commErrors);
 		}
 	}
 	return(commErrors);
 }
 
-// Function DumpBuffer
-void DumpBuffer(byte bufferSize, byte dataSize, byte dataType, byte valuesPerLine, byte checkType) {
-	// dataType:
-	// ---------
-	// 1 = byte
-	// 2 = word
-	// checkType:
-	//-----------
-	// 1 = CRC-8
-	// 2 = (byte)checksum
+// Function Dump10bitBuffer
+void Dump10bitBuffer(byte bufferSize, byte dataSize, byte valuesPerLine) {
 	byte cmdTX[3] = { READBUFF, 0, 0 };
 	byte txSize = 3;
 	byte dataIX = 0;
@@ -1155,7 +1153,7 @@ void DumpBuffer(byte bufferSize, byte dataSize, byte dataType, byte valuesPerLin
 		for (int i = 0; i < blockRXSize; i++) {
 			ackRX[i] = Wire.read();
 		}
-		if (ackRX[0] == ACKRDBUF) {
+		if (ackRX[0] == ACKRDBUF){
 			//Serial.print("ESP8266 - Command ");
 			//Serial.print(cmdTX[0]);
 			//Serial.print(" parsed OK <<< ");
@@ -1173,12 +1171,7 @@ void DumpBuffer(byte bufferSize, byte dataSize, byte dataType, byte valuesPerLin
 				//}
 				//Serial.print(dataIX++);
 				//Serial.print(": ");
-				if (dataType = 2) {
-					Serial.print((ackRX[i] << 8) + ackRX[i + 1]);	/* 2 = dataType word */
-				}
-				else {
-					Serial.print(ackRX[i]);							/* 1 = dataType byte */
-				}
+				Serial.print((ackRX[i] << 8) + ackRX[i + 1]);	/* 10-bit values are transmitted in two bytes */
 				if (v == valuesPerLine) {
 					Serial.println("");
 					v = 0;
@@ -1189,32 +1182,20 @@ void DumpBuffer(byte bufferSize, byte dataSize, byte dataType, byte valuesPerLin
 				v++;
 				//Serial.println(" |");
 			}
-			switch (checkType) {
-			case 1: {	/* CRC-8 */
-				byte checkCRC = CalculateCRC(ackRX, sizeof(ackRX));
-				if (checkCRC == 0) {
-					//Serial.print("   >>> CRC OK! <<<   ");
-					//Serial.println(checkCRC);
+			byte checkCRC = CalculateCRC(ackRX, sizeof(ackRX));
+			if (checkCRC == 0) {
+				//Serial.print("   >>> CRC OK! <<<   ");
+				//Serial.println(checkCRC);
+			}
+			else {
+				Serial.print("ESP8266 - DUMPBUFF aborted due to Checksum ERROR! ");
+				Serial.println(checkCRC);
+				if (crcErrors++ == MAXCKSUMERRORS) {
+					delay(1000);
+					exit(1);
 				}
-				else {
-					Serial.print("ESP8266 - DUMPBUFF aborted due to Checksum ERROR! ");
-					Serial.println(checkCRC);
-					if (crcErrors++ == MAXCKSUMERRORS) {
-						delay(1000);
-						exit(1);
-					}
-				}
-				break;
 			}
-			case 2: {	/* Checksum */
-						// Checksum
-				break;
-			}
-			default: {
-				// Default ...
-				break;
-			}
-			}
+			break;
 		}
 		else {
 			Serial.print("ESP8266 - Error parsing ");
@@ -1223,6 +1204,73 @@ void DumpBuffer(byte bufferSize, byte dataSize, byte dataType, byte valuesPerLin
 			Serial.println(ackRX[0]);
 		}
 		delay(500);
+	}
+}
+
+// Function Write10bitBuff
+void Write10bitBuff(byte bufferPosition, word bufferValue) {
+	byte cmdTX[5] = { WRITBUFF, 0, 0, 0, 0 };
+	byte txSize = 5;
+	Serial.println("");
+	cmdTX[1] = bufferPosition;
+	cmdTX[2] = ((bufferValue & 0xFF00) >> 8);		/* Buffer value high byte */
+	cmdTX[3] = (bufferValue & 0xFF);				/* Buffer value low byte */
+	Serial.print("\nWritting value to Attiny85 10-bit buffer >>> ");
+	Serial.print(cmdTX[0]);
+	Serial.println("(WRITBUFF)");
+	cmdTX[4] = CalculateCRC(cmdTX, 2);
+	// Transmit command
+	byte transmitData[5] = { 0 };
+	for (int i = 0; i < txSize; i++) {
+		if (i > 0) {
+			if (i < txSize - 1) {
+				Serial.print("ESP8266 - Sending Operand >>> ");
+				Serial.println(cmdTX[i]);
+			}
+			else {
+				Serial.print("ESP8266 - Sending CRC >>> ");
+				Serial.println(cmdTX[i]);
+			}
+		}
+		transmitData[i] = cmdTX[i];
+		Wire.beginTransmission(slaveAddress);
+		Wire.write(transmitData[i]);
+		Wire.endTransmission();
+	}
+	// Receive acknowledgement
+	blockRXSize = Wire.requestFrom(slaveAddress, (byte)2);
+	byte ackRX[2] = { 0 };   // Data received from slave
+	for (int i = 0; i < blockRXSize; i++) {
+		ackRX[i] = Wire.read();
+	}
+	if (ackRX[0] == ACKWTBUF) {
+		Serial.print("ESP8266 - Command ");
+		Serial.print(cmdTX[0]);
+		Serial.print(" parsed OK <<< ");
+		Serial.println(ackRX[0]);
+		if (ackRX[1] == 0) {
+			Serial.print("ESP8266 - Operands ");
+			Serial.print(cmdTX[1]);
+			Serial.print(", ");
+			Serial.print(cmdTX[2]);
+			Serial.print(" and ");
+			Serial.print(cmdTX[3]);
+			Serial.print(" parsed OK by slave <<< ATtiny85 CRC Check = ");
+			Serial.println(ackRX[1]);
+		}
+		else {
+			Serial.print("ESP8266 - Operand ");
+			Serial.print(cmdTX[1]);
+			Serial.print(" parsed with {{{ERROR}}} <<< ATtiny85 Flash Page Address Check = ");
+			Serial.println(ackRX[1]);
+		}
+
+	}
+	else {
+		Serial.print("[Timonel] - Error parsing ");
+		Serial.print(cmdTX[0]);
+		Serial.print(" command! <<< ");
+		Serial.println(ackRX[0]);
 	}
 }
 
@@ -1589,7 +1637,7 @@ int WriteFlash(void) {
 				Serial.print(wrtBuff[b], HEX);
 				Serial.print(" ");
 			}
-			wrtErrors += WriteBuffer(wrtBuff);	/* Send data to T85 through I2C */
+			wrtErrors += WritePageBuff(wrtBuff);	/* Send data to T85 through I2C */
 			packet = 0;
 			delay(50);
 		}
@@ -1653,7 +1701,7 @@ int WriteFlashTest(void) {
 				Serial.print(wrtBuff[b], HEX);
 				Serial.print(" ");
 			}
-			wrtErrors += WriteBuffer(wrtBuff);	/* Send data to T85 through I2C */
+			wrtErrors += WritePageBuff(wrtBuff);	/* Send data to T85 through I2C */
 			packet = 0;
 			delay(50);
 		}

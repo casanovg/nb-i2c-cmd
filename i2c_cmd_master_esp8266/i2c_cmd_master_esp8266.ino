@@ -410,7 +410,7 @@ void loop() {
 			// ********************
 			case 'j': case 'J': {
 				//void DumpBuffer(byte bufferSize, byte dataSize, byte dataType, byte valuesPerLine)
-				Dump10bitBuffer(DSPBUFFERSIZE, DSPBUFFTXSIZE, 4);
+				Dump10bitBuffer(DSPBUFFERSIZE, DSPBUFFTXSIZE, 10);
 				delay(250);
 				Serial.println("");
 				//ReleaseAnalogData();
@@ -1153,25 +1153,13 @@ void Dump10bitBuffer(byte bufferSize, byte dataSize, byte valuesPerLine) {
 		for (int i = 0; i < blockRXSize; i++) {
 			ackRX[i] = Wire.read();
 		}
-		if (ackRX[0] == ACKRDBUF){
+		if (ackRX[0] == ACKRDBUF) {
 			//Serial.print("ESP8266 - Command ");
 			//Serial.print(cmdTX[0]);
 			//Serial.print(" parsed OK <<< ");
 			//Serial.println(ackRX[0]);
 			for (uint8_t i = 1; i < (dataSize * 2) + 1; i += 2) {
-				// DSP Buffer 2-Byte Word
-				//Serial.print("| DSP ");
-				//if (dataIX < 100) {
-				//	if (dataIX < 10) {
-				//		Serial.print("  ");
-				//	}
-				//	else {
-				//		Serial.print(" ");
-				//	}
-				//}
-				//Serial.print(dataIX++);
-				//Serial.print(": ");
-				Serial.print((ackRX[i] << 8) + ackRX[i + 1]);	/* 10-bit values are transmitted in two bytes */
+				Serial.print((ackRX[i] << 8) + ackRX[i + 1]);	/* 2 = dataType word */
 				if (v == valuesPerLine) {
 					Serial.println("");
 					v = 0;
@@ -1195,7 +1183,6 @@ void Dump10bitBuffer(byte bufferSize, byte dataSize, byte valuesPerLine) {
 					exit(1);
 				}
 			}
-			break;
 		}
 		else {
 			Serial.print("ESP8266 - Error parsing ");
@@ -1212,13 +1199,13 @@ void Write10bitBuff(byte bufferPosition, word bufferValue) {
 	byte cmdTX[5] = { WRITBUFF, 0, 0, 0, 0 };
 	byte txSize = 5;
 	Serial.println("");
-	cmdTX[1] = bufferPosition;
+	cmdTX[1] = bufferPosition;						/* Buffer position to write */
 	cmdTX[2] = ((bufferValue & 0xFF00) >> 8);		/* Buffer value high byte */
 	cmdTX[3] = (bufferValue & 0xFF);				/* Buffer value low byte */
 	Serial.print("\nWritting value to Attiny85 10-bit buffer >>> ");
 	Serial.print(cmdTX[0]);
 	Serial.println("(WRITBUFF)");
-	cmdTX[4] = CalculateCRC(cmdTX, 2);
+	cmdTX[4] = CalculateCRC(cmdTX, 4);				/* CRC-8 */
 	// Transmit command
 	byte transmitData[5] = { 0 };
 	for (int i = 0; i < txSize; i++) {
@@ -1255,13 +1242,13 @@ void Write10bitBuff(byte bufferPosition, word bufferValue) {
 			Serial.print(cmdTX[2]);
 			Serial.print(" and ");
 			Serial.print(cmdTX[3]);
-			Serial.print(" parsed OK by slave <<< ATtiny85 CRC Check = ");
+			Serial.print(" successfully parsed by slave <<< ATtiny85 CRC Check = ");
 			Serial.println(ackRX[1]);
 		}
 		else {
 			Serial.print("ESP8266 - Operand ");
 			Serial.print(cmdTX[1]);
-			Serial.print(" parsed with {{{ERROR}}} <<< ATtiny85 Flash Page Address Check = ");
+			Serial.print(" parsed with {{{ERROR}}} <<< ATtiny85 CRC Check = ");
 			Serial.println(ackRX[1]);
 		}
 

@@ -360,7 +360,7 @@ void loop() {
 					dataSize = ReadByte();
 				}
 				if (newByte == true) {
-					Read10bitBuffer(dataIX, dataSize);
+					Read10bitBuff(dataIX, dataSize);
 					newByte = false;
 				}
 				break;
@@ -410,7 +410,7 @@ void loop() {
 			// ********************
 			case 'j': case 'J': {
 				//void DumpBuffer(byte bufferSize, byte dataSize, byte dataType, byte valuesPerLine)
-				Dump10bitBuffer(DSPBUFFERSIZE, DSPBUFFTXSIZE, 10);
+				Dump10bitBuff(DSPBUFFERSIZE, DSPBUFFTXSIZE, 10);
 				delay(250);
 				Serial.println("");
 				//ReleaseAnalogData();
@@ -424,7 +424,7 @@ void loop() {
 				delay(250);
 				Serial.println("");
 				//void DumpBuffer(byte bufferSize, byte dataSize, byte dataType, byte valuesPerLine)
-				Dump10bitBuffer(DSPBUFFERSIZE, DSPBUFFTXSIZE, 10);
+				Dump10bitBuff(DSPBUFFERSIZE, DSPBUFFTXSIZE, 10);
 				delay(250);
 				Serial.println("");
 				ReleaseAnalogData();
@@ -538,9 +538,25 @@ void loop() {
 			// * Timonel ::: READPAGE Command *
 			// ********************************
 			case 'q': case 'Q': {
-				//Serial.println("\nBootloader Cmd >>> Write new app firmware to T85 flash memory ...");
-				//ReadFlash();
-				//ReadFlashTest();
+				//ReadPageBuff(dataIX, dataSize)
+
+				byte dataSize = 0;	// 10-bit buffer data size requested to ATtiny85
+				byte dataIX = 0;	// Requested 10-bit buffer data start position
+				Serial.print("Please enter the flash page data start position (1 to 64): ");
+				while (newByte == false) {
+					dataIX = ReadByte();
+				}
+				newByte = false;
+				Serial.println("");
+				Serial.print("Please enter the byte amount to retrieve from the flash page buffer (1 to 10): ");
+				while (newByte == false) {
+					dataSize = ReadByte();
+				}
+				if (newByte == true) {
+					ReadPageBuff(dataIX, dataSize);
+					newByte = false;
+				}
+
 				break;
 			}
 			// ******************
@@ -985,8 +1001,8 @@ void GetInfo(void) {
 	}
 }
 
-// Function Read10bitBuffer
-void Read10bitBuffer(uint8_t dataIX, uint8_t dataSize) {
+// Function Read10bitBuff
+void Read10bitBuff(uint8_t dataIX, uint8_t dataSize) {
 	byte cmdTX[3] = { READBUFF, 0, 0 };
 	byte txSize = 3;
 	Serial.println("");
@@ -1047,85 +1063,8 @@ void Read10bitBuffer(uint8_t dataIX, uint8_t dataSize) {
 	}
 }
 
-// Function WritePageBuff
-int WritePageBuff(uint8_t dataArray[]) {
-	const byte txSize = TXDATASIZE + 2;
-	byte cmdTX[txSize] = { 0 };
-	int commErrors = 0;					/* I2C communication error counter */
-	uint8_t checksum = 0;
-	Serial.println("");
-	cmdTX[0] = WRITPAGE;
-	for (int b = 1; b < txSize - 1; b++) {
-		cmdTX[b] = dataArray[b - 1];
-		checksum += (byte)dataArray[b - 1];
-	}
-	cmdTX[txSize - 1] = checksum;
-	//Serial.print("[Timonel] Writting data to Attiny85 memory page buffer >>> ");
-	//Serial.print(cmdTX[0]);
-	//Serial.println("(WRITBUFF)");
-	// Transmit command
-	byte transmitData[txSize] = { 0 };
-	//Serial.print("[Timonel] - Sending data >>> ");
-	for (int i = 0; i < txSize; i++) {
-		//if (i > 0) {
-		//	if (i < txSize - 1) {
-		//		Serial.print("0x");
-		//		Serial.print(cmdTX[i], HEX);
-		//		Serial.print(" ");
-		//	}
-		//	else {
-		//		Serial.print("\n\r[Timonel] - Sending CRC >>> ");
-		//		Serial.println(cmdTX[i]);
-		//	}
-		//}
-		transmitData[i] = cmdTX[i];
-		Wire.beginTransmission(slaveAddress);
-		Wire.write(transmitData[i]);
-		Wire.endTransmission();
-	}
-	// Receive acknowledgement
-	blockRXSize = Wire.requestFrom(slaveAddress, (byte)2);
-	byte ackRX[2] = { 0 };   // Data received from slave
-	for (int i = 0; i < blockRXSize; i++) {
-		ackRX[i] = Wire.read();
-	}
-	if (ackRX[0] == ACKWTPAG) {
-		//Serial.print("[Timonel] - Command ");
-		//Serial.print(cmdTX[0]);
-		//Serial.print(" parsed OK <<< ");
-		//Serial.println(ackRX[0]);
-		if (ackRX[1] == checksum) {
-			//Serial.print("[Timonel] - Data parsed OK by slave <<< Checksum = 0x");
-			//Serial.println(ackRX[1], HEX);
-			//Serial.println("");
-		}
-		else {
-			Serial.print("[Timonel] - Data parsed with {{{ERROR}}} <<< Checksum = 0x");
-			Serial.println(ackRX[1], HEX);
-			//Serial.println("");
-			if (commErrors++ > 0) {					/* Checksum error detected ... */
-				Serial.println("\n\r[Timonel] - WritePageBuff Checksum Errors, Aborting ...");
-				exit(commErrors);
-			}
-		}
-
-	}
-	else {
-		Serial.print("[Timonel] - Error parsing ");
-		Serial.print(cmdTX[0]);
-		Serial.print(" command! <<< ");
-		Serial.println(ackRX[0]);
-		Serial.println("");
-		if (commErrors++ > 0) {					/* Opcode error detected ... */
-			Serial.println("\n\r[Timonel] - WritePageBuff Opcode Reply Errors, Aborting ...");
-			exit(commErrors);
-		}
-	}
-	return(commErrors);
-}
-
-// Function Dump10bitBuffer
-void Dump10bitBuffer(byte bufferSize, byte dataSize, byte valuesPerLine) {
+// Function Dump10bitBuff
+void Dump10bitBuff(byte bufferSize, byte dataSize, byte valuesPerLine) {
 	byte cmdTX[3] = { READBUFF, 0, 0 };
 	byte txSize = 3;
 	byte dataIX = 0;
@@ -1259,6 +1198,146 @@ void Write10bitBuff(byte bufferPosition, word bufferValue) {
 		Serial.print(" command! <<< ");
 		Serial.println(ackRX[0]);
 	}
+}
+
+// Function ReadPagetBuff
+void ReadPageBuff(uint8_t dataIX, uint8_t dataSize) {
+	byte cmdTX[3] = { READPAGE, 0, 0 };
+	byte txSize = 3;
+	Serial.println("");
+	Serial.println("");
+	cmdTX[1] = dataIX;
+	cmdTX[2] = dataSize;
+	Serial.print("[Timonel] - Sending Opcode >>> ");
+	Serial.print(cmdTX[0]);
+	Serial.println("(READPAGE)");
+	Serial.print("[Timonel] - Sending position IX >>> ");
+	Serial.println(cmdTX[1]);
+	Serial.print("[Timonel] - Sending requested data size >>> ");
+	Serial.println(cmdTX[2]);
+	byte transmitData[1] = { 0 };
+	for (int i = 0; i < txSize; i++) {
+		transmitData[i] = cmdTX[i];
+		Wire.beginTransmission(slaveAddress);
+		Wire.write(transmitData[i]);
+		Wire.endTransmission();
+	}
+	// Receive acknowledgement
+	blockRXSize = Wire.requestFrom(slaveAddress, (byte)(dataSize + 2));
+	byte ackRX[dataSize + 2];   // Data received from slave
+	for (int i = 0; i < blockRXSize; i++) {
+		ackRX[i] = Wire.read();
+	}
+	if (ackRX[0] == ACKRDPAG) {
+		Serial.print("[Timonel] - Command ");
+		Serial.print(cmdTX[0]);
+		Serial.print(" parsed OK <<< ");
+		Serial.println(ackRX[0]);
+		uint8_t checksum = 0;
+		for (uint8_t i = 1; i < (dataSize + 1); i++) {
+			// DSP Buffer 2-Byte Word
+			Serial.print("# ~~~ Page position ");
+			if (dataIX < 10) {
+				Serial.print("0");
+			}
+			Serial.print(dataIX++);
+			Serial.print(": ");
+			Serial.print(ackRX[i]);
+			Serial.println(" ~~~ #");
+			checksum += (uint8_t)ackRX[i];
+		}
+		if (checksum == ackRX[dataSize + 1]) {
+			Serial.print("   >>> Checksum OK! <<<   ");
+			Serial.println(checksum);
+		}
+		else {
+			Serial.print("   ### Checksum ERROR! ###   ");
+			Serial.println(checksum);
+		}
+	}
+	else {
+		Serial.print("[Timonel] - Error parsing ");
+		Serial.print(cmdTX[0]);
+		Serial.print(" command! <<< ");
+		Serial.println(ackRX[0]);
+	}
+}
+
+// Function WritePageBuff
+int WritePageBuff(uint8_t dataArray[]) {
+	const byte txSize = TXDATASIZE + 2;
+	byte cmdTX[txSize] = { 0 };
+	int commErrors = 0;					/* I2C communication error counter */
+	uint8_t checksum = 0;
+	Serial.println("");
+	cmdTX[0] = WRITPAGE;
+	for (int b = 1; b < txSize - 1; b++) {
+		cmdTX[b] = dataArray[b - 1];
+		checksum += (byte)dataArray[b - 1];
+	}
+	cmdTX[txSize - 1] = checksum;
+	//Serial.print("[Timonel] Writting data to Attiny85 memory page buffer >>> ");
+	//Serial.print(cmdTX[0]);
+	//Serial.println("(WRITBUFF)");
+	// Transmit command
+	byte transmitData[txSize] = { 0 };
+	//Serial.print("[Timonel] - Sending data >>> ");
+	for (int i = 0; i < txSize; i++) {
+		//if (i > 0) {
+		//	if (i < txSize - 1) {
+		//		Serial.print("0x");
+		//		Serial.print(cmdTX[i], HEX);
+		//		Serial.print(" ");
+		//	}
+		//	else {
+		//		Serial.print("\n\r[Timonel] - Sending CRC >>> ");
+		//		Serial.println(cmdTX[i]);
+		//	}
+		//}
+		transmitData[i] = cmdTX[i];
+		Wire.beginTransmission(slaveAddress);
+		Wire.write(transmitData[i]);
+		Wire.endTransmission();
+	}
+	// Receive acknowledgement
+	blockRXSize = Wire.requestFrom(slaveAddress, (byte)2);
+	byte ackRX[2] = { 0 };   // Data received from slave
+	for (int i = 0; i < blockRXSize; i++) {
+		ackRX[i] = Wire.read();
+	}
+	if (ackRX[0] == ACKWTPAG) {
+		//Serial.print("[Timonel] - Command ");
+		//Serial.print(cmdTX[0]);
+		//Serial.print(" parsed OK <<< ");
+		//Serial.println(ackRX[0]);
+		if (ackRX[1] == checksum) {
+			//Serial.print("[Timonel] - Data parsed OK by slave <<< Checksum = 0x");
+			//Serial.println(ackRX[1], HEX);
+			//Serial.println("");
+		}
+		else {
+			Serial.print("[Timonel] - Data parsed with {{{ERROR}}} <<< Checksum = 0x");
+			Serial.println(ackRX[1], HEX);
+			//Serial.println("");
+			if (commErrors++ > 0) {					/* Checksum error detected ... */
+				Serial.println("\n\r[Timonel] - WritePageBuff Checksum Errors, Aborting ...");
+				exit(commErrors);
+			}
+		}
+
+	}
+	else {
+		Serial.print("[Timonel] - Error parsing ");
+		Serial.print(cmdTX[0]);
+		Serial.print(" command! <<< ");
+		Serial.println(ackRX[0]);
+		Serial.println("");
+		if (commErrors++ > 0) {					/* Opcode error detected ... */
+			Serial.println("\n\r[Timonel] - WritePageBuff Opcode Reply Errors, Aborting ...");
+			exit(commErrors);
+		}
+	}
+	return(commErrors);
 }
 
 // Function ReleaseAnalogData *

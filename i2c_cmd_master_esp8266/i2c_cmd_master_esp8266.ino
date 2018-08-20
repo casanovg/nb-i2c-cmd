@@ -360,7 +360,7 @@ void loop() {
 					dataSize = ReadByte();
 				}
 				if (newByte == true) {
-					ReadBuffer(dataIX, dataSize);
+					Read10bitBuffer(dataIX, dataSize);
 					newByte = false;
 				}
 				break;
@@ -985,8 +985,8 @@ void GetInfo(void) {
 	}
 }
 
-// Function ReadBuffer
-void ReadBuffer(uint8_t dataIX, uint8_t dataSize) {
+// Function Read10bitBuffer
+void Read10bitBuffer(uint8_t dataIX, uint8_t dataSize) {
 	byte cmdTX[3] = { READBUFF, 0, 0 };
 	byte txSize = 3;
 	Serial.println("");

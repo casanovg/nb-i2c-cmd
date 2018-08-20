@@ -1271,7 +1271,6 @@ void DumpPageBuff(byte bufferSize, byte dataSize, byte valuesPerLine) {
 	byte cmdTX[3] = { READPAGE, 0, 0 };
 	byte txSize = 3;
 	byte dataIX = 0;
-	uint8_t checksum = 0;
 	uint8_t checksumErr = 0;
 	int v = 1;
 	cmdTX[2] = dataSize;
@@ -1283,6 +1282,7 @@ void DumpPageBuff(byte bufferSize, byte dataSize, byte valuesPerLine) {
 		//byte dataIX = 0;		// Requested T85 buffer data start position
 		dataIX = k;
 		cmdTX[1] = k;
+		uint8_t checksum = 0;
 		for (int i = 0; i < txSize; i++) {
 			transmitData[i] = cmdTX[i];
 			Wire.beginTransmission(slaveAddress);

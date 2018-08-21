@@ -1321,7 +1321,7 @@ void DumpPageBuff(byte bufferSize, byte dataSize, byte valuesPerLine) {
 			}
 			else {
 				Serial.print("[Timonel] - DumpPageBuff aborted due to Checksum ERROR! ");
-				Serial.println(checksum);
+				Serial.println(ackRX[dataSize + 1]);
 				if (checksumErr++ == MAXCKSUMERRORS) {
 					delay(1000);
 					exit(1);

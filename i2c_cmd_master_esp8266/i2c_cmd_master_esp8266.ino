@@ -1312,13 +1312,13 @@ void DumpPageBuff(byte bufferSize, byte dataSize, byte valuesPerLine) {
 				checksum += (uint8_t)ackRX[i];
 			}
 			//if (checksum + 1 == ackRX[dataSize + 1]) {
-			if (checksum == ackRX[dataSize]) {
+			if (checksum == ackRX[dataSize + 1]) {
 				//Serial.print("   >>> Checksum OK! <<<   ");
 				//Serial.println(checksum);
 			}
 			else {
 				Serial.print("\n\r   ### Checksum ERROR! ###   ");
-				Serial.print(checksum);
+				Serial.println(checksum);
 				//Serial.print(checksum + 1);
 				//Serial.print(" <-- calculated, received --> ");
 				//Serial.println(ackRX[dataSize + 1]);

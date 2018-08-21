@@ -1311,13 +1311,16 @@ void DumpPageBuff(byte bufferSize, byte dataSize, byte valuesPerLine) {
 				//Serial.println(" |");
 				checksum += (uint8_t)ackRX[i];
 			}
-			if (checksum == ackRX[dataSize + 1]) {
+			if (checksum + 1 == ackRX[dataSize + 1]) {
 				//Serial.print("   >>> Checksum OK! <<<   ");
 				//Serial.println(checksum);
 			}
 			else {
 				Serial.print("\n\r   ### Checksum ERROR! ###   ");
-				Serial.println(checksum);
+				Serial.print(checksum);
+				//Serial.print(checksum + 1);
+				//Serial.print(" <-- calculated, received --> ");
+				//Serial.println(ackRX[dataSize + 1]);
 				if (checksumErr++ == MAXCKSUMERRORS) {
 					Serial.println("[Timonel] - Too many Checksum ERRORS, aborting! ");
 					delay(1000);

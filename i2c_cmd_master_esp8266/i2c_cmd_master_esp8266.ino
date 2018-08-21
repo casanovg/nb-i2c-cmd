@@ -542,7 +542,7 @@ void loop() {
 
 				byte dataSize = 0;	// 10-bit buffer data size requested to ATtiny85
 				byte dataIX = 0;	// Requested 10-bit buffer data start position
-				Serial.print("Please enter the flash page data start position (1 to 64): ");
+				Serial.print("Please enter the flash page data start position (1 to 64; If > 64, dump the whole page buffer): ");
 				while (newByte == false) {
 					dataIX = ReadByte();
 				}
@@ -560,6 +560,7 @@ void loop() {
 				}
 				else {
 					DumpPageBuff(FLASHPGSIZE, 4, 8);
+					newByte = false;
 				}
 				break;
 			}
@@ -1071,7 +1072,6 @@ void Read10bitBuff(uint8_t dataIX, uint8_t dataSize) {
 void Dump10bitBuff(byte bufferSize, byte dataSize, byte valuesPerLine) {
 	byte cmdTX[3] = { READBUFF, 0, 0 };
 	byte txSize = 3;
-	byte dataIX = 0;
 	uint8_t crcErrors = 0;
 	int v = 1;
 	cmdTX[2] = dataSize;
@@ -1081,7 +1081,6 @@ void Dump10bitBuff(byte bufferSize, byte dataSize, byte valuesPerLine) {
 	for (uint8_t k = 1; k < bufferSize + 1; k += dataSize) {
 		//byte dataSize = 0;	// Requested T85 buffer data size
 		//byte dataIX = 0;		// Requested T85 buffer data start position
-		dataIX = k;
 		cmdTX[1] = k;
 		for (int i = 0; i < txSize; i++) {
 			transmitData[i] = cmdTX[i];
@@ -1203,7 +1202,7 @@ void Write10bitBuff(byte bufferPosition, word bufferValue) {
 	}
 }
 
-// Function ReadPagetBuff
+// Function ReadPageBuff
 void ReadPageBuff(uint8_t dataIX, uint8_t dataSize) {
 	byte cmdTX[3] = { READPAGE, 0, 0 };
 	byte txSize = 3;
@@ -1266,23 +1265,20 @@ void ReadPageBuff(uint8_t dataIX, uint8_t dataSize) {
 	}
 }
 
-// Function Dump10bitBuff
+// Function DumpPageBuff
 void DumpPageBuff(byte bufferSize, byte dataSize, byte valuesPerLine) {
 	byte cmdTX[3] = { READPAGE, 0, 0 };
 	byte txSize = 3;
-	byte dataIX = 0;
 	uint8_t checksumErr = 0;
 	int v = 1;
 	cmdTX[2] = dataSize;
 	byte transmitData[1] = { 0 };
-	Serial.println("[Timonel] - Dumping Flash Memory Page Buffer ...");
+	Serial.println("\n\n\r[Timonel] - Dumping Flash Memory Page Buffer ...");
 	Serial.println("");
 	for (uint8_t k = 1; k < bufferSize + 1; k += dataSize) {
 		//byte dataSize = 0;	// Requested T85 buffer data size
 		//byte dataIX = 0;		// Requested T85 buffer data start position
-		dataIX = k;
 		cmdTX[1] = k;
-		uint8_t checksum = 0;
 		for (int i = 0; i < txSize; i++) {
 			transmitData[i] = cmdTX[i];
 			Wire.beginTransmission(slaveAddress);
@@ -1291,7 +1287,7 @@ void DumpPageBuff(byte bufferSize, byte dataSize, byte valuesPerLine) {
 		}
 		// Receive acknowledgement
 		blockRXSize = Wire.requestFrom(slaveAddress, (byte)(dataSize + 2));
-		byte ackRX[(dataSize + 2)];			// Data received from slave
+		byte ackRX[dataSize + 2];   // Data received from slave
 		for (int i = 0; i < blockRXSize; i++) {
 			ackRX[i] = Wire.read();
 		}
@@ -1300,10 +1296,10 @@ void DumpPageBuff(byte bufferSize, byte dataSize, byte valuesPerLine) {
 			//Serial.print(cmdTX[0]);
 			//Serial.print(" parsed OK <<< ");
 			//Serial.println(ackRX[0]);
-			ackRX[dataSize + 1] = 0;
+			uint8_t checksum = 0;
 			for (uint8_t i = 1; i < (dataSize + 1); i++) {
 				Serial.print(ackRX[i]);			/* Byte values */
-				checksum += ackRX[i];
+				//checksum += (ackRX[i]);
 				if (v == valuesPerLine) {
 					Serial.println("");
 					v = 0;
@@ -1313,16 +1309,17 @@ void DumpPageBuff(byte bufferSize, byte dataSize, byte valuesPerLine) {
 				}
 				v++;
 				//Serial.println(" |");
+				checksum += (uint8_t)ackRX[i];
 			}
-			//byte checkCRC = CalculateCRC(ackRX, sizeof(ackRX));
 			if (checksum == ackRX[dataSize + 1]) {
-				//Serial.print("   >>> CRC OK! <<<   ");
-				//Serial.println(checkCRC);
+				//Serial.print("   >>> Checksum OK! <<<   ");
+				//Serial.println(checksum);
 			}
 			else {
-				Serial.print("[Timonel] - DumpPageBuff aborted due to Checksum ERROR! ");
-				Serial.println(ackRX[dataSize + 1]);
+				Serial.print("\n\r   ### Checksum ERROR! ###   ");
+				Serial.println(checksum);
 				if (checksumErr++ == MAXCKSUMERRORS) {
+					Serial.println("[Timonel] - Too many Checksum ERRORS, aborting! ");
 					delay(1000);
 					exit(1);
 				}

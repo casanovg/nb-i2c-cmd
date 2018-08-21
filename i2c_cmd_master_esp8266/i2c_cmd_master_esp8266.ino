@@ -530,8 +530,8 @@ void loop() {
 			// ********************************
 			case 'w': case 'W': {
 				//Serial.println("\nBootloader Cmd >>> Write new app firmware to T85 flash memory ...");
-				//WriteFlash();
-				WriteFlashTest();
+				WriteFlash();
+				//WriteFlashTest();
 				break;
 			}
 			// ********************************
@@ -1298,7 +1298,7 @@ void DumpPageBuff(byte bufferSize, byte dataSize, byte valuesPerLine) {
 			//Serial.println(ackRX[0]);
 			uint8_t checksum = 0;
 			for (uint8_t i = 1; i < (dataSize + 1); i++) {
-				Serial.print(ackRX[i]);			/* Byte values */
+				Serial.print(ackRX[i], HEX);			/* Byte values */
 				//checksum += (ackRX[i]);
 				if (v == valuesPerLine) {
 					Serial.println("");

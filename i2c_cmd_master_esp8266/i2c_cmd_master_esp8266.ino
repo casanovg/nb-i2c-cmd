@@ -282,9 +282,14 @@ void setup() {
 	Serial.println("========================================================================");
 	ShowMenu();
 
+	//for (byte i = 0; i < FLASHPGSIZE * 2; i++) {
+	//	payload[i] = i;
+	//}
+
 	for (byte i = 0; i < FLASHPGSIZE * 2; i++) {
 		payload[i] = i;
 	}
+
 	//for (byte i = 0; i < FLASHPGSIZE * 2; i++) {
 	//	payload[i] = i;
 	//}

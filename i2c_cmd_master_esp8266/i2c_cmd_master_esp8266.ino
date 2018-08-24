@@ -60,6 +60,8 @@ char key = '\0';
 word flashPageAddr = 0xFFFF;	/* Current flash  page address to be written. Tiny85 allowed values are 0 to 0x2000, so 0xFFFF means 'not set' */
 word timonelStart = 0xFFFF;		/* Timonel start address, 0xFFFF means 'not set'. Use Timonel 'version' command to get it */
 word bufferValue = 0;			/* Application 10-bit value to write into buffer */
+byte trampolineFirstByte = 0;
+byte trampolineSecondByte = 0;
 
 								// CRC Table: Polynomial=0x9C, CRC size=8-bit, HD=5, Word Length=9 bytes
 const byte crcTable[256] = {
@@ -536,6 +538,18 @@ void loop() {
 					SetTmlPageAddr(flashPageAddr);
 					newWord = false;
 				}
+
+				Serial.print("\n\rPlease enter the app jump trampoline first byte: ");
+				while (newByte == false) {
+					trampolineFirstByte = ReadByte();
+				}
+				newByte = false;
+				Serial.print("\n\n\rPlease enter the app jump trampoline second byte: ");
+				while (newByte == false) {
+					trampolineSecondByte = ReadByte();
+				}
+				Serial.println("");
+				newByte = false;
 				break;
 			}
 			// ********************************
@@ -545,6 +559,7 @@ void loop() {
 				//Serial.println("\nBootloader Cmd >>> Write new app firmware to T85 flash memory ...");
 				WriteFlash();
 				//WriteFlashTest();
+				FlashTrampoline();
 				break;
 			}
 			// ********************************
@@ -1598,6 +1613,7 @@ void GetTimonelVersion(void) {
 		ackRX[i] = Wire.read();
 	}
 	if (ackRX[0] == ACKTMNLV) {
+		timonelStart = (ackRX[6] << 8) + ackRX[7];
 		Serial.print("[Timonel] - Command ");
 		Serial.print(cmdTX[0]);
 		Serial.print(" parsed OK <<< ");
@@ -1611,9 +1627,8 @@ void GetTimonelVersion(void) {
 		Serial.print(".");
 		Serial.print(ackRX[5]);
 		Serial.print(" >>> Base address: 0x");
-		Serial.print((ackRX[6] << 8) + ackRX[7], HEX);
+		Serial.print(timonelStart, HEX);
 		Serial.println(" <<<");
-		timonelStart = (ackRX[6] << 8) + ackRX[7];
 	}
 	else {
 		Serial.print("[Timonel] - Error parsing ");
@@ -1800,12 +1815,12 @@ int WriteFlash(void) {
 			}
 			wrtErrors += WritePageBuff(dataPacket);	/* Send data to T85 through I2C */
 			packet = 0;
-			delay(50);
+			delay(50);								/* DELAY BETWEEN PACKETS SENT TO PAGE */
 		}
-		if (pageEnd++ == (FLASHPGSIZE - 1)) {	/* When a page end is detected ... */
+		if (pageEnd++ == (FLASHPGSIZE - 1)) {		/* When a page end is detected ... */
 
 			//DumpPageBuff(FLASHPGSIZE, TXDATASIZE, TXDATASIZE);
-			delay(500);	/* DELAY BETWEEN PAGE WRITINGS ... */
+			delay(500);								/* DELAY BETWEEN PAGE WRITINGS ... */
 
 			if (i < (payloadSize - 1)) {
 				Serial.print("::::::::::::::::::: Page ");
@@ -1821,7 +1836,7 @@ int WriteFlash(void) {
 		}
 	}
 	if (wrtErrors == 0) {
-		Serial.println("\n\r==== WriteFlash: Firmware was successfully transferred to T85, please select 'run app' command to start it ...");
+		Serial.println("\n\r==== WriteFlash: Firmware was successfully transferred to T85 ...");
 	}
 	else {
 		Serial.print("\n\r==== WriteFlash: Communication errors detected during firmware transfer, please retry !!! ErrCnt: ");
@@ -1881,13 +1896,84 @@ int WriteFlashTest(void) {
 		}
 	}
 	if (wrtErrors == 0) {
-		Serial.println("\n\r==== WriteFlashTest: Firmware was successfully transferred to T85, please select 'run app' command to start it ...");
+		Serial.println("\n\r==== WriteFlashTest: Firmware was successfully transferred to T85 ...");
 	}
 	else {
 		Serial.print("\n\r==== WriteFlashTest: Communication errors detected during firmware transfer, please retry !!! ErrCnt: ");
 		Serial.print(wrtErrors);
 		Serial.println(" ===");
 	}
+}
+
+// Function FlashTrampoline
+void FlashTrampoline(void) {
+	int packet = 0;								/* Byte counter to be sent in a single I2C data packet */
+	int padding = 0;							/* Amount of padding bytes to match the page size */
+	int pageEnd = 0;							/* Byte counter to detect the end of flash mem page */
+	int pageCount = 1;
+	int wrtErrors = 0;
+	byte trampolinePage[FLASHPGSIZE] = { 0xff };
+	uint8_t dataPacket[TXDATASIZE] = { 0xff };
+	trampolinePage[62] = trampolineFirstByte;
+	trampolinePage[63] = trampolineSecondByte;
+	SetTmlPageAddr(timonelStart - FLASHPGSIZE);
+	int payloadSize = sizeof(trampolinePage);
+	if ((payloadSize % FLASHPGSIZE) != 0) {		/* If the payload to be sent is smaller than flash page size, resize it to match */
+		padding = ((((uint)(payloadSize / FLASHPGSIZE) + 1) * FLASHPGSIZE) - payloadSize);
+		payloadSize += padding;
+	}
+	Serial.print("\n\n\r::::::::::::::::::: Page ");
+	Serial.print(pageCount);
+	Serial.print(" - Address ");
+	//Serial.println(flashPageAddr);
+	Serial.println(timonelStart - FLASHPGSIZE);
+	for (int i = 0; i < payloadSize; i++) {
+		if (i < (payloadSize - padding)) {
+			dataPacket[packet] = trampolinePage[i];	/* If there are data to fill the page, use it ... */
+		}
+		else {
+			dataPacket[packet] = 0xff;				/* If there are no more data, complete the page with padding (0xff) */
+		}
+		if (packet++ == (TXDATASIZE - 1)) {		/* When a data packet is completed to be sent ... */
+			for (int b = 0; b < TXDATASIZE; b++) {
+				Serial.print("0x");
+				if (dataPacket[b] < 0x10) {
+					Serial.print("0");
+				}
+				Serial.print(dataPacket[b], HEX);
+				Serial.print(" ");
+			}
+			wrtErrors += WritePageBuff(dataPacket);	/* Send data to T85 through I2C */
+			packet = 0;
+			delay(50);								/* DELAY BETWEEN PACKETS SENT TO PAGE */
+		}
+		if (pageEnd++ == (FLASHPGSIZE - 1)) {		/* When a page end is detected ... */
+
+			//DumpPageBuff(FLASHPGSIZE, TXDATASIZE, TXDATASIZE);
+			delay(500);								/* DELAY BETWEEN PAGE WRITINGS ... */
+
+			if (i < (payloadSize - 1)) {
+				Serial.print("::::::::::::::::::: Page ");
+				Serial.print(++pageCount);
+				Serial.print(" - Address ");
+				Serial.println(flashPageAddr + 1 + i);
+				pageEnd = 0;
+			}
+		}
+		if (wrtErrors > 10) {
+			Serial.println("\n\r==== FlashTrampoline: too many errors, aborting ...");
+			i = payloadSize;
+		}
+	}
+	if (wrtErrors == 0) {
+		Serial.println("\n\r==== FlashTrampoline: Jump instraction was successfully transferred to T85, please select 'run app' command to start it ...");
+	}
+	else {
+		Serial.print("\n\r==== FlashTrampoline: Communication errors detected during firmware transfer, please retry !!! ErrCnt: ");
+		Serial.print(wrtErrors);
+		Serial.println(" ===");
+	}
+
 }
 
 //Function ShowMenu

@@ -1914,6 +1914,9 @@ void FlashTrampoline(void) {
 	int wrtErrors = 0;
 	byte trampolinePage[FLASHPGSIZE] = { 0xff };
 	uint8_t dataPacket[TXDATASIZE] = { 0xff };
+	for (int i = 0; i < FLASHPGSIZE - 2; i++) {
+		trampolinePage[i] = 0xff;
+	}
 	trampolinePage[62] = trampolineFirstByte;
 	trampolinePage[63] = trampolineSecondByte;
 	SetTmlPageAddr(timonelStart - FLASHPGSIZE);
@@ -1922,7 +1925,7 @@ void FlashTrampoline(void) {
 		padding = ((((uint)(payloadSize / FLASHPGSIZE) + 1) * FLASHPGSIZE) - payloadSize);
 		payloadSize += padding;
 	}
-	Serial.print("\n\n\r::::::::::::::::::: Page ");
+	Serial.print("\n\r::::::::::::::::::: Page ");
 	Serial.print(pageCount);
 	Serial.print(" - Address ");
 	//Serial.println(flashPageAddr);

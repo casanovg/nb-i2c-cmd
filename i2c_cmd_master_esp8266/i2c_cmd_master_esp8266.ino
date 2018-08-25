@@ -1969,7 +1969,7 @@ void FlashTrampoline(void) {
 		}
 	}
 	if (wrtErrors == 0) {
-		Serial.println("\n\r==== FlashTrampoline: Jump instraction was successfully transferred to T85, please select 'run app' command to start it ...");
+		Serial.println("\n\r==== FlashTrampoline: Jump instruction was successfully transferred to T85, please select 'run app' command to start it ...");
 	}
 	else {
 		Serial.print("\n\r==== FlashTrampoline: Communication errors detected during firmware transfer, please retry !!! ErrCnt: ");

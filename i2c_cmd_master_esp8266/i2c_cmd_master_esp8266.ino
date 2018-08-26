@@ -559,7 +559,7 @@ void loop() {
 				//Serial.println("\nBootloader Cmd >>> Write new app firmware to T85 flash memory ...");
 				WriteFlash();
 				//WriteFlashTest();
-				FlashTrampoline();
+				//FlashTrampoline();
 				break;
 			}
 			// ********************************

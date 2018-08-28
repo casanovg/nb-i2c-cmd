@@ -96,8 +96,7 @@ const byte crcTable[256] = {
 
 // Payload Application test for ATtiny85 (SOS Timer)
 const byte payload[1213] = {
-	//0x0e, 0xc0, 0x28, 0xc0, 0x27, 0xc0, 0x26, 0xc0, /* SOS Original */ 
-	0x3f, 0xcd, 0x28, 0xc0, 0x27, 0xc0, 0x26, 0xc0,   /* SOS with modified reset vector */
+	0x0e, 0xc0, 0x28, 0xc0, 0x27, 0xc0, 0x26, 0xc0, /* SOS Original */ 
 	0x25, 0xc0, 0x24, 0xc0, 0x23, 0xc0, 0x22, 0xc0,
 	0x21, 0xc0, 0x20, 0xc0, 0x1f, 0xc0, 0x1e, 0xc0,
 	0x1d, 0xc0, 0x1c, 0xc0, 0x1b, 0xc0, 0x11, 0x24,
@@ -1986,12 +1985,15 @@ void FlashTrampoline(void) {
 void CalculateTrampoline(byte resetFirstByte, byte resetSecondByte) {
 	trampolineFirstByte = 0;
 	trampolineSecondByte = 0;
-	//word jumpOffset = (~(timonelStart - (((((resetSecondByte << 8) + resetFirstByte) + 1) & 0x0FFF) << 1)) >> 1);
-	word jumpOffset = (~(timonelStart >> 1) - ((((resetSecondByte << 8) + resetFirstByte) + 1) & 0xFFF));
+	//timonelStart
+	//word applicationStart = ((((resetSecondByte << 8) + resetFirstByte) + 1) & 0x0FFF);
+	word jumpOffset = (~(timonelStart - (((((resetSecondByte << 8) + resetFirstByte) + 1) & 0x0FFF) << 1)) >> 1);
 	jumpOffset++;
 	trampolineFirstByte = (jumpOffset & 0xFF);
-	trampolineSecondByte = (((jumpOffset & 0xF00) >> 8) + 0xC0);
+	trampolineSecondByte = ((jumpOffset & 0x0F00) >> 8) + 0xC0;
 	Serial.println("");
+	//Serial.print("Application Start: ");
+	//Serial.println(applicationStart, HEX);
 	Serial.print("Jump Offset: ");
 	Serial.println(jumpOffset, HEX);
 	Serial.print("\n\rTrampoline First Byte: ");

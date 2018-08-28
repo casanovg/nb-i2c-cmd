@@ -509,6 +509,8 @@ void loop() {
 			// * Timonel ::: STPGADDR Command *
 			// ********************************
 			case 'b': case 'B': {
+				byte resetFirstByte = 0;
+				byte resetSecondByte = 0;
 				Serial.print("Please enter the flash memory page base address: ");
 				while (newWord == false) {
 					flashPageAddr = ReadWord();
@@ -538,18 +540,20 @@ void loop() {
 					SetTmlPageAddr(flashPageAddr);
 					newWord = false;
 				}
-
-				Serial.print("\n\rPlease enter the app jump trampoline first byte: ");
+				Serial.print("\n\rPlease enter the app reset jump first byte (decimal): ");
 				while (newByte == false) {
-					trampolineFirstByte = ReadByte();
+					resetFirstByte = ReadByte();
 				}
 				newByte = false;
-				Serial.print("\n\n\rPlease enter the app jump trampoline second byte: ");
+				Serial.print("\n\n\rPlease enter the app reset jump second byte (decimal): ");
 				while (newByte == false) {
-					trampolineSecondByte = ReadByte();
+					resetSecondByte = ReadByte();
 				}
 				Serial.println("");
 				newByte = false;
+
+				CalculateTrampoline(resetFirstByte, resetSecondByte);
+
 				break;
 			}
 			// ********************************
@@ -1977,6 +1981,23 @@ void FlashTrampoline(void) {
 		Serial.println(" ===");
 	}
 
+}
+
+void CalculateTrampoline(byte resetFirstByte, byte resetSecondByte) {
+	trampolineFirstByte = 0;
+	trampolineSecondByte = 0;
+	//word jumpOffset = (~(timonelStart - (((((resetSecondByte << 8) + resetFirstByte) + 1) & 0x0FFF) << 1)) >> 1);
+	word jumpOffset = (~(timonelStart >> 1) - ((((resetSecondByte << 8) + resetFirstByte) + 1) & 0xFFF));
+	jumpOffset++;
+	trampolineFirstByte = (jumpOffset & 0xFF);
+	trampolineSecondByte = (((jumpOffset & 0xF00) >> 8) + 0xC0);
+	Serial.println("");
+	Serial.print("Jump Offset: ");
+	Serial.println(jumpOffset, HEX);
+	Serial.print("\n\rTrampoline First Byte: ");
+	Serial.println(trampolineFirstByte, HEX);
+	Serial.print("Trampoline Second Byte: ");
+	Serial.println(trampolineSecondByte, HEX);
 }
 
 //Function ShowMenu

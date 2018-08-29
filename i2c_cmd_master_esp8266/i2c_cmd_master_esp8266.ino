@@ -45,7 +45,7 @@
 // Timonel bootloader
 #define MCUTOTALMEM		8192	/* Slave MCU total flash memory*/
 #define MAXCKSUMERRORS	100		/* Max number of checksum errors allowed in bootloader comms */
-#define TXDATASIZE		4		/* TX data size for WRITBUFF command */
+#define TXDATASIZE		8		/* TX data size for WRITBUFF command */
 #define FLASHPGSIZE		64		/* Tiny85 flash page buffer size */
 #define DATATYPEBYTE	1		/* Buffer data type "Byte" */
 
@@ -1796,7 +1796,7 @@ int WriteFlash(void) {
 		Serial.println("Warning: Flash page start address no set, please use 'b' command to set it ...\n\r");
 		return(1);
 	}
-	Serial.print("::::::::::::::::::: Page ");
+	Serial.print("::::::::::::::::::::::::::::::::::::::: Page ");
 	Serial.print(pageCount);
 	Serial.print(" - Address ");
 	Serial.println(flashPageAddr);
@@ -1807,7 +1807,7 @@ int WriteFlash(void) {
 		else {
 			dataPacket[packet] = 0xff;				/* If there are no more data, complete the page with padding (0xff) */
 		}
-		if (packet++ == (TXDATASIZE - 1)) {		/* When a data packet is completed to be sent ... */
+		if (packet++ == (TXDATASIZE - 1)) {			/* When a data packet is completed to be sent ... */
 			for (int b = 0; b < TXDATASIZE; b++) {
 				Serial.print("0x");
 				if (dataPacket[b] < 0x10) {
@@ -1818,15 +1818,15 @@ int WriteFlash(void) {
 			}
 			wrtErrors += WritePageBuff(dataPacket);	/* Send data to T85 through I2C */
 			packet = 0;
-			delay(50);								/* DELAY BETWEEN PACKETS SENT TO PAGE */
+			delay(10);								/* ###### DELAY BETWEEN PACKETS SENT TO PAGE ###### */
 		}
 		if (pageEnd++ == (FLASHPGSIZE - 1)) {		/* When a page end is detected ... */
 
 			//DumpPageBuff(FLASHPGSIZE, TXDATASIZE, TXDATASIZE);
-			delay(500);								/* DELAY BETWEEN PAGE WRITINGS ... */
+			delay(100);								/* ###### DELAY BETWEEN PAGE WRITINGS ... ###### */
 
 			if (i < (payloadSize - 1)) {
-				Serial.print("::::::::::::::::::: Page ");
+				Serial.print("::::::::::::::::::::::::::::::::::::::: Page ");
 				Serial.print(++pageCount);
 				Serial.print(" - Address ");
 				Serial.println(flashPageAddr + 1 + i);
@@ -1863,7 +1863,7 @@ int WriteFlashTest(void) {
 		Serial.println("Warning: Flash page start address no set, please use 'b' command to set it ...\n\r");
 		return(1);
 	}
-	Serial.print("::::::::::::::::::: Page ");
+	Serial.print("::::::::::::::::::::::::::::::::::::::: Page ");
 	Serial.print(pageCount);
 	Serial.print(" - Address ");
 	Serial.println(flashPageAddr);
@@ -1886,7 +1886,7 @@ int WriteFlashTest(void) {
 		}
 		if (pageEnd++ == (FLASHPGSIZE - 1)) {	/* When a page end is detected ... */
 			if (i < (FLASHPGSIZE - 1)) {
-				Serial.print("::::::::::::::::::: Page ");
+				Serial.print("::::::::::::::::::::::::::::::::::::::: Page ");
 				Serial.print(++pageCount);
 				Serial.print(" - Address ");
 				Serial.println(flashPageAddr + 1 + i);

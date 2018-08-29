@@ -539,20 +539,18 @@ void loop() {
 					SetTmlPageAddr(flashPageAddr);
 					newWord = false;
 				}
-				Serial.print("\n\rPlease enter the app reset jump first byte (decimal): ");
-				while (newByte == false) {
-					resetFirstByte = ReadByte();
-				}
-				newByte = false;
-				Serial.print("\n\n\rPlease enter the app reset jump second byte (decimal): ");
-				while (newByte == false) {
-					resetSecondByte = ReadByte();
-				}
-				Serial.println("");
-				newByte = false;
-
-				CalculateTrampoline(resetFirstByte, resetSecondByte);
-
+				//Serial.print("\n\rPlease enter the app reset jump first byte (decimal): ");
+				//while (newByte == false) {
+				//	resetFirstByte = ReadByte();
+				//}
+				//newByte = false;
+				//Serial.print("\n\n\rPlease enter the app reset jump second byte (decimal): ");
+				//while (newByte == false) {
+				//	resetSecondByte = ReadByte();
+				//}
+				//Serial.println("");
+				//newByte = false;
+				//CalculateTrampoline(resetFirstByte, resetSecondByte);
 				break;
 			}
 			// ********************************
@@ -2005,7 +2003,7 @@ void CalculateTrampoline(byte resetFirstByte, byte resetSecondByte) {
 //Function ShowMenu
 void ShowMenu(void) {
 	if (appMode == true) {
-		Serial.println("Application command ('a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'p', 'n', 'u', 'z' reboot, 'x' reset T85, '?' help): ");
+		Serial.print("Application command ('a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'p', 'n', 'u', 'z' reboot, 'x' reset T85, '?' help): ");
 	}
 	else {
 		Serial.print("Timonel booloader ('v' version, 'r' run app, 'e' erase flash, 'b' set address, 'w' write flash, 'q' read flash): ");

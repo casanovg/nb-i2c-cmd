@@ -1,19 +1,9 @@
-ESP8266 ATtiny85 I2C Communications
-===================================
-This test implements a basic I2C command set to control an ATtiny85 MCU from an ESP8266 through the serial console. In those commands where there are data replies, there is a plain CRC-8 check implemented or a simple checksum, depending on each case.
+ATtiny85 I2C Bootloader Tests
 
-Command path to Attiny85:
--------------------------------
-User (serial console) --> ESP8266 --> Attiny85
+Timonel I2C Bootloader development tests ...
 
-Available commands:
--------------------
-a - (STDPB1_1) Set ATtiny85 PB1 = 1
+Timonel-Bootloader --> ATtiny85 (I2C slave)
 
-s - (STDPB1_0) Set ATtiny85 PB1 = 0
+Timonel-Uploader --> ESP8266 (I2C master)
 
-d - (STANAPB3) Set ATtiny85 PB3 = PWMx (the command asks for a PWM value input)
-
-f - (READADC2) Read ATtiny85 ADC2 (the reply has 2 data bytes + 1 CRC byte)
-
-
+Test Payload: "SOS" blinker for Tiny85. Initially loaded from an ESP8266 array, in the final version it will be parsed from a real ".HEX" file residing on SPIFFS.

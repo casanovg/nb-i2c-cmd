@@ -24,5 +24,19 @@
     <ClInclude Include="..\..\..\..\Google Drive\IoT\Attiny85\nb-libs\nb-i2c-cmd.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="payload-2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="payload-1.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="i2c_cmd_master_esp8266.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

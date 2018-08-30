@@ -115,7 +115,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Google Drive\IoT\Attiny85\nb-libs\nb-i2c-cmd.h" />
+    <ClInclude Include="payload-1.h" />
+    <ClInclude Include="payload-2.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="__vm\.i2c_cmd_master_esp8266.vsarduino.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="i2c_cmd_master_esp8266.rc" />
   </ItemGroup>
   <PropertyGroup>
     <DebuggerFlavor>VisualMicroDebugger</DebuggerFlavor>

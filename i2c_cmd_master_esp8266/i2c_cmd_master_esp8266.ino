@@ -1837,7 +1837,7 @@ int WriteFlash(void) {
 		}
 	}
 	if (wrtErrors == 0) {
-		Serial.println("\n\r==== WriteFlash: Firmware was successfully transferred to T85 ...");
+		Serial.println("\n\r==== WriteFlash: Firmware was successfully transferred to T85, please select 'run app' command to start it ...");
 	}
 	else {
 		Serial.print("\n\r==== WriteFlash: Communication errors detected during firmware transfer, please retry !!! ErrCnt: ");
@@ -1897,7 +1897,7 @@ int WriteFlashTest(void) {
 		}
 	}
 	if (wrtErrors == 0) {
-		Serial.println("\n\r==== WriteFlashTest: Firmware was successfully transferred to T85 ...");
+		Serial.println("\n\r==== WriteFlashTest: Firmware was successfully transferred to T85, please select 'run app' command to start it ...");
 	}
 	else {
 		Serial.print("\n\r==== WriteFlashTest: Communication errors detected during firmware transfer, please retry !!! ErrCnt: ");

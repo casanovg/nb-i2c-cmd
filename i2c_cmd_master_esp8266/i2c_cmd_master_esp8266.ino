@@ -1620,12 +1620,13 @@ int WriteFlash(void) {
 		padding = ((((uint)(payloadSize / FLASHPGSIZE) + 1) * FLASHPGSIZE) - payloadSize);
 		payloadSize += padding;
 	}
-	Serial.println("\n1-Deleting flash ...\n\r");
-	Serial.println("\n2-Writing payload to flash ...\n\n\r");
-	if (flashPageAddr == 0xFFFF) {
-		Serial.println("Warning: Flash page start address no set, please use 'b' command to set it ...\n\r");
-		return(1);
-	}
+	//Serial.println("\n1-Deleting flash ...\n\r");
+	//Serial.println("\n2-Writing payload to flash ...\n\n\r");
+	Serial.println("Writing payload to T85 flash memory ...\n\r");
+	//if (flashPageAddr == 0xFFFF) {
+	//	Serial.println("Warning: Flash page start address no set, please use 'b' command to set it ...\n\r");
+	//	return(1);
+	//}
 	Serial.print("::::::::::::::::::::::::::::::::::::::: Page ");
 	Serial.print(pageCount);
 	Serial.print(" - Address ");

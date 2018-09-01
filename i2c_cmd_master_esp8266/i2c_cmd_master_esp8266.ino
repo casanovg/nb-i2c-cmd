@@ -32,7 +32,7 @@
 #include <Wire.h>
 #include "nb-i2c-cmd.h"
 #include <pgmspace.h>
-#include "payload-1.h"
+#include "payload-3.h"
 
 // Pluggie application
 #define VCC				3.3		/* PSU VCC 3.3 Volts */
@@ -1620,12 +1620,13 @@ int WriteFlash(void) {
 		padding = ((((uint)(payloadSize / FLASHPGSIZE) + 1) * FLASHPGSIZE) - payloadSize);
 		payloadSize += padding;
 	}
-	Serial.println("\n1-Deleting flash ...\n\r");
-	Serial.println("\n2-Writing payload to flash ...\n\n\r");
-	if (flashPageAddr == 0xFFFF) {
-		Serial.println("Warning: Flash page start address no set, please use 'b' command to set it ...\n\r");
-		return(1);
-	}
+	//Serial.println("\n1-Deleting flash ...\n\r");
+	//Serial.println("\n2-Writing payload to flash ...\n\n\r");
+	Serial.println("\nWriting payload to flash ...\n\r");
+	//if (flashPageAddr == 0xFFFF) {
+	//	Serial.println("Warning: Flash page start address no set, please use 'b' command to set it ...\n\r");
+	//	return(1);
+	//}
 	Serial.print("::::::::::::::::::::::::::::::::::::::: Page ");
 	Serial.print(pageCount);
 	Serial.print(" - Address ");
@@ -1689,10 +1690,10 @@ int WriteFlashTest(void) {
 
 	Serial.println("\n1-Deleting flash ...\n\r");
 	Serial.println("\n2-Writing payload to flash ...\n\n\r");
-	if (flashPageAddr == 0xFFFF) {
-		Serial.println("Warning: Flash page start address no set, please use 'b' command to set it ...\n\r");
-		return(1);
-	}
+	//if (flashPageAddr == 0xFFFF) {
+	//	Serial.println("Warning: Flash page start address no set, please use 'b' command to set it ...\n\r");
+	//	return(1);
+	//}
 	Serial.print("::::::::::::::::::::::::::::::::::::::: Page ");
 	Serial.print(pageCount);
 	Serial.print(" - Address ");

@@ -36,6 +36,9 @@
     <ClInclude Include="payload-3.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\timonel\timonel-updater\source-payloads\tml-payload.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="i2c_cmd_master_esp8266.rc">

@@ -32,7 +32,7 @@
 #include <Wire.h>
 #include "nb-i2c-cmd.h"
 #include <pgmspace.h>
-#include "payload-3.h"
+#include "tml-payload.h"
 
 // Pluggie application
 #define VCC				3.3		/* PSU VCC 3.3 Volts */

@@ -6,7 +6,7 @@
 // *  Author: Gustavo Casanova                            *
 // *  ..................................................  *
 // *  Firmware Version: 0.3 | MCU: ESP8266                *
-// *  2017-11-06 gustavo.casanova@nicebots.com            *
+// *  2017-11-16 gustavo.casanova@nicebots.com            *
 // ********************************************************
 //
 // Run this master program on a NodeMCU, ESP-01 or ESP-12 Module
@@ -26,16 +26,11 @@
 // z - (INITTINY) Reboot ESP-8266 and initialize ATtiny85
 // x - (RESETINY) Reset ATtiny85
 
-// Includes
 #include <Wire.h>
 
-// Type definitions
-//typedef uint8_t byte;
-//typedef uint16_t word;
+#define VCC 3.3			  // PSU VCC 3.3 Volts
+#define ADCTOP 1023       // ADC Top Value @ 10-bit precision = 1023 (2^10)
 
-// Defines
-
-// I2C Command Set
 #define STDPB1_1 0xE9     // Command to Set ATtiny85 PB1 = 1
 #define AKDPB1_1 0x16     // Acknowledge Command PB1 = 1
 #define STDPB1_0 0xE1     // Command to Set ATtiny85 PB1 = 0
@@ -51,6 +46,8 @@
 #define RESETINY 0x02     // Command to Reset ATtiny85
 #define ACKRESTY 0xFD     // Acknowledge Command Reset
 
+//typedef uint8_t byte; //  8 bit data type
+//typedef uint16_t word; // 16 bit data type
 
 // Global Variables
 byte slaveAddress = 0;
@@ -90,6 +87,52 @@ byte crcTable[256] = {
   0x6c, 0xf0, 0x1c, 0x80, 0xb8, 0x24
 };
 
+// Hex file to flash in ATtiny85
+/*byte hexFile[238] = {
+  0x3A, 0x31, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30,
+  0x45, 0x43, 0x30, 0x31, 0x44, 0x43, 0x30, 0x31, 0x43, 0x43,
+  0x30, 0x31, 0x42, 0x43, 0x30, 0x31, 0x41, 0x43, 0x30, 0x31,
+  0x39, 0x43, 0x30, 0x31, 0x38, 0x43, 0x30, 0x31, 0x37, 0x43,
+  0x30, 0x32, 0x43, 0x0D, 0x0A, 0x3A, 0x31, 0x30, 0x30, 0x30,
+  0x31, 0x30, 0x30, 0x30, 0x31, 0x36, 0x43, 0x30, 0x31, 0x35,
+  0x43, 0x30, 0x31, 0x34, 0x43, 0x30, 0x31, 0x33, 0x43, 0x30,
+  0x31, 0x32, 0x43, 0x30, 0x31, 0x31, 0x43, 0x30, 0x31, 0x30,
+  0x43, 0x30, 0x31, 0x31, 0x32, 0x34, 0x45, 0x36, 0x0D, 0x0A,
+  0x3A, 0x31, 0x30, 0x30, 0x30, 0x32, 0x30, 0x30, 0x30, 0x31,
+  0x46, 0x42, 0x45, 0x43, 0x46, 0x45, 0x35, 0x44, 0x32, 0x45,
+  0x30, 0x44, 0x45, 0x42, 0x46, 0x43, 0x44, 0x42, 0x46, 0x31,
+  0x30, 0x45, 0x30, 0x41, 0x30, 0x45, 0x36, 0x42, 0x30, 0x45,
+  0x30, 0x35, 0x45, 0x0D, 0x0A, 0x3A, 0x31, 0x30, 0x30, 0x30,
+  0x33, 0x30, 0x30, 0x30, 0x30, 0x31, 0x43, 0x30, 0x31, 0x44,
+  0x39, 0x32, 0x41, 0x30, 0x33, 0x36, 0x42, 0x31, 0x30, 0x37,
+  0x45, 0x31, 0x46, 0x37, 0x30, 0x32, 0x44, 0x30, 0x30, 0x37,
+  0x43, 0x30, 0x45, 0x30, 0x43, 0x46, 0x41, 0x32, 0x0D, 0x0A,
+  0x3A, 0x31, 0x30, 0x30, 0x30, 0x34, 0x30, 0x30, 0x30, 0x42,
+  0x39, 0x39, 0x41, 0x39, 0x32, 0x45, 0x30, 0x38, 0x38, 0x42,
+  0x33, 0x38, 0x39, 0x32, 0x37, 0x38, 0x38, 0x42, 0x42, 0x46,
+  0x43, 0x43, 0x46, 0x46, 0x38, 0x39, 0x34, 0x46, 0x46, 0x43,
+  0x46, 0x39, 0x38, 0x0D, 0x0A, 0x3A, 0x30, 0x30, 0x30, 0x30,
+  0x30, 0x30, 0x30, 0x31, 0x46, 0x46, 0x0D, 0x0A
+};*/
+
+/*
+3a 31 30 30 30 30 30 30 30 30 45 43 30 31 44 43
+30 31 43 43 30 31 42 43 30 31 41 43 30 31 39 43
+30 31 38 43 30 31 37 43 30 32 43 0d 0a 3a 31 30
+30 30 31 30 30 30 31 36 43 30 31 35 43 30 31 34
+43 30 31 33 43 30 31 32 43 30 31 31 43 30 31 30
+43 30 31 31 32 34 45 36 0d 0a 3a 31 30 30 30 32
+30 30 30 31 46 42 45 43 46 45 35 44 32 45 30 44
+45 42 46 43 44 42 46 31 30 45 30 41 30 45 36 42
+30 45 30 35 45 0d 0a 3a 31 30 30 30 33 30 30 30
+30 31 43 30 31 44 39 32 41 30 33 36 42 31 30 37
+45 31 46 37 30 32 44 30 30 37 43 30 45 30 43 46
+41 32 0d 0a 3a 31 30 30 30 34 30 30 30 42 39 39
+41 39 32 45 30 38 38 42 33 38 39 32 37 38 38 42
+42 46 43 43 46 46 38 39 34 46 46 43 46 39 38 0d
+0a 3a 30 30 30 30 30 30 30 31 46 46 0d 0a
+*/
+
 //
 // ***************************
 // * Setup Block (Runs once) *
@@ -117,8 +160,8 @@ void setup() {
   blockRXSize = 0;
 
   ClrScr();
-  Serial.println("Nicebots I2C Command Test");
-  Serial.println("=========================");
+  Serial.println("Nicebots I2C Command Test (v0.2)");
+  Serial.println("================================");
   Serial.println("Please type a command ('a', 's', 'd', 'f', 'g', 'z' reboot or 'x' reset tiny):");
 }
 
@@ -315,7 +358,7 @@ void loop() {
             Serial.println(ackRX[i]);
           }
           Serial.println("*************************");
-          Serial.print("* Analog Data: ");
+          Serial.print("* Analog Value: ");
           Serial.print(analogValue);
           Serial.print("(");
           Serial.print(analogValue, HEX);
@@ -326,7 +369,9 @@ void loop() {
           Serial.print(" | LSB=");
           Serial.print(ackRX[2]);
           Serial.print(" | CRC=");
-          Serial.print(ackRX[3]);
+          Serial.println(ackRX[3]);
+          Serial.print("CRC received ---> ");
+          Serial.println(ackRX[sizeof(ackRX)]);
           byte checkCRC = CalculateCRC(ackRX, sizeof(ackRX));
           if (checkCRC == 0) {
             Serial.print("   >>> CRC OK! <<<   ");
@@ -373,7 +418,8 @@ void loop() {
           Serial.print(cmdTX[0]);
           Serial.print(" parsed OK <<< ");
           Serial.println(ackRX[0]);
-          for (int i = 1; i < blockRXSize - 1; i++) {
+          //for (int i = 1; i < blockRXSize - 1; i++) {   // ----->
+          for (int i = 1; i < 4 - 1; i++) {               // ----->
             Serial.print("ESP8266 - Data Byte ");
             if (i < 9) {
               Serial.print("0");
@@ -385,8 +431,38 @@ void loop() {
             Serial.print(ackRX[i]);
             Serial.println(")");
           }
-		  Serial.print("CRC received ---> ");
-		  Serial.println(ackRX[sizeof(ackRX)]);
+		  // -----------------------------------------------------
+		  // // Half-cycle Vi Average
+		  Serial.print(":::* Half-cycle Vi Average: ");
+		  Serial.print((ackRX[3] << 8) + ackRX[4]);
+		  Serial.println(" *:::");
+          // -----------------------------------------------------
+          // Sum of squared Vi's (instantaneous voltages)
+          Serial.print("# <>* Sum of Vi's: ");
+          Serial.print((unsigned)(ackRX[5] << 24) + (ackRX[6] << 16) + (ackRX[7] << 8) + ackRX[8]);
+          Serial.print(" (");
+          Serial.print(((ackRX[5] << 24) + (ackRX[6] << 16) + (ackRX[7] << 8) + ackRX[8]), HEX);
+          Serial.println(") *<>");
+          // -----------------------------------------------------
+          // VRMS (Square root of sum of sqred VI's / ADC samples
+		  uint16_t vRMS = (ackRX[9] << 8) + ackRX[10];
+		  float volts = (vRMS * VCC) / ADCTOP;
+          Serial.print("# {}* Vrms (AC): ");
+          Serial.print(vRMS);
+          Serial.print(" *{} -------------> {{ ");
+		  Serial.print(volts, 3);
+		  Serial.println(" Volts RMS }}");
+          // -----------------------------------------------------
+          // Last analog value readout (DC)
+          Serial.print("# []* Analog Value (Last): ");
+          Serial.print((ackRX[11] << 8) + ackRX[12]);
+          Serial.println(" *[]");
+          // -----------------------------------------------------
+          // ADC conversions per AC half-cycle
+          Serial.print("# ~~~ ADC count: ");
+          Serial.print((ackRX[13] << 8) + ackRX[14]);
+          Serial.println(" ~~~ #");
+          // --------------------------------------------------
           byte checkCRC = CalculateCRC(ackRX, sizeof(ackRX));
           if (checkCRC == 0) {
             Serial.print("   >>> CRC OK! <<<   ");
@@ -409,8 +485,9 @@ void loop() {
       // * Restart ESP8266 *
       // *******************
       case 'z': case 'Z': {
-        Serial.println("Resetting ESP8266 ...");
+        Serial.println("\nResetting ESP8266 ...");
         ESP.restart();
+        break;
       }
       // ********************
       // * RESETINY Command *

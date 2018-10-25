@@ -5,8 +5,8 @@
 // *  ..................................................  *
 // *  Author: Gustavo Casanova                            *
 // *  ..................................................  *
-// *  Firmware Version: 0.1 | MCU: ESP8266                *
-// *  2017-07-01 gustavo.casanova@nicebots.com            *
+// *  Firmware Version: 0.3 | MCU: ESP8266                *
+// *  2017-11-06 gustavo.casanova@nicebots.com            *
 // ********************************************************
 //
 // Run this master program on a NodeMCU, ESP-01 or ESP-12 Module
@@ -26,8 +26,16 @@
 // z - (INITTINY) Reboot ESP-8266 and initialize ATtiny85
 // x - (RESETINY) Reset ATtiny85
 
+// Includes
 #include <Wire.h>
 
+// Type definitions
+//typedef uint8_t byte;
+//typedef uint16_t word;
+
+// Defines
+
+// I2C Command Set
 #define STDPB1_1 0xE9     // Command to Set ATtiny85 PB1 = 1
 #define AKDPB1_1 0x16     // Acknowledge Command PB1 = 1
 #define STDPB1_0 0xE1     // Command to Set ATtiny85 PB1 = 0
@@ -43,8 +51,6 @@
 #define RESETINY 0x02     // Command to Reset ATtiny85
 #define ACKRESTY 0xFD     // Acknowledge Command Reset
 
-//typedef uint8_t byte; //  8 bit data type
-//typedef uint16_t word; // 16 bit data type
 
 // Global Variables
 byte slaveAddress = 0;
@@ -379,6 +385,8 @@ void loop() {
             Serial.print(ackRX[i]);
             Serial.println(")");
           }
+		  Serial.print("CRC received ---> ");
+		  Serial.println(ackRX[sizeof(ackRX)]);
           byte checkCRC = CalculateCRC(ackRX, sizeof(ackRX));
           if (checkCRC == 0) {
             Serial.print("   >>> CRC OK! <<<   ");

@@ -21,9 +21,6 @@
     <ClInclude Include="__vm\.i2c_cmd_master_esp8266.vsarduino.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\Google Drive\IoT\Attiny85\nb-libs\nb-i2c-cmd.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -36,7 +33,10 @@
     <ClInclude Include="payload-3.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\timonel\timonel-updater\source-payloads\tml-payload.h">
+    <ClInclude Include="..\..\..\..\IoT\Attiny85\nb-libs\nb-i2c-cmd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\source\Repos\timonel\timonel-hexparser\appl-payload\payload.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
